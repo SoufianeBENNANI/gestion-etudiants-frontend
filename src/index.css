@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RESET FULL PAGE */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* ROOT APP */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* BODY STYLE */
+body {
+  background-color: #f1f5f9; /* équivalent bg-gray-100 */
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* MODERN SCROLLBAR */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #081028;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0f172a;
+}
+
+/* FIREFOX */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #081028 transparent;
+}
