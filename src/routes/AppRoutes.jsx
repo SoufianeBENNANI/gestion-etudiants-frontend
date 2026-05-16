@@ -10,20 +10,24 @@ import TeacherDashboard from "../modules/optionnel/teachers/pages/TeacherDashboa
 import StudentDashboard from "../modules/metier/students/pages/StudentDashboard";
 import ManagerDashboard from "../modules/metier/manager/pages/ManagerDashboard";
 
-// Student
-import AddStudent from "../modules/metier/students/pages/AddStudent";
+// Students pages
+import StudentOverview from "../modules/metier/students/pages/StudentOverview";
 import AllStudents from "../modules/metier/students/pages/AllStudents";
+import AddStudent from "../modules/metier/students/pages/AddStudent";
 import ArchivedStudents from "../modules/metier/students/pages/ArchivedStudents";
 import StudentPerformance from "../modules/metier/students/pages/StudentPerformance";
+import StudentAttendance from "../modules/metier/students/pages/StudentAttendance";
+import StudentPredictions from "../modules/metier/students/pages/StudentPredictions";
+import ArchivedAttendance from "../modules/metier/students/pages/ArchivedAttendance";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* REDIRECTION AUTOMATIQUE */}
+        {/* REDIRECTION */}
         <Route path="/" element={<DashboardRedirect />} />
 
-        {/* ADMIN LAYOUT AVEC SIDEBAR FIXE */}
+        {/* ADMIN */}
         <Route
           element={
             <PrivateRoute role="ADMIN">
@@ -33,10 +37,16 @@ function AppRoutes() {
         >
           <Route path="/admin" element={<AdminDashboard />} />
 
-          <Route path="/students/add" element={<AddStudent />} />
+          {/* STUDENTS */}
+          <Route path="/students" element={<StudentOverview />} />
           <Route path="/students/all" element={<AllStudents />} />
+          <Route path="/students/add" element={<AddStudent />} />
           <Route path="/students/archive" element={<ArchivedStudents />} />
           <Route path="/students/performance" element={<StudentPerformance />} />
+          <Route path="/students/attendance" element={<StudentAttendance />} />
+          <Route path="/students/predictions" element={<StudentPredictions />} />
+          <Route path="/students/attendance/archive" element={<ArchivedAttendance />} />
+          
         </Route>
 
         {/* TEACHER */}
@@ -69,7 +79,7 @@ function AppRoutes() {
           }
         />
 
-        {/* PAGE ERREUR */}
+        {/* ERROR */}
         <Route path="/unauthorized" element={<h1>Accès refusé</h1>} />
       </Routes>
     </BrowserRouter>

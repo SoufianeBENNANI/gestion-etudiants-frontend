@@ -7,12 +7,12 @@ import "./StudentForm.css";
 import {
   User,
   Mail,
-  Calendar,
-  MapPin,
   Phone,
+  MapPin,
   Users,
-  Save,
+  Calendar,
   RotateCcw,
+  Save,
 } from "lucide-react";
 
 const CustomDateInput = forwardRef(({ value, onClick }, ref) => (
@@ -214,24 +214,25 @@ export default function StudentForm({ onSubmit }) {
       </div>
 
       <div className="flex justify-end pt-2">
-        <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center">
-          <button
-            type="button"
-            onClick={handleReset}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 px-7 py-4 text-sm font-bold text-slate-700 shadow-[0_8px_20px_rgba(15,23,42,0.08)] transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.12)] active:scale-[0.98]"
-          >
-            <RotateCcw size={18} />
-            Reset
-          </button>
+        {/* ACTIONS */}
+<div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-end">
+  <button
+    type="button"
+    onClick={handleReset}
+    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+  >
+    <RotateCcw size={18} />
+    Reset
+  </button>
 
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 px-8 py-4 text-sm font-bold text-white shadow-[0_12px_30px_rgba(59,130,246,0.35)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(79,70,229,0.45)] active:scale-[0.98]"
-          >
-            <Save size={18} />
-            Add Student
-          </button>
-        </div>
+  <button
+    type="submit"
+    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-7 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800"
+  >
+    <Save size={18} />
+    Add Student
+  </button>
+</div>
       </div>
     </form>
   );

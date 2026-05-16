@@ -4,8 +4,6 @@ import {
   BarChart3,
   Brain,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   GraduationCap,
   Mail,
   RefreshCcw,
@@ -15,6 +13,7 @@ import {
   Users,
   Activity,
   Wand2,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -28,7 +27,6 @@ export default function StudentPerformance() {
   const [searchTerm, setSearchTerm] = useState("");
   const [predictingId, setPredictingId] = useState(null);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -103,7 +101,6 @@ export default function StudentPerformance() {
   );
 
   const safeCurrentPage = Math.min(currentPage, totalPages);
-
   const startIndex = (safeCurrentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
 
@@ -134,17 +131,6 @@ export default function StudentPerformance() {
 
     const sum = predictedStudents.reduce(
       (total, item) => total + Number(item.moyenne || 0),
-      0
-    );
-
-    return (sum / predictedStudents.length).toFixed(2);
-  }, [predictedStudents]);
-
-  const averageRisk = useMemo(() => {
-    if (predictedStudents.length === 0) return "0.00";
-
-    const sum = predictedStudents.reduce(
-      (total, item) => total + Number(item.scoreRisque || 0),
       0
     );
 
@@ -208,20 +194,20 @@ export default function StudentPerformance() {
     if (normalizedStatus === "AT_RISK" || score >= 70) {
       return {
         text: "At Risk",
-        className: "bg-rose-100 text-rose-700 ring-rose-200",
+        className: "bg-rose-50 text-rose-700 ring-rose-200",
       };
     }
 
     if (normalizedStatus === "MODERATE" || score >= 40) {
       return {
         text: "Moderate",
-        className: "bg-amber-100 text-amber-700 ring-amber-200",
+        className: "bg-amber-50 text-amber-700 ring-amber-200",
       };
     }
 
     return {
       text: "Good",
-      className: "bg-emerald-100 text-emerald-700 ring-emerald-200",
+      className: "bg-emerald-50 text-emerald-700 ring-emerald-200",
     };
   };
 
@@ -232,28 +218,85 @@ export default function StudentPerformance() {
 
   const getRiskBarClass = (risk, hasPrediction) => {
     if (!hasPrediction) return "bg-slate-300";
+    if (risk >= 70) return "bg-rose-500";
+    if (risk >= 40) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
 
-    if (risk >= 70) return "bg-gradient-to-r from-rose-500 to-red-600";
-    if (risk >= 40) return "bg-gradient-to-r from-amber-400 to-orange-500";
+  const statsCards = [
+    {
+      title: "Total Students",
+      value: totalStudents,
+      icon: Users,
+      badge: "Records",
+      color: "blue",
+    },
+    {
+      title: "Average Grade",
+      value: averageGrade,
+      icon: GraduationCap,
+      badge: "Average",
+      color: "emerald",
+    },
+    {
+      title: "Best Student",
+      value: bestStudent,
+      icon: Trophy,
+      badge: "Top",
+      color: "amber",
+      mediumText: true,
+    },
+    {
+      title: "At Risk Students",
+      value: atRiskStudents,
+      icon: AlertTriangle,
+      badge: "Risk",
+      color: "rose",
+    },
+  ];
 
-    return "bg-gradient-to-r from-emerald-400 to-green-600";
+  const colorStyles = {
+    blue: {
+      icon: "bg-blue-50 text-blue-600",
+      badge: "bg-blue-50 text-blue-600",
+    },
+    emerald: {
+      icon: "bg-emerald-50 text-emerald-600",
+      badge: "bg-emerald-50 text-emerald-600",
+    },
+    amber: {
+      icon: "bg-amber-50 text-amber-600",
+      badge: "bg-amber-50 text-amber-600",
+    },
+    rose: {
+      icon: "bg-rose-50 text-rose-600",
+      badge: "bg-rose-50 text-rose-600",
+    },
   };
 
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <div className="overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 px-8 py-8 text-white shadow-2xl">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-32 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-5">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
-              <BarChart3 size={30} />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <BarChart3 size={34} />
             </div>
 
             <div>
-              <h1 className="text-3xl font-black tracking-tight">
+              <p className="text-sm font-medium text-blue-200">
+                Students Management
+              </p>
+
+              <h1 className="mt-1 text-3xl font-black tracking-tight">
                 Performance Students
               </h1>
-              <p className="mt-1 text-sm font-medium text-white/80">
+
+              <p className="mt-2 text-sm text-slate-300">
                 Analyse AI des moyennes, absences, risques et recommandations.
               </p>
             </div>
@@ -263,7 +306,7 @@ export default function StudentPerformance() {
             <div className="relative">
               <Search
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
               />
 
               <input
@@ -271,7 +314,7 @@ export default function StudentPerformance() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search student..."
-                className="w-full rounded-2xl border border-white/20 bg-white/15 py-3 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-white/60 focus:border-white/40 focus:bg-white/20 sm:w-72"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-3 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
 
@@ -279,77 +322,93 @@ export default function StudentPerformance() {
               type="button"
               onClick={loadPerformance}
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/25 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCcw size={18} />
+              {loading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <RefreshCcw size={18} />
+              )}
               Refresh
             </button>
           </div>
         </div>
       </div>
 
-      {/* STATS */}
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-green-600 p-6 text-white shadow-xl shadow-emerald-500/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-white/80">Total Students</p>
-            <Users size={26} />
-          </div>
-          <p className="mt-4 text-4xl font-black">{totalStudents}</p>
-        </div>
+      {/* STATS - SMALL CARDS */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {statsCards.map((card, index) => {
+          const Icon = card.icon;
+          const style = colorStyles[card.color];
 
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 p-6 text-white shadow-xl shadow-blue-500/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-white/80">Average Grade</p>
-            <GraduationCap size={26} />
-          </div>
-          <p className="mt-4 text-4xl font-black">{averageGrade}</p>
-        </div>
+          return (
+            <div
+              key={index}
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+            >
+              <div className="flex items-start justify-between">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${style.icon}`}
+                >
+                  <Icon size={21} />
+                </div>
 
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white shadow-xl shadow-amber-500/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-white/80">Best Student</p>
-            <Trophy size={26} />
-          </div>
-          <p className="mt-4 truncate text-2xl font-black">{bestStudent}</p>
-        </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${style.badge}`}
+                >
+                  {card.badge}
+                </span>
+              </div>
 
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500 to-red-600 p-6 text-white shadow-xl shadow-rose-500/20">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-bold text-white/80">At Risk Students</p>
-            <AlertTriangle size={26} />
-          </div>
-          <p className="mt-4 text-4xl font-black">{atRiskStudents}</p>
-        </div>
+              <div className="mt-5">
+                <h2 className="text-base font-bold text-slate-900">
+                  {card.title}
+                </h2>
+
+                <p
+                  className={`mt-2 truncate font-black tracking-tight text-slate-950 ${
+                    card.mediumText ? "text-xl" : "text-3xl"
+                  }`}
+                  title={String(card.value)}
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={26} />
+                  ) : (
+                    card.value
+                  )}
+                </p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* GRAPH + SUMMARY */}
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        {/* RISK GRAPH */}
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl">
+        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
-                <Activity size={24} />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                <Activity size={23} />
               </div>
 
               <div>
-                <h2 className="text-lg font-black text-slate-900">
+                <h2 className="text-xl font-bold text-slate-900">
                   Risk Score Overview
                 </h2>
-                <p className="text-sm font-medium text-slate-500">
+                <p className="text-sm text-slate-500">
                   Vue globale du risque IA pour tous les étudiants.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">
+            <div className="rounded-2xl bg-slate-50 px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200">
               {predictedStudents.length} predicted / {performances.length} students
             </div>
           </div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-3xl bg-emerald-50 p-4">
+            <div className="rounded-2xl bg-emerald-50 p-4">
               <p className="text-xs font-black uppercase text-emerald-600">
                 Low Risk
               </p>
@@ -358,7 +417,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-amber-50 p-4">
+            <div className="rounded-2xl bg-amber-50 p-4">
               <p className="text-xs font-black uppercase text-amber-600">
                 Moderate
               </p>
@@ -367,7 +426,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-rose-50 p-4">
+            <div className="rounded-2xl bg-rose-50 p-4">
               <p className="text-xs font-black uppercase text-rose-600">
                 High Risk
               </p>
@@ -379,7 +438,8 @@ export default function StudentPerformance() {
 
           <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2">
             {loading ? (
-              <div className="flex h-72 items-center justify-center text-sm font-bold text-slate-500">
+              <div className="flex h-72 items-center justify-center gap-2 text-sm font-bold text-slate-500">
+                <Loader2 className="animate-spin" size={20} />
                 Loading graph...
               </div>
             ) : filteredPerformances.length === 0 ? (
@@ -394,7 +454,7 @@ export default function StudentPerformance() {
                 return (
                   <div
                     key={item.studentId}
-                    className="rounded-3xl border border-slate-100 bg-slate-50 p-4"
+                    className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
                   >
                     <div className="mb-3 flex items-center justify-between gap-4">
                       <div>
@@ -409,7 +469,7 @@ export default function StudentPerformance() {
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-black ${
                           hasPrediction
-                            ? "bg-indigo-100 text-indigo-700"
+                            ? "bg-blue-50 text-blue-600"
                             : "bg-slate-200 text-slate-600"
                         }`}
                       >
@@ -435,23 +495,22 @@ export default function StudentPerformance() {
           </div>
         </div>
 
-        {/* AI SUMMARY */}
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-2xl">
+        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-              <Sparkles size={24} />
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+              <Sparkles size={23} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">AI Summary</h2>
-              <p className="text-sm font-medium text-slate-500">
+              <h2 className="text-xl font-bold text-slate-900">AI Summary</h2>
+              <p className="text-sm text-slate-500">
                 Résumé automatique des performances.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-3xl bg-slate-50 p-5">
+            <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-bold text-slate-500">
                 Nombre total d’étudiants
               </p>
@@ -460,16 +519,16 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-slate-50 p-5">
+            <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-bold text-slate-500">
                 Étudiants avec prédiction
               </p>
-              <p className="mt-2 text-2xl font-black text-indigo-600">
+              <p className="mt-2 text-2xl font-black text-blue-600">
                 {predictedStudents.length}
               </p>
             </div>
 
-            <div className="rounded-3xl bg-slate-50 p-5">
+            <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-bold text-slate-500">
                 Moyenne générale
               </p>
@@ -478,7 +537,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-3xl bg-slate-50 p-5">
+            <div className="rounded-2xl bg-slate-50 p-5">
               <p className="text-sm font-bold text-slate-500">
                 Étudiants à risque
               </p>
@@ -491,18 +550,18 @@ export default function StudentPerformance() {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+      <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-100 bg-slate-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Brain size={22} />
             </div>
 
             <div>
-              <h2 className="text-sm font-black text-slate-800">
+              <h2 className="text-xl font-bold text-slate-900">
                 Students Performance Table
               </h2>
-              <p className="mt-1 text-xs font-medium text-slate-500">
+              <p className="mt-1 text-sm text-slate-500">
                 Tous les étudiants actifs avec leur état IA.
               </p>
             </div>
@@ -534,7 +593,8 @@ export default function StudentPerformance() {
         </div>
 
         {loading ? (
-          <div className="p-10 text-center font-bold text-slate-600">
+          <div className="flex items-center justify-center gap-2 p-10 font-bold text-slate-600">
+            <Loader2 className="animate-spin" size={20} />
             Loading performance...
           </div>
         ) : filteredPerformances.length === 0 ? (
@@ -544,7 +604,7 @@ export default function StudentPerformance() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1200px] border-collapse">
+              <table className="w-full min-w-[1100px] border-collapse">
                 <thead>
                   <tr className="bg-white text-left text-sm text-slate-600">
                     <th className="px-6 py-4 font-black">Student</th>
@@ -556,9 +616,7 @@ export default function StudentPerformance() {
                     <th className="px-6 py-4 font-black">Level</th>
                     <th className="px-6 py-4 font-black">Status</th>
                     <th className="px-6 py-4 font-black">Date</th>
-                    <th className="px-6 py-4 text-right font-black">
-                      Action
-                    </th>
+                    <th className="px-6 py-4 text-right font-black">Action</th>
                   </tr>
                 </thead>
 
@@ -582,19 +640,10 @@ export default function StudentPerformance() {
                         className="border-t border-slate-100 text-sm text-slate-700 transition hover:bg-slate-50"
                       >
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-cyan-500 text-sm font-black text-white">
-                              {String(item.nom || "?").charAt(0).toUpperCase()}
-                            </div>
-
-                            <div>
-                              <p className="font-black text-slate-900">
-                                {fullName}
-                              </p>
-                              <p className="text-xs font-semibold text-slate-400">
-                                ID: {item.studentId || "-"}
-                              </p>
-                            </div>
+                          <div className="rounded-2xl bg-slate-50 px-4 py-3">
+                            <p className="font-black text-slate-900">
+                              {fullName}
+                            </p>
                           </div>
                         </td>
 
@@ -659,10 +708,7 @@ export default function StudentPerformance() {
 
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <CalendarDays
-                              size={16}
-                              className="text-slate-400"
-                            />
+                            <CalendarDays size={16} className="text-slate-400" />
                             <span className="whitespace-nowrap">
                               {formatDate(item.date)}
                             </span>
@@ -677,15 +723,20 @@ export default function StudentPerformance() {
                                 handleGeneratePrediction(item.studentId)
                               }
                               disabled={predictingId === item.studentId}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-violet-500/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              <Wand2 size={16} />
+                              {predictingId === item.studentId ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Wand2 size={16} />
+                              )}
+
                               {predictingId === item.studentId
                                 ? "Generating..."
                                 : "Generate"}
                             </button>
                           ) : (
-                            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-700">
+                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-200">
                               Generated
                             </span>
                           )}
@@ -707,13 +758,12 @@ export default function StudentPerformance() {
                   type="button"
                   onClick={goToPreviousPage}
                   disabled={safeCurrentPage === 1}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <ChevronLeft size={18} />
                   Previous
                 </button>
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 text-sm font-black text-white shadow-lg shadow-indigo-500/20">
+                <div className="flex h-12 min-w-12 items-center justify-center rounded-2xl bg-slate-900 px-4 text-sm font-black text-white shadow-sm">
                   {safeCurrentPage}
                 </div>
 
@@ -721,10 +771,9 @@ export default function StudentPerformance() {
                   type="button"
                   onClick={goToNextPage}
                   disabled={safeCurrentPage === totalPages}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
-                  <ChevronRight size={18} />
                 </button>
               </div>
             </div>

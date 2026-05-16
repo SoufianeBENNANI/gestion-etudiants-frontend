@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Search,
   Archive,
+  Loader2,
 } from "lucide-react";
 
 import {
@@ -189,17 +190,27 @@ export default function AllStudents() {
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 px-8 py-8 text-white shadow-2xl">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-32 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-5">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
-              <Users size={30} />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <Users size={34} />
             </div>
 
             <div>
-              <h1 className="text-3xl font-black">All Students</h1>
-              <p className="mt-1 text-sm text-white/80">
-                Manage, view and delete student records.
+              <p className="text-sm font-medium text-blue-200">
+                Students Management
+              </p>
+
+              <h1 className="mt-1 text-3xl font-black tracking-tight">
+                All Students
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-300">
+                Manage, view and archive student records.
               </p>
             </div>
           </div>
@@ -208,7 +219,7 @@ export default function AllStudents() {
             <div className="relative">
               <Search
                 size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
               />
 
               <input
@@ -216,7 +227,7 @@ export default function AllStudents() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="Search by last name..."
-                className="w-full rounded-2xl border border-white/20 bg-white/15 py-3 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-white/60 focus:border-white/40 focus:bg-white/20 sm:w-72 lg:w-80"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-3 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
               />
             </div>
 
@@ -224,16 +235,20 @@ export default function AllStudents() {
               type="button"
               onClick={loadStudents}
               disabled={loading || searching}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/25 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCcw size={18} />
+              {loading || searching ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <RefreshCcw size={18} />
+              )}
               Refresh
             </button>
 
             <button
               type="button"
               onClick={() => navigate("/students/archive")}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/15 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/25 transition hover:bg-white/20"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Archive size={18} />
               Archive
@@ -243,9 +258,10 @@ export default function AllStudents() {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+      <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-sm">
         {loading ? (
-          <div className="p-10 text-center font-bold text-slate-600">
+          <div className="flex items-center justify-center gap-2 p-10 font-bold text-slate-600">
+            <Loader2 size={20} className="animate-spin" />
             Loading students...
           </div>
         ) : students.length === 0 ? (
@@ -254,16 +270,22 @@ export default function AllStudents() {
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-4 border-b border-slate-100 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-black text-slate-800">
-                  Students list
-                </p>
+            <div className="flex flex-col gap-4 border-b border-slate-100 bg-slate-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <Users size={22} />
+                </div>
 
-                <p className="mt-1 text-xs font-medium text-slate-500">
-                  Showing {startStudent} to {endStudent} of {students.length}{" "}
-                  students
-                </p>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Students List
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Showing {startStudent} to {endStudent} of {students.length}{" "}
+                    students
+                  </p>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
@@ -272,7 +294,7 @@ export default function AllStudents() {
                 <select
                   value={itemsPerPage}
                   onChange={handleChangeItemsPerPage}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
                 >
                   <option value={5}>5</option>
                   <option value={10}>10</option>
@@ -304,12 +326,17 @@ export default function AllStudents() {
                       key={student.id}
                       className="border-t border-slate-100 text-sm text-slate-700 transition hover:bg-slate-50"
                     >
-                      <td className="px-6 py-4 font-bold">{student.nom}</td>
-                      <td className="px-6 py-4">{student.prenom}</td>
-                      <td className="px-6 py-4">{student.email}</td>
-                      <td className="px-6 py-4">{student.genre}</td>
-                      <td className="px-6 py-4">{student.telephone}</td>
-                      <td className="px-6 py-4">{student.adresse}</td>
+                      <td className="px-6 py-4">
+                        <span className="font-black text-slate-900">
+                          {student.nom || "-"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">{student.prenom || "-"}</td>
+                      <td className="px-6 py-4">{student.email || "-"}</td>
+                      <td className="px-6 py-4">{student.genre || "-"}</td>
+                      <td className="px-6 py-4">{student.telephone || "-"}</td>
+                      <td className="px-6 py-4">{student.adresse || "-"}</td>
 
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-3">
@@ -317,7 +344,7 @@ export default function AllStudents() {
                             type="button"
                             onClick={() => setSelectedStudent(student)}
                             disabled={!student.id}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             <Pencil size={16} />
                             Edit
@@ -327,9 +354,14 @@ export default function AllStudents() {
                             type="button"
                             onClick={() => handleDelete(student.id)}
                             disabled={deletingId === student.id}
-                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-rose-500/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            <Trash2 size={16} />
+                            {deletingId === student.id ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Trash2 size={16} />
+                            )}
+
                             {deletingId === student.id
                               ? "Deleting..."
                               : "Delete"}
@@ -370,7 +402,7 @@ export default function AllStudents() {
                     onClick={() => setCurrentPage(page)}
                     className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black transition ${
                       currentPage === page
-                        ? "bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20"
+                        ? "bg-slate-900 text-white shadow-sm"
                         : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                     }`}
                   >

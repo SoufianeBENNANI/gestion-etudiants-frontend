@@ -1,4 +1,4 @@
-import { GraduationCap, Sparkles, ArrowLeft } from "lucide-react";
+import { GraduationCap, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import StudentForm from "../components/StudentForm";
 import { addStudent } from "../services/studentService";
@@ -14,6 +14,8 @@ export default function AddStudent() {
 
       alert("Student added successfully");
 
+      navigate("/students/all");
+
       return true;
     } catch (error) {
       console.error("Add student error:", error);
@@ -23,37 +25,59 @@ export default function AddStudent() {
     }
   };
 
- return (
-  <div className="space-y-8">
-    {/* HEADER */}
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 px-8 py-8 text-white shadow-2xl">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-5">
-          
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
-            <GraduationCap size={30} />
+  return (
+    <div className="space-y-8">
+      {/* HEADER */}
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-32 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <GraduationCap size={34} />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-blue-200">
+                Students Management
+              </p>
+
+              <h1 className="mt-1 text-3xl font-black tracking-tight">
+                Add Student
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-300">
+                Enter the student&apos;s personal information to create a new
+                profile.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FORM CARD */}
+      <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <UserPlus size={23} />
           </div>
 
           <div>
-            <h1 className="text-3xl font-black">Add Student</h1>
-            <p className="mt-1 text-sm text-white/80">
-              Enter the student&apos;s personal information to create a new
-              profile.
+            <h2 className="text-xl font-bold text-slate-900">
+              Student Information
+            </h2>
+            <p className="text-sm text-slate-500">
+              Fill in the form below to add a new student.
             </p>
           </div>
         </div>
 
-        
+        <StudentForm
+          onSubmit={handleAddStudent}
+          onBack={() => navigate("/students/all")}
+        />
       </div>
     </div>
-
-    {/* FORM CARD */}
-    <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-8 py-8 shadow-2xl md:px-10 md:py-10">
-      <StudentForm
-        onSubmit={handleAddStudent}
-        onBack={() => navigate("/admin")}
-      />
-    </div>
-  </div>
-);
+  );
 }

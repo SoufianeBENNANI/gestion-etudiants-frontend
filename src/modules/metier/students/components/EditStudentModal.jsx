@@ -67,7 +67,7 @@ export default function EditStudentModal({
   if (!student) return null;
 
   const inputClass =
-    "w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-slate-800 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100";
+    "w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-slate-800 shadow-sm outline-none transition duration-200 placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100";
 
   const labelClass = "mb-2 block text-sm font-bold text-slate-700";
 
@@ -75,39 +75,49 @@ export default function EditStudentModal({
     "absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400";
 
   return (
-  <div className="space-y-8">
-    {/* HEADER SAME SIZE AS ALL STUDENTS */}
-    <div className="relative overflow-hidden rounded-[2rem] border border-white/15 bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 px-8 py-8 text-white shadow-2xl">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-5">
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex items-center justify-center text-white/90 transition duration-200 hover:-translate-x-1 hover:text-white"
-            title="Back to all students"
-          >
-            <ArrowLeft size={30} strokeWidth={2.5} />
-          </button>
+    <div className="space-y-8">
+      {/* HEADER */}
+      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-32 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
 
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 ring-1 ring-white/30">
-            <GraduationCap size={30} />
-          </div>
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-5">
+            <button
+              type="button"
+              onClick={onClose}
+              title="Back to all students"
+              className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+            >
+              <ArrowLeft size={22} />
+            </button>
 
-          <div>
-            <h1 className="text-3xl font-black">Update Student</h1>
-            <p className="mt-1 text-sm text-white/80">
-              Edit the student&apos;s personal information and save changes.
-            </p>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <GraduationCap size={34} />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-blue-200">
+                Students Management
+              </p>
+
+              <h1 className="mt-1 text-3xl font-black tracking-tight">
+                Update Student
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-300">
+                Edit the student&apos;s personal information and save changes.
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    {/* FORM CARD */}
-    <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-        <form onSubmit={handleSubmit} className="bg-white px-8 py-8 md:px-10 md:py-10">
+      {/* FORM CARD */}
+      <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <form onSubmit={handleSubmit}>
           <div className="rounded-3xl border border-slate-200 bg-slate-50/70 p-6 md:p-7">
-            <h2 className="mb-6 text-lg font-black text-slate-900">
+            <h2 className="mb-6 text-xl font-bold text-slate-900">
               Personal Information
             </h2>
 
@@ -223,11 +233,11 @@ export default function EditStudentModal({
           </div>
 
           {/* ACTIONS */}
-          <div className="mt-6 flex justify-end gap-4">
+          <div className="mt-8 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-2xl border border-slate-200 bg-white px-7 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               Cancel
             </button>
@@ -235,7 +245,7 @@ export default function EditStudentModal({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-violet-600 to-cyan-500 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-7 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 <Loader2 size={18} className="animate-spin" />
