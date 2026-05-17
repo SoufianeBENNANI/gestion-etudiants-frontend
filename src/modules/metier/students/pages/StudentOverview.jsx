@@ -20,7 +20,7 @@ export default function StudentOverview() {
     totalArchivedStudents: 0,
     totalPredictions: 0,
     averagePerformance: 0,
-    averageAttendance: 0,
+    totalAttendance: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,13 @@ export default function StudentOverview() {
 
       const data = await getStudentOverviewStats();
 
-      setStats(data);
+      setStats({
+        totalStudents: Number(data.totalStudents) || 0,
+        totalArchivedStudents: Number(data.totalArchivedStudents) || 0,
+        totalPredictions: Number(data.totalPredictions) || 0,
+        averagePerformance: Number(data.averagePerformance) || 0,
+        totalAttendance: Number(data.totalAttendance) || 0,
+      });
     } catch (error) {
       console.error("Error loading overview stats:", error);
     } finally {
@@ -82,8 +88,8 @@ export default function StudentOverview() {
     },
     {
       title: "Attendance",
-      value: `${stats.averageAttendance}%`,
-      description: "Track student attendance",
+      value: stats.totalAttendance,
+      description: "Total student attendance records",
       icon: Bell,
       path: "/students/attendance",
       badge: "Presence",
@@ -135,7 +141,6 @@ export default function StudentOverview() {
 
   return (
     <div className="space-y-8">
-      {/* HEADER */}
       <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
         <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
 
@@ -160,12 +165,9 @@ export default function StudentOverview() {
               </p>
             </div>
           </div>
-
-          
         </div>
       </div>
 
-      {/* CARDS */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {overviewCards.map((card, index) => {
           const Icon = card.icon;
@@ -221,7 +223,6 @@ export default function StudentOverview() {
         })}
       </div>
 
-      {/* SUMMARY */}
       <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
@@ -249,16 +250,16 @@ export default function StudentOverview() {
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Archived</p>
+            <p className="text-sm text-slate-500">Total Attendance</p>
             <p className="mt-2 text-2xl font-black text-slate-900">
-              {loading ? "..." : stats.totalArchivedStudents}
+              {loading ? "..." : stats.totalAttendance}
             </p>
           </div>
 
           <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-sm text-slate-500">Average Attendance</p>
+            <p className="text-sm text-slate-500">AI Predictions</p>
             <p className="mt-2 text-2xl font-black text-slate-900">
-              {loading ? "..." : `${stats.averageAttendance}%`}
+              {loading ? "..." : stats.totalPredictions}
             </p>
           </div>
         </div>

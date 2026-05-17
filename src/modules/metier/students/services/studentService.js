@@ -1,4 +1,5 @@
 import api from "../../../../api/axios";
+import { getAllAttendances } from "./attendanceService";
 
 export const addStudent = async (studentData) => {
   const response = await api.post("/Students/Ajouter", studentData);
@@ -53,38 +54,132 @@ export const generateStudentPrediction = async (id) => {
   return response.data;
 };
 
-export const getStudentOverviewStats = async () => {
-  const [students, archivedStudents, performances] = await Promise.all([
-    getAllStudents(),
-    getArchivedStudents(),
-    getStudentPerformance(),
-  ]);
+const getNumberValue = (...values) => {
+  for (const value of values) {
+    if (value !== null && value !== undefined && value !== "") {
+      const number = Number(value);
 
-  const totalStudents = students.length;
-  const totalArchivedStudents = archivedStudents.length;
-  const totalPredictions = performances.length;
-
-  let averagePerformance = 0;
-  let averageAttendance = 0;
-
-  if (performances.length > 0) {
-    const performanceSum = performances.reduce((sum, item) => {
-      return sum + Number(item.moyenne || item.average || item.performance || 0);
-    }, 0);
-
-    const attendanceSum = performances.reduce((sum, item) => {
-      return sum + Number(item.attendance || item.absenceRate || item.presence || 0);
-    }, 0);
-
-    averagePerformance = Math.round(performanceSum / performances.length);
-    averageAttendance = Math.round(attendanceSum / performances.length);
+      if (!Number.isNaN(number)) {
+        return number;
+      }
+    }
   }
 
-  return {
-    totalStudents,
-    totalArchivedStudents,
-    totalPredictions,
-    averagePerformance,
-    averageAttendance,
-  };
+  return 0;
+};
+
+export const getStudentOverviewStats = async () => {
+  try {
+    const [
+      studentsData,
+      archivedStudentsData,
+      performancesData,
+      attendancesData,
+    ] = await Promise.all([
+      getAllStudents(),
+      getArchivedStudents(),
+      getStudentPerformance(),
+      getAllAttendances(),
+    ]);
+
+    const students = Array.isArray(studentsData) ? studentsData : [];
+
+    const archivedStudents = Array.isArray(archivedStudentsData)
+      ? archivedStudentsData
+      : [];
+
+    const performances = Array.isArray(performancesData)
+      ? performancesData
+      : [];
+
+    const attendances = Array.isArray(attendancesData)
+      ? attendancesData
+      : [];
+
+    const totalStudents = students.length;
+    const totalArchivedStudents = archivedStudents.length;
+    const totalAttendance = attendances.length;
+
+    const predictedStudents = performances.filter((item) => {
+      const hasPrediction = item.hasPrediction === true;
+
+      const prediction = String(item.prediction || "")
+        .trim()
+        .toLowerCase();
+
+      const status = String(item.status || "")
+        .trim()
+        .toLowerCase();
+
+      const scoreRisque = item.scoreRisque;
+
+      const hasValidPredictionText =
+        prediction !== "" &&
+        prediction !== "-" &&
+        prediction !== "no prediction" &&
+        prediction !== "no prediction yet";
+
+      const hasValidStatus =
+        status !== "" &&
+        status !== "-" &&
+        status !== "no prediction" &&
+        status !== "no prediction yet";
+
+      const hasValidScore =
+        scoreRisque !== null &&
+        scoreRisque !== undefined &&
+        scoreRisque !== "" &&
+        !Number.isNaN(Number(scoreRisque));
+
+      return (
+        hasPrediction &&
+        (hasValidPredictionText || hasValidStatus || hasValidScore)
+      );
+    });
+
+    const totalPredictions = predictedStudents.length;
+
+    let averagePerformance = 0;
+
+    if (predictedStudents.length > 0) {
+      const performanceSum = predictedStudents.reduce((sum, item) => {
+        const moyenne = getNumberValue(
+          item.moyenne,
+          item.average,
+          item.averageGrade,
+          item.note,
+          item.performance
+        );
+
+        return sum + moyenne;
+      }, 0);
+
+      const averageGrade = performanceSum / predictedStudents.length;
+
+      // Si moyenne est sur 20 => convertir en %
+      // Si performance est déjà sur 100 => garder comme %
+      averagePerformance =
+        averageGrade <= 20
+          ? Math.round((averageGrade / 20) * 100)
+          : Math.round(averageGrade);
+    }
+
+    return {
+      totalStudents,
+      totalArchivedStudents,
+      totalPredictions,
+      totalAttendance,
+      averagePerformance,
+    };
+  } catch (error) {
+    console.error("Error loading student overview stats:", error);
+
+    return {
+      totalStudents: 0,
+      totalArchivedStudents: 0,
+      totalPredictions: 0,
+      totalAttendance: 0,
+      averagePerformance: 0,
+    };
+  }
 };

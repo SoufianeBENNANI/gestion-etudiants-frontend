@@ -41,9 +41,6 @@ export default function StudentAttendance() {
         getAllAttendances(),
       ]);
 
-      console.log("Students from DB:", studentsData);
-      console.log("Attendances from DB:", attendancesData);
-
       setStudents(Array.isArray(studentsData) ? studentsData : []);
       setAttendances(Array.isArray(attendancesData) ? attendancesData : []);
       setLastUpdated(new Date());
@@ -92,30 +89,10 @@ export default function StudentAttendance() {
     return item.studentId || item.student?.id || item.idStudent || null;
   };
 
-  const countUniqueStudentsByStatus = (status) => {
-    const ids = new Set();
-
-    attendances
-      .filter((item) => normalizeStatus(item.status) === status)
-      .forEach((item) => {
-        const studentId = getStudentId(item);
-
-        if (studentId) {
-          ids.add(studentId);
-        }
-      });
-
-    /*
-      Si le backend ne retourne pas studentId,
-      on compte les records directement.
-    */
-    if (ids.size === 0) {
-      return attendances.filter(
-        (item) => normalizeStatus(item.status) === status
-      ).length;
-    }
-
-    return ids.size;
+  const countAttendanceRecordsByStatus = (status) => {
+    return attendances.filter(
+      (item) => normalizeStatus(item.status) === status
+    ).length;
   };
 
   const filteredAttendances = useMemo(() => {
@@ -141,16 +118,9 @@ export default function StudentAttendance() {
   const totalStudents = students.length;
   const totalRecords = attendances.length;
 
-  const absentStudents = countUniqueStudentsByStatus("ABSENT");
-  const lateStudents = countUniqueStudentsByStatus("LATE");
+  const absentStudents = countAttendanceRecordsByStatus("ABSENT");
+  const lateStudents = countAttendanceRecordsByStatus("LATE");
 
-  /*
-    Logique demandée :
-    Total Students = 3
-    Absent Students = 2
-    Late Students = 0
-    Present Students = 3 - 2 - 0 = 1
-  */
   const presentStudents = Math.max(
     totalStudents - absentStudents - lateStudents,
     0

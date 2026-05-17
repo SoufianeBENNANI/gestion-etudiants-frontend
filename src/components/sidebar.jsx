@@ -17,6 +17,10 @@ import {
   Plus,
   BarChart3,
   Brain,
+  Building2,
+  Cpu,
+  FileBarChart,
+  ScrollText,
 } from "lucide-react";
 
 import logo from "../assets/LogoSchool.png";
@@ -29,6 +33,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     students: true,
     evaluation: false,
     finance: false,
+    ai: false,
   });
 
   const toggleMenu = (menu) => {
@@ -61,6 +66,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     "w-full flex items-center justify-between px-4 py-3 rounded-2xl text-white hover:bg-white/10 hover:text-cyan-300 transition-all duration-300";
 
   const studentSubItemClass = (path) =>
+    `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300
+    ${
+      pathname === path
+        ? "bg-white/10 text-white font-semibold"
+        : "text-slate-300 hover:bg-white/10 hover:text-white"
+    }`;
+
+  const aiSubItemClass = (path) =>
     `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300
     ${
       pathname === path
@@ -136,7 +149,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               {/* STUDENTS SUB MENU */}
               {openMenus.students && (
                 <div className="ml-5 mt-2 space-y-1">
-                  <Link to="/students" className={studentSubItemClass("/students")}>
+                  <Link
+                    to="/students"
+                    className={studentSubItemClass("/students")}
+                  >
                     <LayoutDashboard size={17} />
                     <span>Overview</span>
                   </Link>
@@ -166,12 +182,12 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                   </Link>
 
                   <Link
-  to="/students/attendance"
-  className={studentSubItemClass("/students/attendance")}
->
-  <Bell size={17} />
-  <span>Attendance</span>
-</Link>
+                    to="/students/attendance"
+                    className={studentSubItemClass("/students/attendance")}
+                  >
+                    <Bell size={17} />
+                    <span>Attendance</span>
+                  </Link>
 
                   <Link
                     to="/students/predictions"
@@ -185,17 +201,56 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
               <Link to="/classes" className={itemClass("/classes")}>
                 <Layers size={18} />
-                Classes
+                {!collapsed && <span>Classes</span>}
               </Link>
 
               <Link to="/courses" className={itemClass("/courses")}>
                 <BookOpen size={18} />
-                Courses
+                {!collapsed && <span>Courses</span>}
+              </Link>
+
+              <Link to="/departments" className={itemClass("/departments")}>
+                <Building2 size={18} />
+                {!collapsed && <span>Departments</span>}
               </Link>
 
               <Link to="/teachers" className={itemClass("/teachers")}>
                 <GraduationCap size={18} />
-                Teachers
+                {!collapsed && <span>Teachers</span>}
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* AI */}
+        <div>
+          <button
+            onClick={() => toggleMenu("ai")}
+            className={buttonClass(openMenus.ai)}
+          >
+            <div className="flex items-center gap-3">
+              <Brain size={20} />
+              {!collapsed && <span>AI</span>}
+            </div>
+
+            {!collapsed &&
+              (openMenus.ai ? (
+                <ChevronDown size={18} />
+              ) : (
+                <ChevronRight size={18} />
+              ))}
+          </button>
+
+          {openMenus.ai && !collapsed && (
+            <div className="ml-6 mt-3 space-y-2 border-l border-white/10 pl-4">
+              <Link to="/ai/models" className={aiSubItemClass("/ai/models")}>
+                <Cpu size={17} />
+                <span>Models</span>
+              </Link>
+
+              <Link to="/ai/logs" className={aiSubItemClass("/ai/logs")}>
+                <ScrollText size={17} />
+                <span>Logs</span>
               </Link>
             </div>
           )}
@@ -224,7 +279,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <div className="ml-6 mt-3 space-y-3 pl-4">
               <Link to="/grades" className={itemClass("/grades")}>
                 <ClipboardList size={18} />
-                Grades
+                {!collapsed && <span>Grades</span>}
               </Link>
             </div>
           )}
@@ -253,7 +308,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <div className="ml-6 mt-3 space-y-3 pl-4">
               <Link to="/payments" className={itemClass("/payments")}>
                 <DollarSign size={18} />
-                Payments
+                {!collapsed && <span>Payments</span>}
               </Link>
             </div>
           )}
