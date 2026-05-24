@@ -1,6 +1,23 @@
 import { Loader2, Plus, Save, X } from "lucide-react";
 
-export default function AddStudent({
+const niveauOptions = ["Technicien", "Licence", "Master", "Doctorat"];
+
+const anneeOptions = [
+  "2020",
+  "2021",
+  "2022",
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2031",
+];
+
+export default function AddClasse({
   open,
   formData,
   saving,
@@ -16,7 +33,7 @@ export default function AddStudent({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
+        className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-7 py-7 text-white">
@@ -31,13 +48,13 @@ export default function AddStudent({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Students Management
+                  Academics Management
                 </p>
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add Student
+                  Add Class
                 </h2>
                 <p className="mt-2 text-xs text-slate-300">
-                  Add a new student record.
+                  Add the class name, level and academic year.
                 </p>
               </div>
             </div>
@@ -54,63 +71,60 @@ export default function AddStudent({
 
         <form onSubmit={onSubmit} className="grid gap-5 p-6">
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <InputField
-              label="Last Name"
-              name="nom"
-              value={formData.nom}
-              onChange={onChange}
-              placeholder="Ex: BENNANI"
-            />
-
-            <InputField
-              label="First Name"
-              name="prenom"
-              value={formData.prenom}
-              onChange={onChange}
-              placeholder="Ex: Soufiane"
-            />
-
-            <InputField
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={onChange}
-              placeholder="Ex: soufiane@gmail.com"
-            />
+            <div>
+              <label className="mb-2 block text-xs font-black text-slate-700">
+                Class Name
+              </label>
+              <input
+                type="text"
+                name="nom"
+                value={formData.nom}
+                onChange={onChange}
+                placeholder="Ex: Physics"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                required
+              />
+            </div>
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Gender
+                Level
               </label>
               <select
-                name="genre"
-                value={formData.genre}
+                name="niveau"
+                value={formData.niveau}
                 onChange={onChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select gender</option>
-                <option value="Homme">Homme</option>
-                <option value="Femme">Femme</option>
+                <option value="">Select level</option>
+                {niveauOptions.map((niveau) => (
+                  <option key={niveau} value={niveau}>
+                    {niveau}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <InputField
-              label="Phone"
-              name="telephone"
-              value={formData.telephone}
-              onChange={onChange}
-              placeholder="Ex: 0674870006"
-            />
-
-            <InputField
-              label="Address"
-              name="adresse"
-              value={formData.adresse}
-              onChange={onChange}
-              placeholder="Ex: Meknes"
-            />
+            <div>
+              <label className="mb-2 block text-xs font-black text-slate-700">
+                Academic Year
+              </label>
+              <select
+                name="annee"
+                value={formData.annee}
+                onChange={onChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                required
+              >
+                <option value="">Select year</option>
+                {anneeOptions.map((annee) => (
+                  <option key={annee} value={annee}>
+                    {annee}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-end border-t border-slate-100 pt-5">
@@ -129,33 +143,6 @@ export default function AddStudent({
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-function InputField({
-  label,
-  name,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-xs font-black text-slate-700">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
-        required
-      />
     </div>
   );
 }

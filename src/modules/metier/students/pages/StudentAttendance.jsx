@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import ArchivedAttendance from "./ArchivedAttendance";
 import {
   Bell,
   Calendar,
@@ -12,14 +12,14 @@ import {
   XCircle,
   Activity,
   Archive,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { getAllStudents } from "../services/studentService";
 import { getAllAttendances } from "../services/attendanceService";
 
 export default function StudentAttendance() {
-  const navigate = useNavigate();
-
   const [students, setStudents] = useState([]);
   const [attendances, setAttendances] = useState([]);
 
@@ -27,6 +27,11 @@ export default function StudentAttendance() {
   const [loading, setLoading] = useState(true);
   const [autoRefreshing, setAutoRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const loadData = async (silent = false) => {
     try {
@@ -114,6 +119,49 @@ export default function StudentAttendance() {
       );
     });
   }, [attendances, searchTerm]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredAttendances.length / itemsPerPage)
+  );
+
+  const paginatedAttendances = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredAttendances.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredAttendances, currentPage, itemsPerPage]);
+
+  const startRecord =
+    filteredAttendances.length === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
+
+  const endRecord = Math.min(
+    currentPage * itemsPerPage,
+    filteredAttendances.length
+  );
+
+  const visiblePages = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleChangeItemsPerPage = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
 
   const totalStudents = students.length;
   const totalRecords = attendances.length;
@@ -222,7 +270,7 @@ export default function StudentAttendance() {
 
               <button
                 type="button"
-                onClick={() => navigate("/students/attendance/archive")}
+                onClick={() => setOpenArchiveDialog(true)}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
               >
                 <Archive size={18} />
@@ -341,25 +389,43 @@ export default function StudentAttendance() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
+                Showing {startRecord} to {endRecord} of{" "}
                 {filteredAttendances.length} attendance record
                 {filteredAttendances.length > 1 ? "s" : ""}
               </p>
             </div>
           </div>
 
-          <div className="relative">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
 
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by student, email, date or status..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-96"
-            />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search by student, email, date or status..."
+                className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 sm:w-96"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-600">Rows:</span>
+
+              <select
+                value={itemsPerPage}
+                onChange={handleChangeItemsPerPage}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={20}>20</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -373,50 +439,111 @@ export default function StudentAttendance() {
             No attendance records found.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] border-collapse">
-              <thead>
-                <tr className="bg-white text-left text-sm text-slate-600">
-                  <th className="px-6 py-4 font-black">Student</th>
-                  <th className="px-6 py-4 font-black">Email</th>
-                  <th className="px-6 py-4 font-black">Date</th>
-                  <th className="px-6 py-4 font-black">Status</th>
-                  <th className="px-6 py-4 font-black">Student ID</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredAttendances.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-t border-slate-100 text-sm text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <td className="px-6 py-4 font-black text-slate-900">
-                      {getStudentName(item)}
-                    </td>
-
-                    <td className="px-6 py-4">{getStudentEmail(item)}</td>
-
-                    <td className="px-6 py-4">{formatDateOnly(item.date)}</td>
-
-                    <td className="px-6 py-4">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-black ring-1 ${getStatusBadge(
-                          item.status
-                        )}`}
-                      >
-                        {normalizeStatus(item.status) || "-"}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">{getStudentId(item) || "-"}</td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] border-collapse">
+                <thead>
+                  <tr className="bg-white text-left text-sm text-slate-600">
+                    <th className="px-6 py-4 font-black">Student</th>
+                    <th className="px-6 py-4 font-black">Email</th>
+                    <th className="px-6 py-4 font-black">Date</th>
+                    <th className="px-6 py-4 font-black">Status</th>
+                    <th className="px-6 py-4 font-black">Student ID</th>
                   </tr>
+                </thead>
+
+                <tbody>
+                  {paginatedAttendances.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-t border-slate-100 text-sm text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <td className="px-6 py-4 font-black text-slate-900">
+                        {getStudentName(item)}
+                      </td>
+
+                      <td className="px-6 py-4">{getStudentEmail(item)}</td>
+
+                      <td className="px-6 py-4">{formatDateOnly(item.date)}</td>
+
+                      <td className="px-6 py-4">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-black ring-1 ${getStatusBadge(
+                            item.status
+                          )}`}
+                        >
+                          {normalizeStatus(item.status) || "-"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {getStudentId(item) || "-"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col gap-4 border-t border-slate-100 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm font-semibold text-slate-500">
+                Page{" "}
+                <span className="font-black text-slate-800">
+                  {currentPage}
+                </span>{" "}
+                of{" "}
+                <span className="font-black text-slate-800">{totalPages}</span>
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ChevronLeft size={18} />
+                  Previous
+                </button>
+
+                {visiblePages.map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black transition ${
+                      currentPage === page
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
                 ))}
-              </tbody>
-            </table>
-          </div>
+
+                <button
+                  type="button"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
+
+      <ArchivedAttendance
+        open={openArchiveDialog}
+        onClose={() => setOpenArchiveDialog(false)}
+        onRestored={(restoredAttendance) => {
+          setAttendances((prev) => [restoredAttendance, ...prev]);
+          loadData(true);
+        }}
+      />
     </div>
   );
 }

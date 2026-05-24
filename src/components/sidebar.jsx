@@ -14,12 +14,10 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
-  Plus,
   BarChart3,
   Brain,
   Building2,
   Cpu,
-  FileBarChart,
   ScrollText,
 } from "lucide-react";
 
@@ -163,14 +161,6 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                   >
                     <Users size={17} />
                     <span>All Students</span>
-                  </Link>
-
-                  <Link
-                    to="/students/add"
-                    className={studentSubItemClass("/students/add")}
-                  >
-                    <Plus size={17} />
-                    <span>Add Student</span>
                   </Link>
 
                   <Link

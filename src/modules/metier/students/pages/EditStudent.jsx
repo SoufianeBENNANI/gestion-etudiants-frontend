@@ -1,14 +1,49 @@
-import { Loader2, Plus, Save, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Pencil, Save, X } from "lucide-react";
 
-export default function AddStudent({
-  open,
-  formData,
+export default function EditStudent({
+  student,
   saving,
   onClose,
-  onChange,
   onSubmit,
 }) {
-  if (!open) return null;
+  const [formData, setFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    genre: "",
+    telephone: "",
+    adresse: "",
+  });
+
+  useEffect(() => {
+    if (student) {
+      setFormData({
+        nom: student.nom || "",
+        prenom: student.prenom || "",
+        email: student.email || "",
+        genre: student.genre || "",
+        telephone: student.telephone || "",
+        adresse: student.adresse || "",
+      });
+    }
+  }, [student]);
+
+  if (!student) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(student.id, formData);
+  };
 
   return (
     <div
@@ -19,6 +54,7 @@ export default function AddStudent({
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* HEADER */}
         <div className="relative overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-7 py-7 text-white">
           <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
           <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
@@ -26,18 +62,20 @@ export default function AddStudent({
           <div className="relative flex items-center justify-between gap-5">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-                <Plus size={28} />
+                <Pencil size={28} />
               </div>
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
                   Students Management
                 </p>
+
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add Student
+                  Edit Student
                 </h2>
+
                 <p className="mt-2 text-xs text-slate-300">
-                  Add a new student record.
+                  Update selected student information.
                 </p>
               </div>
             </div>
@@ -52,13 +90,14 @@ export default function AddStudent({
           </div>
         </div>
 
-        <form onSubmit={onSubmit} className="grid gap-5 p-6">
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="grid gap-5 p-6">
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             <InputField
               label="Last Name"
               name="nom"
               value={formData.nom}
-              onChange={onChange}
+              onChange={handleChange}
               placeholder="Ex: BENNANI"
             />
 
@@ -66,7 +105,7 @@ export default function AddStudent({
               label="First Name"
               name="prenom"
               value={formData.prenom}
-              onChange={onChange}
+              onChange={handleChange}
               placeholder="Ex: Soufiane"
             />
 
@@ -75,7 +114,7 @@ export default function AddStudent({
               name="email"
               type="email"
               value={formData.email}
-              onChange={onChange}
+              onChange={handleChange}
               placeholder="Ex: soufiane@gmail.com"
             />
 
@@ -83,10 +122,11 @@ export default function AddStudent({
               <label className="mb-2 block text-xs font-black text-slate-700">
                 Gender
               </label>
+
               <select
                 name="genre"
                 value={formData.genre}
-                onChange={onChange}
+                onChange={handleChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
@@ -100,7 +140,7 @@ export default function AddStudent({
               label="Phone"
               name="telephone"
               value={formData.telephone}
-              onChange={onChange}
+              onChange={handleChange}
               placeholder="Ex: 0674870006"
             />
 
@@ -108,7 +148,7 @@ export default function AddStudent({
               label="Address"
               name="adresse"
               value={formData.adresse}
-              onChange={onChange}
+              onChange={handleChange}
               placeholder="Ex: Meknes"
             />
           </div>

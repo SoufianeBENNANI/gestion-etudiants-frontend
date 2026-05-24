@@ -1,34 +1,42 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Trash2,
   Pencil,
   Users,
-  RefreshCcw,
   ChevronLeft,
   ChevronRight,
   Search,
   Archive,
   Loader2,
+  Plus,
+  Eye,
 } from "lucide-react";
 
 import {
   getAllStudents,
+  addStudent,
   deleteStudent,
   updateStudent,
   searchStudentsByName,
 } from "../services/studentService";
 
+import AddStudent from "./AddStudent";
+import ArchivedStudents from "./ArchivedStudents";
+import StudentDetails from "./StudentDetails";
+import EditStudent from "./EditStudent";
 import EditStudentModal from "../components/EditStudentModal";
 
 export default function AllStudents() {
-  const navigate = useNavigate();
-
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
 
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
+  const [viewStudent, setViewStudent] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,12 +45,19 @@ export default function AllStudents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searching, setSearching] = useState(false);
 
+  const [addFormData, setAddFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    genre: "",
+    telephone: "",
+    adresse: "",
+  });
+
   const loadStudents = async () => {
     try {
       setLoading(true);
-
       const data = await getAllStudents();
-
       setStudents(Array.isArray(data) ? data : []);
       setCurrentPage(1);
     } catch (error) {
@@ -70,7 +85,6 @@ export default function AllStudents() {
 
     try {
       setSearching(true);
-
       const data = await searchStudentsByName(value.trim());
       setStudents(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -78,6 +92,61 @@ export default function AllStudents() {
       setStudents([]);
     } finally {
       setSearching(false);
+    }
+  };
+
+  const handleOpenAddDialog = () => {
+    setAddFormData({
+      nom: "",
+      prenom: "",
+      email: "",
+      genre: "",
+      telephone: "",
+      adresse: "",
+    });
+
+    setOpenAddDialog(true);
+  };
+
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+
+    setAddFormData({
+      nom: "",
+      prenom: "",
+      email: "",
+      genre: "",
+      telephone: "",
+      adresse: "",
+    });
+  };
+
+  const handleChangeAddForm = (e) => {
+    const { name, value } = e.target;
+
+    setAddFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAddStudent = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSavingAdd(true);
+
+      const newStudent = await addStudent(addFormData);
+
+      setStudents((prev) => [newStudent, ...prev]);
+      handleCloseAddDialog();
+
+      alert("Student added successfully");
+    } catch (error) {
+      console.error("Add student error:", error);
+      alert("Error while adding the student");
+    } finally {
+      setSavingAdd(false);
     }
   };
 
@@ -145,9 +214,7 @@ export default function AllStudents() {
 
   const paginatedStudents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    return students.slice(startIndex, endIndex);
+    return students.slice(startIndex, startIndex + itemsPerPage);
   }, [students, currentPage, itemsPerPage]);
 
   const startStudent =
@@ -171,21 +238,7 @@ export default function AllStudents() {
   const visiblePages = Array.from(
     { length: totalPages },
     (_, index) => index + 1
-  ).slice(
-    Math.max(currentPage - 3, 0),
-    Math.min(currentPage + 2, totalPages)
-  );
-
-  if (selectedStudent) {
-    return (
-      <EditStudentModal
-        student={selectedStudent}
-        saving={savingUpdate}
-        onClose={() => setSelectedStudent(null)}
-        onUpdate={handleUpdateStudent}
-      />
-    );
-  }
+  ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
 
   return (
     <div className="space-y-8">
@@ -233,21 +286,16 @@ export default function AllStudents() {
 
             <button
               type="button"
-              onClick={loadStudents}
-              disabled={loading || searching}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={handleOpenAddDialog}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
-              {loading || searching ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <RefreshCcw size={18} />
-              )}
-              Refresh
+              <Plus size={18} />
+              Add
             </button>
 
             <button
               type="button"
-              onClick={() => navigate("/students/archive")}
+              onClick={() => setOpenArchiveDialog(true)}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Archive size={18} />
@@ -305,7 +353,7 @@ export default function AllStudents() {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] border-collapse">
+              <table className="w-full min-w-[1050px] border-collapse">
                 <thead>
                   <tr className="bg-white text-left text-sm text-slate-600">
                     <th className="px-6 py-4 font-black">Last Name</th>
@@ -342,6 +390,15 @@ export default function AllStudents() {
                         <div className="flex justify-end gap-3">
                           <button
                             type="button"
+                            onClick={() => setViewStudent(student)}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
+                          >
+                            <Eye size={16} />
+                            View
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => setSelectedStudent(student)}
                             disabled={!student.id}
                             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -361,7 +418,6 @@ export default function AllStudents() {
                             ) : (
                               <Trash2 size={16} />
                             )}
-
                             {deletingId === student.id
                               ? "Deleting..."
                               : "Delete"}
@@ -400,11 +456,10 @@ export default function AllStudents() {
                     key={page}
                     type="button"
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black transition ${
-                      currentPage === page
+                    className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black transition ${currentPage === page
                         ? "bg-slate-900 text-white shadow-sm"
                         : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -424,6 +479,32 @@ export default function AllStudents() {
           </>
         )}
       </div>
+
+      <AddStudent
+        open={openAddDialog}
+        formData={addFormData}
+        saving={savingAdd}
+        onClose={handleCloseAddDialog}
+        onChange={handleChangeAddForm}
+        onSubmit={handleAddStudent}
+      />
+
+      <StudentDetails student={viewStudent} onClose={() => setViewStudent(null)} />
+
+      <EditStudent
+        student={selectedStudent}
+        saving={savingUpdate}
+        onClose={() => setSelectedStudent(null)}
+        onSubmit={handleUpdateStudent}
+      />
+
+      <ArchivedStudents
+        open={openArchiveDialog}
+        onClose={() => setOpenArchiveDialog(false)}
+        onRestored={(restoredStudent) => {
+          setStudents((prev) => [restoredStudent, ...prev]);
+        }}
+      />
     </div>
   );
 }

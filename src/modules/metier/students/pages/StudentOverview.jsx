@@ -12,7 +12,14 @@ import {
   Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getStudentOverviewStats } from "../services/studentService";
+
+import {
+  getStudentOverviewStats,
+  addStudent,
+} from "../services/studentService";
+
+import AddStudent from "./AddStudent";
+import ArchivedStudents from "./ArchivedStudents";
 
 export default function StudentOverview() {
   const [stats, setStats] = useState({
@@ -24,6 +31,20 @@ export default function StudentOverview() {
   });
 
   const [loading, setLoading] = useState(true);
+
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
+
+  const [savingAdd, setSavingAdd] = useState(false);
+
+  const [addFormData, setAddFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    genre: "",
+    telephone: "",
+    adresse: "",
+  });
 
   useEffect(() => {
     loadStats();
@@ -49,6 +70,61 @@ export default function StudentOverview() {
     }
   };
 
+  const handleOpenAddDialog = () => {
+    setAddFormData({
+      nom: "",
+      prenom: "",
+      email: "",
+      genre: "",
+      telephone: "",
+      adresse: "",
+    });
+
+    setOpenAddDialog(true);
+  };
+
+  const handleCloseAddDialog = () => {
+    setOpenAddDialog(false);
+
+    setAddFormData({
+      nom: "",
+      prenom: "",
+      email: "",
+      genre: "",
+      telephone: "",
+      adresse: "",
+    });
+  };
+
+  const handleChangeAddForm = (e) => {
+    const { name, value } = e.target;
+
+    setAddFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAddStudent = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSavingAdd(true);
+
+      await addStudent(addFormData);
+
+      handleCloseAddDialog();
+      await loadStats();
+
+      alert("Student added successfully");
+    } catch (error) {
+      console.error("Add student error:", error);
+      alert("Error while adding student");
+    } finally {
+      setSavingAdd(false);
+    }
+  };
+
   const overviewCards = [
     {
       title: "All Students",
@@ -58,24 +134,25 @@ export default function StudentOverview() {
       path: "/students/all",
       badge: "Records",
       color: "blue",
+      type: "link",
     },
     {
       title: "Add Student",
       value: "+",
       description: "Create a new student profile",
       icon: UserPlus,
-      path: "/students/add",
       badge: "New",
       color: "emerald",
+      type: "addDialog",
     },
     {
       title: "Archived Students",
       value: stats.totalArchivedStudents,
       description: "View deleted or archived students",
       icon: Archive,
-      path: "/students/archive",
       badge: "Archive",
       color: "amber",
+      type: "archiveDialog",
     },
     {
       title: "Performance",
@@ -85,6 +162,7 @@ export default function StudentOverview() {
       path: "/students/performance",
       badge: "Analytics",
       color: "violet",
+      type: "link",
     },
     {
       title: "Attendance",
@@ -94,6 +172,7 @@ export default function StudentOverview() {
       path: "/students/attendance",
       badge: "Presence",
       color: "cyan",
+      type: "link",
     },
     {
       title: "AI Predictions",
@@ -103,6 +182,7 @@ export default function StudentOverview() {
       path: "/students/predictions",
       badge: "AI",
       color: "rose",
+      type: "link",
     },
   ];
 
@@ -139,8 +219,93 @@ export default function StudentOverview() {
     },
   };
 
+  const renderCardContent = (card) => {
+    const Icon = card.icon;
+    const style = colorStyles[card.color];
+
+    return (
+      <>
+        <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-slate-100 transition group-hover:scale-125" />
+
+        <div className="relative flex items-start justify-between">
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${style.icon} ${style.hover}`}
+          >
+            <Icon size={25} />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold ${style.badge}`}
+            >
+              {card.badge}
+            </span>
+
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-slate-900 group-hover:text-white">
+              <ArrowUpRight size={18} />
+            </div>
+          </div>
+        </div>
+
+        <div className="relative mt-8">
+          <h2 className="text-lg font-bold text-slate-900">{card.title}</h2>
+
+          <p className="mt-3 text-4xl font-black tracking-tight text-slate-950">
+            {loading ? (
+              <Loader2 className="animate-spin" size={32} />
+            ) : (
+              card.value
+            )}
+          </p>
+
+          <p className="mt-3 text-sm leading-6 text-slate-500">
+            {card.description}
+          </p>
+        </div>
+      </>
+    );
+  };
+
+  const renderCard = (card, index) => {
+    const cardClass =
+      "group relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl";
+
+    if (card.type === "addDialog") {
+      return (
+        <button
+          key={index}
+          type="button"
+          onClick={handleOpenAddDialog}
+          className={cardClass}
+        >
+          {renderCardContent(card)}
+        </button>
+      );
+    }
+
+    if (card.type === "archiveDialog") {
+      return (
+        <button
+          key={index}
+          type="button"
+          onClick={() => setOpenArchiveDialog(true)}
+          className={cardClass}
+        >
+          {renderCardContent(card)}
+        </button>
+      );
+    }
+
+    return (
+      <Link key={index} to={card.path} className={cardClass}>
+        {renderCardContent(card)}
+      </Link>
+    );
+  };
+
   return (
     <div className="space-y-8">
+      {/* HEADER */}
       <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
         <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
 
@@ -168,61 +333,12 @@ export default function StudentOverview() {
         </div>
       </div>
 
+      {/* CARDS */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {overviewCards.map((card, index) => {
-          const Icon = card.icon;
-          const style = colorStyles[card.color];
-
-          return (
-            <Link
-              key={index}
-              to={card.path}
-              className="group relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl"
-            >
-              <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-slate-100 transition group-hover:scale-125" />
-
-              <div className="relative flex items-start justify-between">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl transition ${style.icon} ${style.hover}`}
-                >
-                  <Icon size={25} />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${style.badge}`}
-                  >
-                    {card.badge}
-                  </span>
-
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition group-hover:bg-slate-900 group-hover:text-white">
-                    <ArrowUpRight size={18} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative mt-8">
-                <h2 className="text-lg font-bold text-slate-900">
-                  {card.title}
-                </h2>
-
-                <p className="mt-3 text-4xl font-black tracking-tight text-slate-950">
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={32} />
-                  ) : (
-                    card.value
-                  )}
-                </p>
-
-                <p className="mt-3 text-sm leading-6 text-slate-500">
-                  {card.description}
-                </p>
-              </div>
-            </Link>
-          );
-        })}
+        {overviewCards.map((card, index) => renderCard(card, index))}
       </div>
 
+      {/* SUMMARY */}
       <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
@@ -264,6 +380,25 @@ export default function StudentOverview() {
           </div>
         </div>
       </div>
+
+      {/* ADD STUDENT DIALOG */}
+      <AddStudent
+        open={openAddDialog}
+        formData={addFormData}
+        saving={savingAdd}
+        onClose={handleCloseAddDialog}
+        onChange={handleChangeAddForm}
+        onSubmit={handleAddStudent}
+      />
+
+      {/* ARCHIVED STUDENTS DIALOG */}
+      <ArchivedStudents
+        open={openArchiveDialog}
+        onClose={() => setOpenArchiveDialog(false)}
+        onRestored={() => {
+          loadStats();
+        }}
+      />
     </div>
   );
 }

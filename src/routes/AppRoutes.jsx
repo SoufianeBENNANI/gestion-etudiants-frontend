@@ -20,6 +20,13 @@ import StudentAttendance from "../modules/metier/students/pages/StudentAttendanc
 import StudentPredictions from "../modules/metier/students/pages/StudentPredictions";
 import ArchivedAttendance from "../modules/metier/students/pages/ArchivedAttendance";
 
+// Classes pages
+import AllClasses from "../modules/metier/classes/pages/AllClasses";
+import AddClasse from "../modules/metier/classes/pages/AddClasse";
+import EditClasse from "../modules/metier/classes/pages/EditClasse";
+import ClasseDetails from "../modules/metier/classes/pages/ClasseDetails";
+import ArchivedClasses from "../modules/metier/classes/pages/ArchivedClasses";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -45,8 +52,17 @@ function AppRoutes() {
           <Route path="/students/performance" element={<StudentPerformance />} />
           <Route path="/students/attendance" element={<StudentAttendance />} />
           <Route path="/students/predictions" element={<StudentPredictions />} />
-          <Route path="/students/attendance/archive" element={<ArchivedAttendance />} />
-          
+          <Route
+            path="/students/attendance/archive"
+            element={<ArchivedAttendance />}
+          />
+
+          {/* CLASSES */}
+          <Route path="/classes" element={<AllClasses />} />
+          <Route path="/classes/add" element={<AddClasse />} />
+          <Route path="/classes/edit/:id" element={<EditClasse />} />
+          <Route path="/classes/archive" element={<ArchivedClasses />} />
+          <Route path="/classes/:id" element={<ClasseDetails />} />
         </Route>
 
         {/* TEACHER */}
