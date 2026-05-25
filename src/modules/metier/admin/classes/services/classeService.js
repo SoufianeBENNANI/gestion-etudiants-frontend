@@ -1,4 +1,4 @@
-import api from "../../../../api/axios";
+import api from "../../../../../api/axios";
 
 export const getAllClasses = async () => {
   const response = await api.get("/Classes/AllClasses");

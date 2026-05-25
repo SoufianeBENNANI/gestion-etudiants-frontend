@@ -1,4 +1,4 @@
-import api from "../../../../api/axios";
+import api from "../../../../../api/axios";
 import { getAllAttendances } from "./attendanceService";
 
 export const addStudent = async (studentData) => {
@@ -182,4 +182,26 @@ export const getStudentOverviewStats = async () => {
       averagePerformance: 0,
     };
   }
+};
+
+export const downloadStudentsPdf = async () => {
+  const response = await api.get("/Students/DownloadPdf", {
+    responseType: "blob",
+  });
+
+  const file = new Blob([response.data], {
+    type: "application/pdf",
+  });
+
+  const fileURL = window.URL.createObjectURL(file);
+
+  const link = document.createElement("a");
+  link.href = fileURL;
+  link.download = "liste_etudiants.pdf";
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(fileURL);
 };

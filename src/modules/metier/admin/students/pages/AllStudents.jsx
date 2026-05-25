@@ -10,6 +10,7 @@ import {
   Loader2,
   Plus,
   Eye,
+  FileDown,
 } from "lucide-react";
 
 import {
@@ -18,6 +19,7 @@ import {
   deleteStudent,
   updateStudent,
   searchStudentsByName,
+  downloadStudentsPdf,
 } from "../services/studentService";
 
 import AddStudent from "./AddStudent";
@@ -301,6 +303,15 @@ export default function AllStudents() {
               <Archive size={18} />
               Archive
             </button>
+
+            <button
+              type="button"
+              onClick={downloadStudentsPdf}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-500/40"
+            >
+              <FileDown size={18} />
+              PDF
+            </button>
           </div>
         </div>
       </div>
@@ -457,8 +468,8 @@ export default function AllStudents() {
                     type="button"
                     onClick={() => setCurrentPage(page)}
                     className={`flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-black transition ${currentPage === page
-                        ? "bg-slate-900 text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                       }`}
                   >
                     {page}

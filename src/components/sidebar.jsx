@@ -101,7 +101,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       {/* MENU */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
         {/* DASHBOARD */}
-        <Link to="/" className={itemClass("/")}>
+        <Link to="/admin" className={itemClass("/admin")}>
           <LayoutDashboard size={20} />
           {!collapsed && <span>Dashboard</span>}
         </Link>
@@ -148,40 +148,46 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               {openMenus.students && (
                 <div className="ml-5 mt-2 space-y-1">
                   <Link
-                    to="/students"
-                    className={studentSubItemClass("/students")}
+                    to="/admin/students"
+                    className={studentSubItemClass("/admin/students")}
                   >
                     <LayoutDashboard size={17} />
                     <span>Overview</span>
                   </Link>
 
                   <Link
-                    to="/students/all"
-                    className={studentSubItemClass("/students/all")}
+                    to="/admin/students/all"
+                    className={studentSubItemClass("/admin/students/all")}
                   >
                     <Users size={17} />
                     <span>All Students</span>
                   </Link>
 
                   <Link
-                    to="/students/performance"
-                    className={studentSubItemClass("/students/performance")}
+                    to="/admin/students/performance"
+                    className={studentSubItemClass(
+                      "/admin/students/performance"
+                    )}
                   >
                     <BarChart3 size={17} />
                     <span>Performance</span>
                   </Link>
 
                   <Link
-                    to="/students/attendance"
-                    className={studentSubItemClass("/students/attendance")}
+                    to="/admin/students/attendance"
+                    className={studentSubItemClass(
+                      "/admin/students/attendance"
+                    )}
                   >
                     <Bell size={17} />
                     <span>Attendance</span>
                   </Link>
 
                   <Link
-                    to="/students/predictions"
-                    className={studentSubItemClass("/students/predictions")}
+                    to="/admin/students/predictions"
+                    className={studentSubItemClass(
+                      "/admin/students/predictions"
+                    )}
                   >
                     <Brain size={17} />
                     <span>AI Predictions</span>
@@ -189,22 +195,28 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 </div>
               )}
 
-              <Link to="/classes" className={itemClass("/classes")}>
+              <Link to="/admin/classes" className={itemClass("/admin/classes")}>
                 <Layers size={18} />
                 {!collapsed && <span>Classes</span>}
               </Link>
 
-              <Link to="/courses" className={itemClass("/courses")}>
+              <Link to="/admin/courses" className={itemClass("/admin/courses")}>
                 <BookOpen size={18} />
                 {!collapsed && <span>Courses</span>}
               </Link>
 
-              <Link to="/departments" className={itemClass("/departments")}>
+              <Link
+                to="/admin/departments"
+                className={itemClass("/admin/departments")}
+              >
                 <Building2 size={18} />
                 {!collapsed && <span>Departments</span>}
               </Link>
 
-              <Link to="/teachers" className={itemClass("/teachers")}>
+              <Link
+                to="/admin/teachers"
+                className={itemClass("/admin/teachers")}
+              >
                 <GraduationCap size={18} />
                 {!collapsed && <span>Teachers</span>}
               </Link>
@@ -233,12 +245,18 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
           {openMenus.ai && !collapsed && (
             <div className="ml-6 mt-3 space-y-2 border-l border-white/10 pl-4">
-              <Link to="/ai/models" className={aiSubItemClass("/ai/models")}>
+              <Link
+                to="/admin/ai/models"
+                className={aiSubItemClass("/admin/ai/models")}
+              >
                 <Cpu size={17} />
                 <span>Models</span>
               </Link>
 
-              <Link to="/ai/logs" className={aiSubItemClass("/ai/logs")}>
+              <Link
+                to="/admin/ai/logs"
+                className={aiSubItemClass("/admin/ai/logs")}
+              >
                 <ScrollText size={17} />
                 <span>Logs</span>
               </Link>
@@ -267,7 +285,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
           {openMenus.evaluation && !collapsed && (
             <div className="ml-6 mt-3 space-y-3 pl-4">
-              <Link to="/grades" className={itemClass("/grades")}>
+              <Link to="/admin/grades" className={itemClass("/admin/grades")}>
                 <ClipboardList size={18} />
                 {!collapsed && <span>Grades</span>}
               </Link>
@@ -296,7 +314,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
           {openMenus.finance && !collapsed && (
             <div className="ml-6 mt-3 space-y-3 pl-4">
-              <Link to="/payments" className={itemClass("/payments")}>
+              <Link
+                to="/admin/payments"
+                className={itemClass("/admin/payments")}
+              >
                 <DollarSign size={18} />
                 {!collapsed && <span>Payments</span>}
               </Link>
@@ -307,7 +328,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
       {/* FOOTER */}
       <div className="p-3">
-        <Link to="/settings" className={itemClass("/settings")}>
+        <Link to="/admin/settings" className={itemClass("/admin/settings")}>
           <Settings size={20} />
           {!collapsed && <span>Settings</span>}
         </Link>
