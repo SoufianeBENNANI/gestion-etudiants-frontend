@@ -92,8 +92,8 @@ export default function AddStudent({
                 required
               >
                 <option value="">Select gender</option>
-                <option value="Homme">Homme</option>
-                <option value="Femme">Femme</option>
+                <option value="Homme">Male</option>
+                <option value="Femme">Female</option>
               </select>
             </div>
 

@@ -29,6 +29,9 @@ import AllCourses from "../modules/metier/admin/courses/pages/AllCourses";
 // Departements pages
 import AllDepartements from "../modules/metier/admin/departements/pages/AllDepartements";
 
+// Teachers pages
+import AllTeachers from "../modules/metier/admin/teachers/pages/AllTeachers";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -69,6 +72,9 @@ function AppRoutes() {
           {/* DEPARTEMENTS */}
           <Route path="departements" element={<AllDepartements />} />
           <Route path="departments" element={<AllDepartements />} />
+
+          {/* TEACHERS */}
+          <Route path="teachers" element={<AllTeachers />} />
         </Route>
 
         {/* TEACHER */}

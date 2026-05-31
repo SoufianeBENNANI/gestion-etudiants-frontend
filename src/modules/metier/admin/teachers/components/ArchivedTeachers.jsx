@@ -4,31 +4,43 @@ import {
   Archive,
   RotateCcw,
   Loader2,
+  GraduationCap,
   Search,
   RefreshCcw,
   Layers3,
 } from "lucide-react";
 
 import {
-  getArchivedDepartements,
-  restoreDepartement,
-} from "../service/departementService";
+  getArchivedTeachers,
+  restoreTeacher,
+} from "../service/teacherService";
 
-export default function ArchivedDepartement({ open, onClose, onRestored }) {
-  const [archivedDepartements, setArchivedDepartements] = useState([]);
+export default function ArchivedTeachers({ open, onClose, onRestored }) {
+  const [archivedTeachers, setArchivedTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
 
-  const loadArchivedDepartements = async () => {
+  const normalizeTeachers = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
+
+  const loadArchivedTeachers = async () => {
     try {
       setLoading(true);
 
-      const data = await getArchivedDepartements();
-      setArchivedDepartements(Array.isArray(data) ? data : []);
+      const data = await getArchivedTeachers();
+      setArchivedTeachers(normalizeTeachers(data));
     } catch (error) {
-      console.error("Error loading archived departments:", error);
-      setArchivedDepartements([]);
+      console.error("Load archived teachers error:", error);
+      console.error("Status:", error.response?.status);
+      console.error("Response:", error.response?.data);
+
+      alert("Error while loading archived teachers");
+      setArchivedTeachers([]);
     } finally {
       setLoading(false);
     }
@@ -37,41 +49,53 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
   useEffect(() => {
     if (open) {
       setSearchTerm("");
-      loadArchivedDepartements();
+      loadArchivedTeachers();
     }
   }, [open]);
 
-  const filteredDepartements = useMemo(() => {
-    return archivedDepartements.filter((departement) => {
-      const departementName = String(departement.nom || "");
-      const description = String(departement.description || "");
+  const filteredTeachers = useMemo(() => {
+    return archivedTeachers.filter((teacher) => {
+      const lastName = String(teacher.nom || "");
+      const firstName = String(teacher.prenom || "");
+      const email = String(teacher.email || "");
+      const speciality = String(teacher.specialite || "");
 
-      return `${departementName} ${description}`
+      const departmentName = String(
+        teacher.departement?.nom ||
+          teacher.departementNom ||
+          teacher.nomDepartement ||
+          ""
+      );
+
+      return `${lastName} ${firstName} ${email} ${speciality} ${departmentName}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
     });
-  }, [archivedDepartements, searchTerm]);
+  }, [archivedTeachers, searchTerm]);
 
-  const handleRestore = async (departement) => {
-    if (!window.confirm("Restore this department?")) return;
+  const handleRestore = async (teacher) => {
+    if (!window.confirm("Restore this teacher?")) return;
 
     try {
-      setRestoringId(departement.id);
+      setRestoringId(teacher.id);
 
-      const restoredDepartement = await restoreDepartement(departement.id);
+      const restoredTeacher = await restoreTeacher(teacher.id);
 
-      setArchivedDepartements((prev) =>
-        prev.filter((item) => item.id !== departement.id)
+      setArchivedTeachers((prev) =>
+        prev.filter((item) => item.id !== teacher.id)
       );
 
       if (onRestored) {
-        onRestored(restoredDepartement || departement);
+        onRestored(restoredTeacher || teacher);
       }
 
-      alert("Department restored successfully");
+      alert("Teacher restored successfully");
     } catch (error) {
-      console.error("Error restoring department:", error);
-      alert("Error while restoring the department");
+      console.error("Restore teacher error:", error);
+      console.error("Status:", error.response?.status);
+      console.error("Response:", error.response?.data);
+
+      alert("Error while restoring teacher");
     } finally {
       setRestoringId(null);
     }
@@ -101,15 +125,15 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Optional Management
+                  Teachers Management
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Departments
+                  Archived Teachers
                 </h2>
 
                 <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived department records.
+                  View and restore archived teacher records.
                 </p>
               </div>
             </div>
@@ -133,11 +157,11 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Departments List
+                Archived Teachers List
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredDepartements.length} archived departments
+                Showing {filteredTeachers.length} archived teachers
               </p>
             </div>
           </div>
@@ -160,7 +184,7 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
 
             <button
               type="button"
-              onClick={loadArchivedDepartements}
+              onClick={loadArchivedTeachers}
               disabled={loading}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -179,63 +203,81 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-[30%] px-5 py-4 font-black">
-                  Department Name
-                </th>
-                <th className="w-[45%] px-5 py-4 font-black">
-                  Description
-                </th>
-                <th className="w-[25%] px-5 py-4 font-black">
-                  Action
-                </th>
+                <th className="w-[15%] px-4 py-4 font-black">Last Name</th>
+                <th className="w-[15%] px-4 py-4 font-black">First Name</th>
+                <th className="w-[24%] px-4 py-4 font-black">Email</th>
+                <th className="w-[16%] px-4 py-4 font-black">Speciality</th>
+                <th className="w-[15%] px-4 py-4 font-black">Department</th>
+                <th className="w-[15%] px-4 py-4 font-black">Action</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="3" className="px-5 py-10 text-center">
+                  <td colSpan="6" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived departments...
+                      Loading archived teachers...
                     </div>
                   </td>
                 </tr>
-              ) : filteredDepartements.length === 0 ? (
+              ) : filteredTeachers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="3"
+                    colSpan="6"
                     className="px-5 py-10 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived departments found.
+                    No archived teachers found.
                   </td>
                 </tr>
               ) : (
-                filteredDepartements.map((departement) => (
+                filteredTeachers.map((teacher) => (
                   <tr
-                    key={departement.id}
+                    key={teacher.id}
                     className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
                   >
-                    <td className="px-5 py-4">
-                      <span className="font-black text-slate-900">
-                        {departement.nom || "No name"}
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <GraduationCap size={16} className="text-blue-600" />
+
+                        <span className="font-black text-slate-900">
+                          {teacher.nom || "-"}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-4">{teacher.prenom || "-"}</td>
+
+                    <td className="px-4 py-4">
+                      <span className="block truncate">
+                        {teacher.email || "-"}
                       </span>
                     </td>
 
-                    <td className="px-5 py-4">
-                      <span className="line-clamp-1">
-                        {departement.description || "No description"}
+                    <td className="px-4 py-4">
+                      <span className="block truncate">
+                        {teacher.specialite || "-"}
                       </span>
                     </td>
 
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-4">
+                      <span className="block truncate">
+                        {teacher.departement?.nom ||
+                          teacher.departementNom ||
+                          teacher.nomDepartement ||
+                          "-"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-4">
                       <button
                         type="button"
-                        onClick={() => handleRestore(departement)}
-                        disabled={restoringId === departement.id}
+                        onClick={() => handleRestore(teacher)}
+                        disabled={restoringId === teacher.id}
                         className="inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {restoringId === departement.id ? (
+                        {restoringId === teacher.id ? (
                           <Loader2 size={16} className="animate-spin" />
                         ) : (
                           <RotateCcw size={16} />

@@ -11,27 +11,28 @@ import {
   Plus,
   Eye,
   FileDown,
+  GraduationCap,
   AlertTriangle,
 } from "lucide-react";
 
 import {
-  getAllStudents,
-  addStudent,
-  deleteStudent,
-  updateStudent,
-  searchStudentsByName,
-  downloadStudentsPdf,
-  getArchivedStudents,
-} from "../services/studentService";
+  getAllTeachers,
+  addTeacher,
+  deleteTeacher,
+  updateTeacher,
+  searchTeachersByName,
+  downloadTeachersPdf,
+  getArchivedTeachers,
+} from "../service/teacherService";
 
-import AddStudent from "./AddStudent";
-import ArchivedStudents from "./ArchivedStudents";
-import StudentDetails from "./StudentDetails";
-import EditStudent from "./EditStudent";
+import AddTeacher from "../components/AddTeacher";
+import ArchivedTeachers from "../components/ArchivedTeachers";
+import TeacherDetails from "../components/TeacherDetails";
+import EditTeacher from "../components/EditTeacher";
 
-export default function AllStudents() {
-  const [students, setStudents] = useState([]);
-  const [totalStudents, setTotalStudents] = useState(0);
+export default function AllTeachers() {
+  const [teachers, setTeachers] = useState([]);
+  const [totalTeachers, setTotalTeachers] = useState(0);
   const [archivedCount, setArchivedCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
@@ -39,8 +40,8 @@ export default function AllStudents() {
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
-  const [viewStudent, setViewStudent] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [viewTeacher, setViewTeacher] = useState(null);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
@@ -55,45 +56,52 @@ export default function AllStudents() {
     nom: "",
     prenom: "",
     email: "",
-    genre: "",
-    telephone: "",
-    adresse: "",
+    specialite: "",
+    departementId: "",
   });
+
+  const normalizeTeachers = (data) => {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.content)) return data.content;
+    if (Array.isArray(data?.data)) return data.data;
+    return [];
+  };
 
   const loadArchivedCount = async () => {
     try {
-      const data = await getArchivedStudents();
-      setArchivedCount(Array.isArray(data) ? data.length : 0);
+      const data = await getArchivedTeachers();
+      const archivedTeachers = normalizeTeachers(data);
+      setArchivedCount(archivedTeachers.length);
     } catch (error) {
-      console.error("Load archived students count error:", error);
+      console.error("Load archived teachers count error:", error);
       setArchivedCount(0);
     }
   };
 
-  const loadStudents = async () => {
+  const loadTeachers = async () => {
     try {
       setLoading(true);
 
-      const data = await getAllStudents();
-      const list = Array.isArray(data) ? data : [];
+      const data = await getAllTeachers();
+      const teachersList = normalizeTeachers(data);
 
-      setStudents(list);
-      setTotalStudents(list.length);
+      setTeachers(teachersList);
+      setTotalTeachers(teachersList.length);
       setCurrentPage(1);
 
       await loadArchivedCount();
     } catch (error) {
-      console.error("Load students error:", error);
-      alert("Error while loading students");
-      setStudents([]);
-      setTotalStudents(0);
+      console.error("Load teachers error:", error);
+      alert("Error while loading teachers.");
+      setTeachers([]);
+      setTotalTeachers(0);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadStudents();
+    loadTeachers();
   }, []);
 
   const handleSearchChange = async (e) => {
@@ -103,18 +111,20 @@ export default function AllStudents() {
     setCurrentPage(1);
 
     if (!value.trim()) {
-      loadStudents();
+      loadTeachers();
       return;
     }
 
     try {
       setSearching(true);
 
-      const data = await searchStudentsByName(value.trim());
-      setStudents(Array.isArray(data) ? data : []);
+      const data = await searchTeachersByName(value.trim());
+      const teachersList = normalizeTeachers(data);
+
+      setTeachers(teachersList);
     } catch (error) {
-      console.error("Search students error:", error);
-      setStudents([]);
+      console.error("Search teachers error:", error);
+      setTeachers([]);
     } finally {
       setSearching(false);
     }
@@ -125,9 +135,8 @@ export default function AllStudents() {
       nom: "",
       prenom: "",
       email: "",
-      genre: "",
-      telephone: "",
-      adresse: "",
+      specialite: "",
+      departementId: "",
     });
 
     setOpenAddDialog(true);
@@ -140,9 +149,8 @@ export default function AllStudents() {
       nom: "",
       prenom: "",
       email: "",
-      genre: "",
-      telephone: "",
-      adresse: "",
+      specialite: "",
+      departementId: "",
     });
   };
 
@@ -155,53 +163,58 @@ export default function AllStudents() {
     }));
   };
 
-  const handleAddStudent = async (e) => {
+  const handleAddTeacher = async (e) => {
     e.preventDefault();
 
     try {
       setSavingAdd(true);
 
-      const newStudent = await addStudent(addFormData);
+      const newTeacher = await addTeacher(addFormData);
 
-      setStudents((prev) => [newStudent, ...prev]);
-      setTotalStudents((prev) => prev + 1);
+      setTeachers((prev) => [newTeacher, ...prev]);
+      setTotalTeachers((prev) => prev + 1);
 
       handleCloseAddDialog();
 
-      alert("Student added successfully");
+      alert("Teacher added successfully.");
     } catch (error) {
-      console.error("Add student error:", error);
-      alert("Error while adding the student");
+      console.error("Add teacher error:", error);
+      alert("Error while adding the teacher.");
     } finally {
       setSavingAdd(false);
     }
   };
 
-  const handleUpdateStudent = async (id, studentData) => {
+  const handleUpdateTeacher = async (id, teacherData) => {
+    if (!id) return;
+
     try {
       setSavingUpdate(true);
 
-      const updatedStudent = await updateStudent(id, studentData);
+      const updatedTeacher = await updateTeacher(id, teacherData);
 
-      setStudents((prevStudents) =>
-        prevStudents.map((student) =>
-          student.id === id ? updatedStudent : student
+      setTeachers((prevTeachers) =>
+        prevTeachers.map((teacher) =>
+          teacher.id === id ? updatedTeacher : teacher
         )
       );
 
-      setSelectedStudent(null);
-      alert("Student updated successfully");
+      setSelectedTeacher(null);
+
+      alert("Teacher updated successfully.");
     } catch (error) {
-      console.error("Update student error:", error);
-      alert("Error while updating the student");
+      console.error("Update teacher error:", error);
+      alert("Error while updating the teacher.");
     } finally {
       setSavingUpdate(false);
     }
   };
 
   const handleDelete = async (id) => {
+    if (!id) return;
+
     const confirmed = window.confirm(
-      "Are you sure you want to archive this student?"
+      "Are you sure you want to archive this teacher?"
     );
 
     if (!confirmed) return;
@@ -209,61 +222,48 @@ export default function AllStudents() {
     try {
       setDeletingId(id);
 
-      await deleteStudent(id);
+      await deleteTeacher(id);
 
-      setStudents((prevStudents) => {
-        const updatedStudents = prevStudents.filter(
-          (student) => student.id !== id
+      setTeachers((prevTeachers) => {
+        const updatedTeachers = prevTeachers.filter(
+          (teacher) => teacher.id !== id
         );
 
         const newTotalPages = Math.max(
           1,
-          Math.ceil(updatedStudents.length / itemsPerPage)
+          Math.ceil(updatedTeachers.length / itemsPerPage)
         );
 
         if (currentPage > newTotalPages) {
           setCurrentPage(newTotalPages);
         }
 
-        return updatedStudents;
+        return updatedTeachers;
       });
 
-      setTotalStudents((prev) => Math.max(prev - 1, 0));
+      setTotalTeachers((prev) => Math.max(prev - 1, 0));
       setArchivedCount((prev) => prev + 1);
 
-      alert("Student archived successfully");
+      alert("Teacher archived successfully.");
     } catch (error) {
-      console.error("Archive student error:", error);
-      alert("Error while archiving the student");
+      console.error("Archive teacher error:", error);
+      alert("Error while archiving the teacher.");
     } finally {
       setDeletingId(null);
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(students.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(teachers.length / itemsPerPage));
 
-  const paginatedStudents = useMemo(() => {
+  const paginatedTeachers = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return students.slice(startIndex, startIndex + itemsPerPage);
-  }, [students, currentPage, itemsPerPage]);
+    return teachers.slice(startIndex, startIndex + itemsPerPage);
+  }, [teachers, currentPage, itemsPerPage]);
 
-  const startStudent =
-    students.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const startTeacher =
+    teachers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
 
-  const endStudent = Math.min(currentPage * itemsPerPage, students.length);
-
-  const goToPreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
-  };
-
-  const handleChangeItemsPerPage = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-  };
+  const endTeacher = Math.min(currentPage * itemsPerPage, teachers.length);
 
   const visiblePages = Array.from(
     { length: totalPages },
@@ -280,20 +280,20 @@ export default function AllStudents() {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <Users size={28} />
+              <GraduationCap size={28} />
             </div>
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Students Management
+                Teachers Management
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                All Students
+                All Teachers
               </h1>
 
               <p className="mt-2 text-xs text-slate-300">
-                Manage, view and archive student records.
+                Manage, view and archive teacher records.
               </p>
             </div>
           </div>
@@ -309,7 +309,7 @@ export default function AllStudents() {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search by last name..."
+                placeholder="Search teacher..."
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
               />
 
@@ -341,7 +341,7 @@ export default function AllStudents() {
 
             <button
               type="button"
-              onClick={downloadStudentsPdf}
+              onClick={downloadTeachersPdf}
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-500/40"
             >
               <FileDown size={17} />
@@ -353,10 +353,10 @@ export default function AllStudents() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Users size={22} />
+              <GraduationCap size={22} />
             </div>
 
             <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
@@ -364,14 +364,14 @@ export default function AllStudents() {
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Total Students</p>
+          <p className="text-sm font-black text-slate-950">Total Teachers</p>
 
           <h2 className="mt-3 text-2xl font-black text-slate-950">
-            {totalStudents}
+            {totalTeachers}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
               <Search size={22} />
@@ -383,15 +383,15 @@ export default function AllStudents() {
           </div>
 
           <p className="text-sm font-black text-slate-950">
-            Displayed Students
+            Displayed Teachers
           </p>
 
           <h2 className="mt-3 text-2xl font-black text-slate-950">
-            {students.length}
+            {teachers.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-500">
               <AlertTriangle size={22} />
@@ -420,12 +420,12 @@ export default function AllStudents() {
 
             <div>
               <h2 className="text-lg font-black text-slate-900">
-                Students List
+                Teachers List
               </h2>
 
               <p className="mt-0.5 text-xs text-slate-500">
-                Showing {startStudent} to {endStudent} of {students.length}{" "}
-                students
+                Showing {startTeacher} to {endTeacher} of {teachers.length}{" "}
+                teachers
               </p>
             </div>
           </div>
@@ -435,7 +435,10 @@ export default function AllStudents() {
 
             <select
               value={itemsPerPage}
-              onChange={handleChangeItemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
             >
               <option value={5}>5</option>
@@ -448,111 +451,107 @@ export default function AllStudents() {
 
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="w-[12%] px-2 py-3 font-black">Last Name</th>
-              <th className="w-[12%] px-2 py-3 font-black">First Name</th>
-              <th className="w-[19%] px-2 py-3 font-black">Email</th>
-              <th className="w-[8%] px-2 py-3 font-black">Gender</th>
-              <th className="w-[11%] px-2 py-3 font-black">Phone</th>
-              <th className="w-[12%] px-2 py-3 font-black">Address</th>
-              <th className="w-[26%] px-2 py-3 font-black">Action</th>
+            <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
+              <th className="w-[12%] px-3 py-3 font-black">Last Name</th>
+              <th className="w-[12%] px-3 py-3 font-black">First Name</th>
+              <th className="w-[24%] px-3 py-3 font-black">Email</th>
+              <th className="w-[13%] px-3 py-3 font-black">Speciality</th>
+              <th className="w-[13%] px-3 py-3 font-black">Department</th>
+              <th className="w-[26%] px-3 py-3 font-black">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="px-5 py-8 text-center">
+                <td colSpan="6" className="px-5 py-8 text-center">
                   <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                     <Loader2 size={18} className="animate-spin" />
-                    Loading students...
+                    Loading teachers...
                   </div>
                 </td>
               </tr>
-            ) : students.length === 0 ? (
+            ) : teachers.length === 0 ? (
               <tr>
                 <td
-                  colSpan="7"
+                  colSpan="6"
                   className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                 >
-                  No students found.
+                  No teachers found.
                 </td>
               </tr>
             ) : (
-              paginatedStudents.map((student) => (
+              paginatedTeachers.map((teacher) => (
                 <tr
-                  key={student.id}
-                  className="border-t border-slate-100 text-center text-xs text-slate-700 transition hover:bg-slate-50 xl:text-sm"
+                  key={teacher.id}
+                  className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
                 >
-                  <td className="px-2 py-3">
+                  <td className="px-3 py-3">
                     <span className="block truncate font-black text-slate-900">
-                      {student.nom || "-"}
+                      {teacher.nom || "-"}
                     </span>
                   </td>
 
-                  <td className="px-2 py-3">
+                  <td className="px-3 py-3">
                     <span className="block truncate">
-                      {student.prenom || "-"}
+                      {teacher.prenom || "-"}
                     </span>
                   </td>
 
-                  <td className="px-2 py-3">
+                  <td className="px-3 py-3">
                     <span className="block truncate">
-                      {student.email || "-"}
+                      {teacher.email || "-"}
                     </span>
                   </td>
 
-                  <td className="px-2 py-3">
+                  <td className="px-3 py-3">
                     <span className="block truncate">
-                      {student.genre || "-"}
+                      {teacher.specialite || "-"}
                     </span>
                   </td>
 
-                  <td className="px-2 py-3">
+                  <td className="px-3 py-3">
                     <span className="block truncate">
-                      {student.telephone || "-"}
+                      {teacher.departement?.nom ||
+                        teacher.departementNom ||
+                        teacher.nomDepartement ||
+                        "-"}
                     </span>
                   </td>
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.adresse || "-"}
-                    </span>
-                  </td>
-
-                  <td className="px-2 py-3">
-                    <div className="flex flex-nowrap justify-center gap-1.5">
+                  <td className="px-3 py-3">
+                    <div className="flex flex-nowrap justify-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setViewStudent(student)}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-blue-600 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-blue-700 xl:gap-1.5 xl:px-3 xl:text-xs"
+                        onClick={() => setViewTeacher(teacher)}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
                       >
-                        <Eye size={13} />
+                        <Eye size={14} />
                         View
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => setSelectedStudent(student)}
-                        disabled={!student.id}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-900 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 xl:gap-1.5 xl:px-3 xl:text-xs"
+                        onClick={() => setSelectedTeacher(teacher)}
+                        disabled={!teacher.id}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        <Pencil size={13} />
+                        <Pencil size={14} />
                         Edit
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => handleDelete(student.id)}
-                        disabled={deletingId === student.id}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-red-600 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60 xl:gap-1.5 xl:px-3 xl:text-xs"
+                        onClick={() => handleDelete(teacher.id)}
+                        disabled={deletingId === teacher.id}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {deletingId === student.id ? (
-                          <Loader2 size={13} className="animate-spin" />
+                        {deletingId === teacher.id ? (
+                          <Loader2 size={14} className="animate-spin" />
                         ) : (
-                          <Trash2 size={13} />
+                          <Trash2 size={14} />
                         )}
-                        {deletingId === student.id ? "Deleting" : "Delete"}
+                        {deletingId === teacher.id ? "Deleting" : "Delete"}
                       </button>
                     </div>
                   </td>
@@ -566,14 +565,14 @@ export default function AllStudents() {
         <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold text-slate-500">
             Page{" "}
-            <span className="font-black text-slate-800">{currentPage}</span>{" "}
-            of <span className="font-black text-slate-800">{totalPages}</span>
+            <span className="font-black text-slate-800">{currentPage}</span> of{" "}
+            <span className="font-black text-slate-800">{totalPages}</span>
           </p>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={goToPreviousPage}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -598,7 +597,9 @@ export default function AllStudents() {
 
             <button
               type="button"
-              onClick={goToNextPage}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -609,33 +610,33 @@ export default function AllStudents() {
         </div>
       </div>
 
-      <AddStudent
+      <AddTeacher
         open={openAddDialog}
         formData={addFormData}
         saving={savingAdd}
         onClose={handleCloseAddDialog}
         onChange={handleChangeAddForm}
-        onSubmit={handleAddStudent}
+        onSubmit={handleAddTeacher}
       />
 
-      <StudentDetails
-        student={viewStudent}
-        onClose={() => setViewStudent(null)}
+      <TeacherDetails
+        teacher={viewTeacher}
+        onClose={() => setViewTeacher(null)}
       />
 
-      <EditStudent
-        student={selectedStudent}
+      <EditTeacher
+        teacher={selectedTeacher}
         saving={savingUpdate}
-        onClose={() => setSelectedStudent(null)}
-        onSubmit={handleUpdateStudent}
+        onClose={() => setSelectedTeacher(null)}
+        onSubmit={handleUpdateTeacher}
       />
 
-      <ArchivedStudents
+      <ArchivedTeachers
         open={openArchiveDialog}
         onClose={() => setOpenArchiveDialog(false)}
-        onRestored={(restoredStudent) => {
-          setStudents((prev) => [restoredStudent, ...prev]);
-          setTotalStudents((prev) => prev + 1);
+        onRestored={(restoredTeacher) => {
+          setTeachers((prev) => [restoredTeacher, ...prev]);
+          setTotalTeachers((prev) => prev + 1);
           setArchivedCount((prev) => Math.max(prev - 1, 0));
         }}
       />
