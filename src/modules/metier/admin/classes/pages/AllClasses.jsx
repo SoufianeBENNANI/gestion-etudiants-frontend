@@ -23,10 +23,10 @@ import {
   updateClasse,
 } from "../services/classeService";
 
-import AddClasse from "./AddClasse";
-import ClasseDetails from "./ClasseDetails";
-import EditClasse from "./EditClasse";
-import ArchivedClasses from "./ArchivedClasses";
+import AddClasse from "../components/AddClasse";
+import ClasseDetails from "../components/ClasseDetails";
+import EditClasse from "../components/EditClasse";
+import ArchivedClasses from "../components/ArchivedClasses";
 
 export default function AllClasses() {
   const navigate = useNavigate();

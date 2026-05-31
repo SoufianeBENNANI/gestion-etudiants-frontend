@@ -3,7 +3,7 @@ import {
   Search,
   Pencil,
   Trash2,
-  BookOpen,
+  Building2,
   Archive,
   AlertTriangle,
   Loader2,
@@ -14,27 +14,27 @@ import {
 } from "lucide-react";
 
 import {
-  getAllCourses,
-  getArchivedCourses,
-  addCourse,
-  deleteCourse,
-  updateCourse,
-} from "../services/courseService";
+  getAllDepartements,
+  getArchivedDepartements,
+  addDepartement,
+  deleteDepartement,
+  updateDepartement,
+} from "../service/departementService";
 
-import AddCourse from "../components/AddCourse";
-import CourseDetails from "../components/CourseDetails";
-import EditCourse from "../components/EditCourse";
-import ArchivedCourses from "../components/ArchivedCourses";
+import AddDepartement from "../components/AddDepartement";
+import DepartementDetails from "../components/DepartementDetails";
+import EditDepartement from "../components/EditDepartement";
+import ArchivedDepartement from "../components/ArchivedDepartement";
 
-export default function AllCourses() {
-  const [courses, setCourses] = useState([]);
+export default function AllDepartements() {
+  const [departements, setDepartements] = useState([]);
   const [archivedCount, setArchivedCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [viewCourse, setViewCourse] = useState(null);
-  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [viewDepartement, setViewDepartement] = useState(null);
+  const [selectedDepartement, setSelectedDepartement] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
@@ -44,37 +44,36 @@ export default function AllCourses() {
 
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
 
-  const emptyCourseForm = {
+  const emptyDepartementForm = {
     nom: "",
     description: "",
-    credits: "",
   };
 
-  const [addFormData, setAddFormData] = useState(emptyCourseForm);
-  const [editFormData, setEditFormData] = useState(emptyCourseForm);
+  const [addFormData, setAddFormData] = useState(emptyDepartementForm);
+  const [editFormData, setEditFormData] = useState(emptyDepartementForm);
 
   const loadArchivedCount = async () => {
     try {
-      const archivedData = await getArchivedCourses();
+      const archivedData = await getArchivedDepartements();
       setArchivedCount(Array.isArray(archivedData) ? archivedData.length : 0);
     } catch (error) {
-      console.error("Error loading archived courses:", error);
+      console.error("Error loading archived departments:", error);
       setArchivedCount(0);
     }
   };
 
-  const loadCourses = async () => {
+  const loadDepartements = async () => {
     try {
       setLoading(true);
 
-      const data = await getAllCourses();
-      setCourses(Array.isArray(data) ? data : []);
+      const data = await getAllDepartements();
+      setDepartements(Array.isArray(data) ? data : []);
 
       await loadArchivedCount();
       setCurrentPage(1);
     } catch (error) {
-      console.error("Error loading courses:", error);
-      setCourses([]);
+      console.error("Error loading departments:", error);
+      setDepartements([]);
       setArchivedCount(0);
     } finally {
       setLoading(false);
@@ -82,37 +81,38 @@ export default function AllCourses() {
   };
 
   useEffect(() => {
-    loadCourses();
+    loadDepartements();
   }, []);
 
-  const filteredCourses = useMemo(() => {
-    return courses.filter((course) => {
-      const name = String(course.nom || course.name || "");
-      const description = String(course.description || "");
-      const credits = String(course.credits || "");
+  const filteredDepartements = useMemo(() => {
+    return departements.filter((departement) => {
+      const name = String(departement.nom || "");
+      const description = String(departement.description || "");
 
-      return `${name} ${description} ${credits}`
+      return `${name} ${description}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
     });
-  }, [courses, searchTerm]);
+  }, [departements, searchTerm]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredCourses.length / itemsPerPage)
+    Math.ceil(filteredDepartements.length / itemsPerPage)
   );
 
-  const paginatedCourses = useMemo(() => {
+  const paginatedDepartements = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredCourses.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredCourses, currentPage, itemsPerPage]);
+    return filteredDepartements.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredDepartements, currentPage, itemsPerPage]);
 
-  const startCourse =
-    filteredCourses.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const startDepartement =
+    filteredDepartements.length === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
 
-  const endCourse = Math.min(
+  const endDepartement = Math.min(
     currentPage * itemsPerPage,
-    filteredCourses.length
+    filteredDepartements.length
   );
 
   const visiblePages = Array.from(
@@ -139,13 +139,13 @@ export default function AllCourses() {
   };
 
   const handleOpenAddDialog = () => {
-    setAddFormData(emptyCourseForm);
+    setAddFormData(emptyDepartementForm);
     setOpenAddDialog(true);
   };
 
   const handleCloseAddDialog = () => {
     setOpenAddDialog(false);
-    setAddFormData(emptyCourseForm);
+    setAddFormData(emptyDepartementForm);
   };
 
   const handleChangeAddForm = (e) => {
@@ -157,19 +157,16 @@ export default function AllCourses() {
     }));
   };
 
-  const buildCoursePayload = (formData) => {
-    const credits = Number(formData.credits);
-
+  const buildDepartementPayload = (formData) => {
     return {
       nom: formData.nom.trim(),
       description: formData.description.trim(),
-      credits,
     };
   };
 
-  const validateCoursePayload = (payload) => {
+  const validateDepartementPayload = (payload) => {
     if (!payload.nom) {
-      alert("Course name is required");
+      alert("Department name is required");
       return false;
     }
 
@@ -178,59 +175,53 @@ export default function AllCourses() {
       return false;
     }
 
-    if (!payload.credits || payload.credits < 1) {
-      alert("Credits must be greater than 0");
-      return false;
-    }
-
     return true;
   };
 
-  const handleAddCourse = async (e) => {
+  const handleAddDepartement = async (e) => {
     e.preventDefault();
 
-    const payload = buildCoursePayload(addFormData);
+    const payload = buildDepartementPayload(addFormData);
 
-    if (!validateCoursePayload(payload)) return;
+    if (!validateDepartementPayload(payload)) return;
 
     try {
       setSavingAdd(true);
 
-      const newCourse = await addCourse(payload);
+      const newDepartement = await addDepartement(payload);
 
-      setCourses((prev) => [newCourse, ...prev]);
+      setDepartements((prev) => [newDepartement, ...prev]);
       handleCloseAddDialog();
 
-      alert("Course added successfully");
+      alert("Department added successfully");
     } catch (error) {
-      console.error("Error adding course:", error);
-      alert("Error while adding the course");
+      console.error("Error adding department:", error);
+      alert("Error while adding the department");
     } finally {
       setSavingAdd(false);
     }
   };
 
-  const handleViewClick = (course) => {
-    setViewCourse(course);
+  const handleViewClick = (departement) => {
+    setViewDepartement(departement);
   };
 
   const handleCloseViewDialog = () => {
-    setViewCourse(null);
+    setViewDepartement(null);
   };
 
-  const handleEditClick = (course) => {
-    setSelectedCourse(course);
+  const handleEditClick = (departement) => {
+    setSelectedDepartement(departement);
 
     setEditFormData({
-      nom: course.nom || course.name || "",
-      description: course.description || "",
-      credits: course.credits ?? "",
+      nom: departement.nom || "",
+      description: departement.description || "",
     });
   };
 
   const handleCloseEditDialog = () => {
-    setSelectedCourse(null);
-    setEditFormData(emptyCourseForm);
+    setSelectedDepartement(null);
+    setEditFormData(emptyDepartementForm);
   };
 
   const handleChangeEditForm = (e) => {
@@ -242,66 +233,73 @@ export default function AllCourses() {
     }));
   };
 
-  const handleUpdateCourse = async (e) => {
+  const handleUpdateDepartement = async (e) => {
     e.preventDefault();
 
-    if (!selectedCourse?.id) {
-      alert("Course ID not found");
+    if (!selectedDepartement?.id) {
+      alert("Department ID not found");
       return;
     }
 
-    const payload = buildCoursePayload(editFormData);
+    const payload = buildDepartementPayload(editFormData);
 
-    if (!validateCoursePayload(payload)) return;
+    if (!validateDepartementPayload(payload)) return;
 
     try {
       setSavingUpdate(true);
 
-      const updatedCourse = await updateCourse(selectedCourse.id, payload);
+      const updatedDepartement = await updateDepartement(
+        selectedDepartement.id,
+        payload
+      );
 
-      setCourses((prev) =>
-        prev.map((course) =>
-          course.id === selectedCourse.id ? updatedCourse : course
+      setDepartements((prev) =>
+        prev.map((departement) =>
+          departement.id === selectedDepartement.id
+            ? updatedDepartement
+            : departement
         )
       );
 
       handleCloseEditDialog();
-      alert("Course updated successfully");
+      alert("Department updated successfully");
     } catch (error) {
-      console.error("Error updating course:", error);
-      alert("Error while updating the course");
+      console.error("Error updating department:", error);
+      alert("Error while updating the department");
     } finally {
       setSavingUpdate(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Archive this course?")) return;
+    if (!window.confirm("Archive this department?")) return;
 
     try {
-      await deleteCourse(id);
+      await deleteDepartement(id);
 
       setArchivedCount((prev) => prev + 1);
 
-      setCourses((prev) => {
-        const updatedCourses = prev.filter((course) => course.id !== id);
+      setDepartements((prev) => {
+        const updatedDepartements = prev.filter(
+          (departement) => departement.id !== id
+        );
 
         const newTotalPages = Math.max(
           1,
-          Math.ceil(updatedCourses.length / itemsPerPage)
+          Math.ceil(updatedDepartements.length / itemsPerPage)
         );
 
         if (currentPage > newTotalPages) {
           setCurrentPage(newTotalPages);
         }
 
-        return updatedCourses;
+        return updatedDepartements;
       });
 
-      alert("Course archived successfully");
+      alert("Department archived successfully");
     } catch (error) {
-      console.error("Error archiving course:", error);
-      alert("Error while archiving the course");
+      console.error("Error archiving department:", error);
+      alert("Error while archiving the department");
     }
   };
 
@@ -315,20 +313,20 @@ export default function AllCourses() {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <BookOpen size={28} />
+              <Building2 size={28} />
             </div>
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Academics Management
+                Optional Management
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                All Courses
+                All Departments
               </h1>
 
               <p className="mt-2 text-xs text-slate-300">
-                Manage, view and archive course records.
+                Manage, view and archive department records.
               </p>
             </div>
           </div>
@@ -344,7 +342,7 @@ export default function AllCourses() {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search course..."
+                placeholder="Search department..."
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
               />
             </div>
@@ -375,7 +373,7 @@ export default function AllCourses() {
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <BookOpen size={22} />
+              <Building2 size={22} />
             </div>
 
             <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
@@ -383,10 +381,12 @@ export default function AllCourses() {
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Total Courses</p>
+          <p className="text-sm font-black text-slate-950">
+            Total Departments
+          </p>
 
           <h2 className="mt-3 text-2xl font-black text-slate-950">
-            {courses.length}
+            {departements.length}
           </h2>
         </div>
 
@@ -402,11 +402,11 @@ export default function AllCourses() {
           </div>
 
           <p className="text-sm font-black text-slate-950">
-            Displayed Courses
+            Displayed Departments
           </p>
 
           <h2 className="mt-3 text-2xl font-black text-slate-950">
-            {filteredCourses.length}
+            {filteredDepartements.length}
           </h2>
         </div>
 
@@ -434,17 +434,17 @@ export default function AllCourses() {
         <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <BookOpen size={20} />
+              <Building2 size={20} />
             </div>
 
             <div>
               <h2 className="text-lg font-black text-slate-900">
-                Courses List
+                Departments List
               </h2>
 
               <p className="mt-0.5 text-xs text-slate-500">
-                Showing {startCourse} to {endCourse} of{" "}
-                {filteredCourses.length} courses
+                Showing {startDepartement} to {endDepartement} of{" "}
+                {filteredDepartements.length} departments
               </p>
             </div>
           </div>
@@ -469,47 +469,47 @@ export default function AllCourses() {
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-1/4 px-5 py-3 font-black">Course Name</th>
-                <th className="w-1/4 px-5 py-3 font-black">Description</th>
-                <th className="w-1/4 px-5 py-3 font-black">Credits</th>
-                <th className="w-1/4 px-5 py-3 font-black">Action</th>
+                <th className="w-1/3 px-5 py-3 font-black">
+                  Department Name
+                </th>
+                <th className="w-1/3 px-5 py-3 font-black">Description</th>
+                <th className="w-1/3 px-5 py-3 font-black">Action</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="px-5 py-8 text-center">
+                  <td colSpan="3" className="px-5 py-8 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading courses...
+                      Loading departments...
                     </div>
                   </td>
                 </tr>
-              ) : filteredCourses.length === 0 ? (
+              ) : filteredDepartements.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="3"
                     className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                   >
-                    No courses found.
+                    No departments found.
                   </td>
                 </tr>
               ) : (
-                paginatedCourses.map((course) => {
-                  const courseName = course.nom || course.name || "No name";
+                paginatedDepartements.map((departement) => {
+                  const departementName = departement.nom || "No name";
                   const description =
-                    course.description || "No description";
-                  const credits = course.credits ?? "Not defined";
+                    departement.description || "No description";
 
                   return (
                     <tr
-                      key={course.id}
+                      key={departement.id}
                       className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
                     >
                       <td className="px-5 py-3">
                         <span className="font-black text-slate-900">
-                          {courseName}
+                          {departementName}
                         </span>
                       </td>
 
@@ -518,16 +518,10 @@ export default function AllCourses() {
                       </td>
 
                       <td className="px-5 py-3">
-                        <span className="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
-                          {credits}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-3">
                         <div className="flex justify-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleViewClick(course)}
+                            onClick={() => handleViewClick(departement)}
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
                           >
                             <Eye size={14} />
@@ -536,7 +530,7 @@ export default function AllCourses() {
 
                           <button
                             type="button"
-                            onClick={() => handleEditClick(course)}
+                            onClick={() => handleEditClick(departement)}
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
                           >
                             <Pencil size={14} />
@@ -545,7 +539,7 @@ export default function AllCourses() {
 
                           <button
                             type="button"
-                            onClick={() => handleDelete(course.id)}
+                            onClick={() => handleDelete(departement.id)}
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700"
                           >
                             <Trash2 size={14} />
@@ -609,31 +603,34 @@ export default function AllCourses() {
       </div>
 
       {/* DIALOGS */}
-      <AddCourse
+      <AddDepartement
         open={openAddDialog}
         formData={addFormData}
         saving={savingAdd}
         onClose={handleCloseAddDialog}
         onChange={handleChangeAddForm}
-        onSubmit={handleAddCourse}
+        onSubmit={handleAddDepartement}
       />
 
-      <CourseDetails course={viewCourse} onClose={handleCloseViewDialog} />
+      <DepartementDetails
+        departement={viewDepartement}
+        onClose={handleCloseViewDialog}
+      />
 
-      <EditCourse
-        course={selectedCourse}
+      <EditDepartement
+        departement={selectedDepartement}
         formData={editFormData}
         saving={savingUpdate}
         onClose={handleCloseEditDialog}
         onChange={handleChangeEditForm}
-        onSubmit={handleUpdateCourse}
+        onSubmit={handleUpdateDepartement}
       />
 
-      <ArchivedCourses
+      <ArchivedDepartement
         open={openArchiveDialog}
         onClose={() => setOpenArchiveDialog(false)}
-        onRestored={(restoredCourse) => {
-          setCourses((prev) => [restoredCourse, ...prev]);
+        onRestored={(restoredDepartement) => {
+          setDepartements((prev) => [restoredDepartement, ...prev]);
           setArchivedCount((prev) => Math.max(prev - 1, 0));
         }}
       />

@@ -6,7 +6,7 @@ import AdminLayout from "../layouts/AdminLayout";
 
 // Dashboards
 import AdminDashboard from "../modules/metier/admin/pages/AdminDashboard";
-import TeacherDashboard from "../modules/optionnel/teachers/pages/TeacherDashboard";
+import TeacherDashboard from "../modules/metier/admin/teachers/pages/TeacherDashboard";
 import StudentDashboard from "../modules/metier/admin/students/pages/StudentDashboard";
 import ManagerDashboard from "../modules/metier/admin/manager/pages/ManagerDashboard";
 
@@ -22,17 +22,12 @@ import ArchivedAttendance from "../modules/metier/admin/students/pages/ArchivedA
 
 // Classes pages
 import AllClasses from "../modules/metier/admin/classes/pages/AllClasses";
-import AddClasse from "../modules/metier/admin/classes/pages/AddClasse";
-import EditClasse from "../modules/metier/admin/classes/pages/EditClasse";
-import ClasseDetails from "../modules/metier/admin/classes/pages/ClasseDetails";
-import ArchivedClasses from "../modules/metier/admin/classes/pages/ArchivedClasses";
 
 // Courses pages
 import AllCourses from "../modules/metier/admin/courses/pages/AllCourses";
-import AddCourse from "../modules/metier/admin/courses/pages/AddCourse";
-import EditCourse from "../modules/metier/admin/courses/pages/EditCourse";
-import CourseDetails from "../modules/metier/admin/courses/pages/CourseDetails";
-import ArchivedCourses from "../modules/metier/admin/courses/pages/ArchivedCourses";
+
+// Departements pages
+import AllDepartements from "../modules/metier/admin/departements/pages/AllDepartements";
 
 function AppRoutes() {
   return (
@@ -67,17 +62,13 @@ function AppRoutes() {
 
           {/* CLASSES */}
           <Route path="classes" element={<AllClasses />} />
-          <Route path="classes/add" element={<AddClasse />} />
-          <Route path="classes/edit/:id" element={<EditClasse />} />
-          <Route path="classes/archive" element={<ArchivedClasses />} />
-          <Route path="classes/:id" element={<ClasseDetails />} />
 
           {/* COURSES */}
           <Route path="courses" element={<AllCourses />} />
-          <Route path="courses/add" element={<AddCourse />} />
-          <Route path="courses/edit/:id" element={<EditCourse />} />
-          <Route path="courses/archive" element={<ArchivedCourses />} />
-          <Route path="courses/:id" element={<CourseDetails />} />
+
+          {/* DEPARTEMENTS */}
+          <Route path="departements" element={<AllDepartements />} />
+          <Route path="departments" element={<AllDepartements />} />
         </Route>
 
         {/* TEACHER */}
