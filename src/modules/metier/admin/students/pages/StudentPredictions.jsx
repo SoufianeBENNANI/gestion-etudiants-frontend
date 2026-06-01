@@ -1,5 +1,3 @@
-// src/modules/metier/students/pages/StudentPredictions.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
@@ -14,9 +12,10 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+
 import { getAllPredictions } from "../services/predictionService";
 
-function StudentPredictions() {
+export default function StudentPredictions() {
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -28,9 +27,10 @@ function StudentPredictions() {
     try {
       setLoading(true);
       const data = await getAllPredictions();
-      setPredictions(data || []);
+      setPredictions(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erreur lors du chargement des prédictions :", error);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,10 @@ function StudentPredictions() {
     });
   }, [predictions, search]);
 
-  const totalPages = Math.ceil(filteredPredictions.length / itemsPerPage);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPredictions.length / itemsPerPage)
+  );
 
   const paginatedPredictions = filteredPredictions.slice(
     (currentPage - 1) * itemsPerPage,
@@ -88,6 +91,21 @@ function StudentPredictions() {
           ) / predictions.length
         ).toFixed(1)
       : "0.0";
+
+  const startPrediction =
+    filteredPredictions.length === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
+
+  const endPrediction = Math.min(
+    currentPage * itemsPerPage,
+    filteredPredictions.length
+  );
+
+  const visiblePages = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
 
   const getRiskStyle = (status) => {
     if (status === "HIGH") {
@@ -142,383 +160,378 @@ function StudentPredictions() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 lg:p-8">
-      <div className="mx-auto max-w-7xl">
-        {/* HEADER */}
-        <div className="mb-8 rounded-[2rem] bg-slate-950 p-8 text-white shadow-xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-white/10 ring-1 ring-white/10">
-                <Brain size={40} className="text-blue-300" />
-              </div>
+    <div className="space-y-6">
+      {/* HEADER */}
+      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
-              <div>
-                <p className="mb-2 text-sm font-bold text-blue-300">
-                  Students Management
-                </p>
-                <h1 className="text-3xl font-black tracking-tight lg:text-4xl">
-                  AI Predictions
-                </h1>
-                <p className="mt-2 text-sm text-slate-300 lg:text-base">
-                  Analyse IA des risques, absences, moyennes et recommandations.
-                </p>
-              </div>
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <Brain size={28} />
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search student..."
-                  className="h-14 w-full rounded-2xl border border-white/10 bg-white/10 pl-11 pr-4 text-sm font-semibold text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-400 sm:w-80"
-                />
-              </div>
+            <div>
+              <p className="text-xs font-bold text-blue-200">
+                Students Management
+              </p>
 
-              <button
-                type="button"
-                onClick={loadPredictions}
-                className="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 text-sm font-bold text-white ring-1 ring-white/10 transition hover:bg-white/15"
-              >
-                <RefreshCcw size={18} />
-                Refresh
-              </button>
+              <h1 className="mt-1 text-2xl font-black tracking-tight">
+                AI Predictions
+              </h1>
+
+              <p className="mt-2 text-xs text-slate-300">
+                Analyse IA des risques, absences, moyennes et recommandations.
+              </p>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Search
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
+              />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search student..."
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={loadPredictions}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+            >
+              <RefreshCcw size={17} />
+              Refresh
+            </button>
           </div>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center rounded-[2rem] bg-white p-12 shadow-sm ring-1 ring-slate-200">
-            <Loader2 className="animate-spin text-blue-600" size={34} />
-            <span className="ml-3 font-bold text-slate-600">
-              Loading predictions...
-            </span>
-          </div>
-        ) : (
-          <>
-            {/* STATS */}
-            <div className="mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                    <Users size={24} />
-                  </div>
-                  <span className="rounded-full bg-blue-50 px-4 py-2 text-xs font-black text-blue-600">
-                    Records
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-slate-500">
-                  Total Predictions
-                </p>
-                <h2 className="mt-3 text-4xl font-black text-slate-950">
-                  {totalPredictions}
-                </h2>
-              </div>
-
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                    <AlertTriangle size={24} />
-                  </div>
-                  <span className="rounded-full bg-red-50 px-4 py-2 text-xs font-black text-red-600">
-                    Risk
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-slate-500">High Risk</p>
-                <h2 className="mt-3 text-4xl font-black text-red-600">
-                  {highRisk}
-                </h2>
-              </div>
-
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
-                    <ShieldAlert size={24} />
-                  </div>
-                  <span className="rounded-full bg-orange-50 px-4 py-2 text-xs font-black text-orange-600">
-                    Moderate
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-slate-500">Medium Risk</p>
-                <h2 className="mt-3 text-4xl font-black text-orange-600">
-                  {mediumRisk}
-                </h2>
-              </div>
-
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="mb-6 flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-                    <CheckCircle size={24} />
-                  </div>
-                  <span className="rounded-full bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-600">
-                    Safe
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-slate-500">Low Risk</p>
-                <h2 className="mt-3 text-4xl font-black text-emerald-600">
-                  {lowRisk}
-                </h2>
-              </div>
-            </div>
-
-            {/* TABLE */}
-            <div className="mb-8 rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200">
-              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-2xl font-black text-slate-950">
-                    Students Risk Predictions
-                  </h2>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    Tableau complet des prédictions IA.
-                  </p>
+      {loading ? (
+        <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-white p-10 shadow-sm">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
+          <span className="ml-3 text-sm font-bold text-slate-600">
+            Loading predictions...
+          </span>
+        </div>
+      ) : (
+        <>
+          {/* STATS */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <Users size={22} />
                 </div>
 
-                <span className="rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black text-slate-700">
-                  {filteredPredictions.length} results
+                <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
+                  Records
                 </span>
               </div>
 
-              <div className="overflow-hidden rounded-3xl ring-1 ring-slate-100">
-                <table className="w-full table-fixed border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 text-xs font-black uppercase text-slate-500">
-                      <th className="w-[22%] px-4 py-4 text-left">Student</th>
-                      <th className="w-[28%] px-4 py-4 text-left">
-                        Prediction
-                      </th>
-                      <th className="w-[14%] px-4 py-4 text-center">
-                        Risk Level
-                      </th>
-                      <th className="w-[9%] px-4 py-4 text-center">Score</th>
-                      <th className="w-[9%] px-4 py-4 text-center">
-                        Moyenne
-                      </th>
-                      <th className="w-[9%] px-4 py-4 text-center">
-                        Absences
-                      </th>
-                      <th className="w-[9%] px-4 py-4 text-center">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
+              <p className="text-sm font-black text-slate-950">
+                Total Predictions
+              </p>
 
-                  <tbody>
-                    {paginatedPredictions.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan="7"
-                          className="px-5 py-10 text-center font-bold text-slate-500"
-                        >
-                          No predictions found.
-                        </td>
-                      </tr>
-                    ) : (
-                      paginatedPredictions.map((item) => {
-                        const risk = getRiskStyle(item.status);
-                        const Icon = risk.icon;
+              <h2 className="mt-3 text-2xl font-black text-slate-950">
+                {totalPredictions}
+              </h2>
+            </div>
 
-                        return (
-                          <tr
-                            key={item.predictionId || item.id}
-                            className="border-t border-slate-100 align-middle transition hover:bg-slate-50"
-                          >
-                            <td className="px-4 py-6 align-middle">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${risk.iconBox}`}
-                                >
-                                  <Icon size={18} />
-                                </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+                  <AlertTriangle size={22} />
+                </div>
 
-                                <div className="min-w-0">
-                                  <p className="break-words text-sm font-black leading-5 text-slate-950">
-                                    {item.prenom} {item.nom}
-                                  </p>
-                                  <p className="mt-1 break-words text-xs font-semibold leading-5 text-slate-500">
-                                    {item.email || "-"}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-6 align-middle">
-                              <p className="break-words text-sm font-bold leading-5 text-slate-800">
-                                {item.prediction || "-"}
-                              </p>
-                              <p className="mt-2 break-words text-xs font-semibold leading-5 text-slate-500">
-                                {item.recommandation || "-"}
-                              </p>
-                            </td>
-
-                            <td className="px-4 py-6 text-center align-middle">
-                              <span
-                                className={`inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-black leading-4 ${risk.badge}`}
-                              >
-                                {risk.label}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-6 text-center align-middle">
-                              <span className="inline-flex items-center justify-center rounded-full bg-blue-50 px-3 py-2 text-xs font-black text-blue-600">
-                                {item.scoreRisque ?? 0}%
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-6 text-center align-middle text-sm font-black text-slate-700">
-                              {item.moyenne ?? 0}
-                            </td>
-
-                            <td className="px-4 py-6 text-center align-middle text-sm font-black text-slate-700">
-                              {item.absences ?? 0}
-                            </td>
-
-                            <td className="px-4 py-6 text-center align-middle">
-                              <div
-                                className={`mx-auto flex max-w-[100px] items-center justify-center gap-2 text-sm font-black leading-5 ${risk.statusColor}`}
-                              >
-                                <Icon size={16} className="shrink-0" />
-                                <span className="break-words text-center">
-                                  {risk.statusText}
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+                <span className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-600">
+                  Risk
+                </span>
               </div>
 
-              {/* PAGINATION */}
-              <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-bold text-slate-500">
-                  Showing{" "}
-                  <span className="text-slate-900">
-                    {filteredPredictions.length === 0
-                      ? 0
-                      : (currentPage - 1) * itemsPerPage + 1}
-                  </span>{" "}
-                  to{" "}
-                  <span className="text-slate-900">
-                    {Math.min(
-                      currentPage * itemsPerPage,
-                      filteredPredictions.length
-                    )}
-                  </span>{" "}
-                  of{" "}
-                  <span className="text-slate-900">
-                    {filteredPredictions.length}
-                  </span>{" "}
-                  predictions
-                </p>
+              <p className="text-sm font-black text-slate-950">High Risk</p>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
+              <h2 className="mt-3 text-2xl font-black text-red-600">
+                {highRisk}
+              </h2>
+            </div>
 
-                  {Array.from({ length: totalPages || 1 }).map((_, index) => {
-                    const page = index + 1;
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+                  <ShieldAlert size={22} />
+                </div>
+
+                <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-600">
+                  Moderate
+                </span>
+              </div>
+
+              <p className="text-sm font-black text-slate-950">Medium Risk</p>
+
+              <h2 className="mt-3 text-2xl font-black text-orange-600">
+                {mediumRisk}
+              </h2>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                  <CheckCircle size={22} />
+                </div>
+
+                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
+                  Safe
+                </span>
+              </div>
+
+              <p className="text-sm font-black text-slate-950">Low Risk</p>
+
+              <h2 className="mt-3 text-2xl font-black text-emerald-600">
+                {lowRisk}
+              </h2>
+            </div>
+          </div>
+
+          {/* TABLE */}
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <Brain size={20} />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-black text-slate-900">
+                    Students Risk Predictions
+                  </h2>
+
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Showing {startPrediction} to {endPrediction} of{" "}
+                    {filteredPredictions.length} predictions
+                  </p>
+                </div>
+              </div>
+
+              <span className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-700">
+                {filteredPredictions.length} results
+              </span>
+            </div>
+
+            <table className="w-full table-fixed border-collapse">
+              <thead>
+                <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
+                  <th className="w-[22%] px-3 py-3 font-black">Student</th>
+                  <th className="w-[28%] px-3 py-3 font-black">Prediction</th>
+                  <th className="w-[14%] px-3 py-3 font-black">Risk</th>
+                  <th className="w-[10%] px-3 py-3 font-black">Score</th>
+                  <th className="w-[9%] px-3 py-3 font-black">Avg</th>
+                  <th className="w-[9%] px-3 py-3 font-black">Abs.</th>
+                  <th className="w-[8%] px-3 py-3 font-black">Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {paginatedPredictions.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan="7"
+                      className="px-5 py-8 text-center text-sm font-bold text-slate-600"
+                    >
+                      No predictions found.
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedPredictions.map((item) => {
+                    const risk = getRiskStyle(item.status);
+                    const Icon = risk.icon;
 
                     return (
-                      <button
-                        key={page}
-                        type="button"
-                        onClick={() => setCurrentPage(page)}
-                        className={`h-10 w-10 rounded-xl text-sm font-black transition ${
-                          currentPage === page
-                            ? "bg-slate-950 text-white"
-                            : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                        }`}
+                      <tr
+                        key={item.predictionId || item.id}
+                        className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
                       >
-                        {page}
-                      </button>
+                        <td className="px-3 py-3">
+                          <div className="mx-auto flex max-w-full items-center justify-center gap-2">
+                            <div
+                              className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl sm:flex ${risk.iconBox}`}
+                            >
+                              <Icon size={17} />
+                            </div>
+
+                            <div className="min-w-0 text-left">
+                              <p className="truncate font-black text-slate-900">
+                                {item.prenom || "-"} {item.nom || ""}
+                              </p>
+                              <p className="truncate text-xs font-semibold text-slate-500">
+                                {item.email || "-"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-3 py-3">
+                          <p className="truncate text-sm font-bold text-slate-800">
+                            {item.prediction || "-"}
+                          </p>
+                          <p className="truncate text-xs font-semibold text-slate-500">
+                            {item.recommandation || "-"}
+                          </p>
+                        </td>
+
+                        <td className="px-3 py-3">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-black ${risk.badge}`}
+                          >
+                            {risk.label}
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-3">
+                          <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-600">
+                            {item.scoreRisque ?? 0}%
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-3 font-black text-slate-700">
+                          {item.moyenne ?? 0}
+                        </td>
+
+                        <td className="px-3 py-3 font-black text-slate-700">
+                          {item.absences ?? 0}
+                        </td>
+
+                        <td className="px-3 py-3">
+                          <div
+                            className={`mx-auto flex items-center justify-center gap-1 text-xs font-black ${risk.statusColor}`}
+                            title={risk.statusText}
+                          >
+                            <Icon size={15} />
+                          </div>
+                        </td>
+                      </tr>
                     );
-                  })}
+                  })
+                )}
+              </tbody>
+            </table>
 
+            {/* PAGINATION */}
+            <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+              <p className="text-xs font-semibold text-slate-500">
+                Page{" "}
+                <span className="font-black text-slate-800">
+                  {currentPage}
+                </span>{" "}
+                of{" "}
+                <span className="font-black text-slate-800">{totalPages}</span>
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+
+                {visiblePages.map((page) => (
                   <button
+                    key={page}
                     type="button"
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages || totalPages === 0}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
+                      currentPage === page
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
                   >
-                    <ChevronRight size={18} />
+                    {page}
                   </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* AI SUMMARY */}
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+              <div className="mb-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+                  <Sparkles size={24} />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">
+                    AI Summary
+                  </h2>
+                  <p className="text-xs font-semibold text-slate-500">
+                    Résumé automatique des prédictions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-bold text-slate-500">
+                    Nombre total des prédictions
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black text-slate-950">
+                    {totalPredictions}
+                  </h3>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-bold text-slate-500">
+                    Score risque moyen
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black text-slate-950">
+                    {averageRisk}%
+                  </h3>
+                </div>
+
+                <div className="rounded-2xl bg-orange-50 p-4">
+                  <p className="text-xs font-bold text-orange-700">
+                    Étudiants à surveiller
+                  </p>
+                  <h3 className="mt-2 text-2xl font-black text-orange-700">
+                    {highRisk + mediumRisk}
+                  </h3>
                 </div>
               </div>
             </div>
 
-            {/* AI SUMMARY + RECOMMENDATION */}
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-              <div className="rounded-[2rem] bg-white p-6 shadow-sm ring-1 ring-slate-200 xl:col-span-2">
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
-                    <Sparkles size={26} />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-950">
-                      AI Summary
-                    </h2>
-                    <p className="text-sm font-semibold text-slate-500">
-                      Résumé automatique des prédictions.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                  <div className="rounded-3xl bg-slate-50 p-5">
-                    <p className="text-sm font-bold text-slate-500">
-                      Nombre total des prédictions
-                    </p>
-                    <h3 className="mt-2 text-3xl font-black text-slate-950">
-                      {totalPredictions}
-                    </h3>
-                  </div>
-
-                  <div className="rounded-3xl bg-slate-50 p-5">
-                    <p className="text-sm font-bold text-slate-500">
-                      Score risque moyen
-                    </p>
-                    <h3 className="mt-2 text-3xl font-black text-slate-950">
-                      {averageRisk}%
-                    </h3>
-                  </div>
-
-                  <div className="rounded-3xl bg-orange-50 p-5">
-                    <p className="text-sm font-bold text-orange-700">
-                      Étudiants à surveiller
-                    </p>
-                    <h3 className="mt-2 text-3xl font-black text-orange-700">
-                      {highRisk + mediumRisk}
-                    </h3>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-sm">
-                <h3 className="text-xl font-black">Recommendation</h3>
-                <p className="mt-4 text-sm leading-7 text-slate-300">
-                  Students with a moderate or high risk should be monitored more
-                  closely: attendance, grades, and regular work.
-                </p>
-              </div>
+            <div className="rounded-2xl bg-slate-950 p-5 text-white shadow-sm">
+              <h3 className="text-lg font-black">Recommendation</h3>
+              <p className="mt-4 text-sm leading-7 text-slate-300">
+                Students with a moderate or high risk should be monitored more
+                closely: attendance, grades, and regular work.
+              </p>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
-export default StudentPredictions;

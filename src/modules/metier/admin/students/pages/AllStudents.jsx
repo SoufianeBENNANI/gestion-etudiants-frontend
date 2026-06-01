@@ -273,11 +273,11 @@ export default function AllStudents() {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-7 py-7 text-white shadow-sm">
+      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
               <Users size={28} />
@@ -310,7 +310,7 @@ export default function AllStudents() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="Search by last name..."
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
 
               {searching && (
@@ -353,7 +353,7 @@ export default function AllStudents() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Users size={22} />
@@ -371,7 +371,7 @@ export default function AllStudents() {
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
               <Search size={22} />
@@ -391,7 +391,7 @@ export default function AllStudents() {
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-500">
               <AlertTriangle size={22} />
@@ -412,7 +412,7 @@ export default function AllStudents() {
 
       {/* TABLE */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Users size={20} />
@@ -449,20 +449,19 @@ export default function AllStudents() {
         <table className="w-full table-fixed border-collapse">
           <thead>
             <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="w-[12%] px-2 py-3 font-black">Last Name</th>
-              <th className="w-[12%] px-2 py-3 font-black">First Name</th>
-              <th className="w-[19%] px-2 py-3 font-black">Email</th>
-              <th className="w-[8%] px-2 py-3 font-black">Gender</th>
-              <th className="w-[11%] px-2 py-3 font-black">Phone</th>
-              <th className="w-[12%] px-2 py-3 font-black">Address</th>
-              <th className="w-[26%] px-2 py-3 font-black">Action</th>
+              <th className="w-[15%] px-2 py-3 font-black">Student</th>
+              <th className="w-[20%] px-2 py-3 font-black">Email</th>
+              <th className="w-[10%] px-2 py-3 font-black">Gender</th>
+              <th className="w-[14%] px-2 py-3 font-black">Phone</th>
+              <th className="w-[17%] px-2 py-3 font-black">Address</th>
+              <th className="w-[24%] px-2 py-3 font-black">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="px-5 py-8 text-center">
+                <td colSpan="6" className="px-5 py-8 text-center">
                   <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                     <Loader2 size={18} className="animate-spin" />
                     Loading students...
@@ -472,105 +471,111 @@ export default function AllStudents() {
             ) : students.length === 0 ? (
               <tr>
                 <td
-                  colSpan="7"
+                  colSpan="6"
                   className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                 >
                   No students found.
                 </td>
               </tr>
             ) : (
-              paginatedStudents.map((student) => (
-                <tr
-                  key={student.id}
-                  className="border-t border-slate-100 text-center text-xs text-slate-700 transition hover:bg-slate-50 xl:text-sm"
-                >
-                  <td className="px-2 py-3">
-                    <span className="block truncate font-black text-slate-900">
-                      {student.nom || "-"}
-                    </span>
-                  </td>
+              paginatedStudents.map((student) => {
+                const fullName = `${student.nom || ""} ${
+                  student.prenom || ""
+                }`.trim();
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.prenom || "-"}
-                    </span>
-                  </td>
+                return (
+                  <tr
+                    key={student.id}
+                    className="border-t border-slate-100 text-center text-xs text-slate-700 transition hover:bg-slate-50 xl:text-sm"
+                  >
+                    <td className="px-2 py-3">
+                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
+                        <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                          <Users size={17} />
+                        </div>
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.email || "-"}
-                    </span>
-                  </td>
+                        <span className="truncate font-black text-slate-900">
+                          {fullName || "-"}
+                        </span>
+                      </div>
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.genre || "-"}
-                    </span>
-                  </td>
+                    <td className="px-2 py-3">
+                      <span className="block truncate">
+                        {student.email || "-"}
+                      </span>
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.telephone || "-"}
-                    </span>
-                  </td>
+                    <td className="px-2 py-3">
+                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-600">
+                        {student.genre || "-"}
+                      </span>
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <span className="block truncate">
-                      {student.adresse || "-"}
-                    </span>
-                  </td>
+                    <td className="px-2 py-3">
+                      <span className="block truncate">
+                        {student.telephone || "-"}
+                      </span>
+                    </td>
 
-                  <td className="px-2 py-3">
-                    <div className="flex flex-nowrap justify-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setViewStudent(student)}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-blue-600 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-blue-700 xl:gap-1.5 xl:px-3 xl:text-xs"
-                      >
-                        <Eye size={13} />
-                        View
-                      </button>
+                    <td className="px-2 py-3">
+                      <span className="block truncate">
+                        {student.adresse || "-"}
+                      </span>
+                    </td>
 
-                      <button
-                        type="button"
-                        onClick={() => setSelectedStudent(student)}
-                        disabled={!student.id}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-900 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 xl:gap-1.5 xl:px-3 xl:text-xs"
-                      >
-                        <Pencil size={13} />
-                        Edit
-                      </button>
+                    <td className="px-2 py-3">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setViewStudent(student)}
+                          title="View"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+                        >
+                          <Eye size={15} />
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(student.id)}
-                        disabled={deletingId === student.id}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-red-600 px-2.5 py-2 text-[11px] font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60 xl:gap-1.5 xl:px-3 xl:text-xs"
-                      >
-                        {deletingId === student.id ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={13} />
-                        )}
-                        {deletingId === student.id ? "Deleting" : "Delete"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStudent(student)}
+                          disabled={!student.id}
+                          title="Edit"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Pencil size={15} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(student.id)}
+                          disabled={deletingId === student.id}
+                          title="Archive"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {deletingId === student.id ? (
+                            <Loader2 size={15} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={15} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-xs font-semibold text-slate-500">
             Page{" "}
             <span className="font-black text-slate-800">{currentPage}</span>{" "}
             of <span className="font-black text-slate-800">{totalPages}</span>
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={goToPreviousPage}

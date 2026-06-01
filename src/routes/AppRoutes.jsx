@@ -6,7 +6,7 @@ import AdminLayout from "../layouts/AdminLayout";
 
 // Dashboards
 import AdminDashboard from "../modules/metier/admin/pages/AdminDashboard";
-import TeacherDashboard from "../modules/metier/admin/teachers/pages/TeacherDashboard";
+import TeacherDashboard from "../modules/metier/teacher/TeacherDashboard";
 import StudentDashboard from "../modules/metier/admin/students/pages/StudentDashboard";
 import ManagerDashboard from "../modules/metier/admin/manager/pages/ManagerDashboard";
 
@@ -26,14 +26,16 @@ import AllClasses from "../modules/metier/admin/classes/pages/AllClasses";
 // Courses pages
 import AllCourses from "../modules/metier/admin/courses/pages/AllCourses";
 
-// Departments pages
+// Departements pages
 import AllDepartements from "../modules/metier/admin/departements/pages/AllDepartements";
 
 // Teachers pages
 import AllTeachers from "../modules/metier/admin/teachers/pages/AllTeachers";
 
-// AI Models pages
+// AI pages
 import AllModels from "../modules/metier/admin/AImodels/pages/AllModels";
+import Alllogs from "../modules/metier/admin/AIlogs/pages/Alllogs";
+
 
 function AppRoutes() {
   return (
@@ -72,16 +74,16 @@ function AppRoutes() {
           {/* COURSES */}
           <Route path="courses" element={<AllCourses />} />
 
-          {/* DEPARTMENTS */}
+          {/* DEPARTEMENTS */}
           <Route path="departements" element={<AllDepartements />} />
           <Route path="departments" element={<AllDepartements />} />
 
           {/* TEACHERS */}
           <Route path="teachers" element={<AllTeachers />} />
 
-          {/* AI MODELS */}
+          {/* AI */}
           <Route path="AImodels" element={<AllModels />} />
-
+          <Route path="AIlogs" element={<Alllogs />} />
         </Route>
 
         {/* TEACHER */}

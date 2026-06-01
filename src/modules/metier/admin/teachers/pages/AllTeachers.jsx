@@ -270,14 +270,22 @@ export default function AllTeachers() {
     (_, index) => index + 1
   ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
 
+  const goToPreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const goToNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-7 py-7 text-white shadow-sm">
+      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
               <GraduationCap size={28} />
@@ -310,7 +318,7 @@ export default function AllTeachers() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="Search teacher..."
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
 
               {searching && (
@@ -412,7 +420,7 @@ export default function AllTeachers() {
 
       {/* TABLE */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Users size={20} />
@@ -451,20 +459,19 @@ export default function AllTeachers() {
 
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-              <th className="w-[12%] px-3 py-3 font-black">Last Name</th>
-              <th className="w-[12%] px-3 py-3 font-black">First Name</th>
-              <th className="w-[24%] px-3 py-3 font-black">Email</th>
-              <th className="w-[13%] px-3 py-3 font-black">Speciality</th>
-              <th className="w-[13%] px-3 py-3 font-black">Department</th>
-              <th className="w-[26%] px-3 py-3 font-black">Action</th>
+            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
+              <th className="w-[22%] px-3 py-3 font-black">Teacher</th>
+              <th className="w-[25%] px-3 py-3 font-black">Email</th>
+              <th className="w-[19%] px-3 py-3 font-black">Speciality</th>
+              <th className="w-[20%] px-3 py-3 font-black">Department</th>
+              <th className="w-[14%] px-3 py-3 font-black">Actions</th>
             </tr>
           </thead>
 
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" className="px-5 py-8 text-center">
+                <td colSpan="5" className="px-5 py-8 text-center">
                   <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                     <Loader2 size={18} className="animate-spin" />
                     Loading teachers...
@@ -474,105 +481,114 @@ export default function AllTeachers() {
             ) : teachers.length === 0 ? (
               <tr>
                 <td
-                  colSpan="6"
+                  colSpan="5"
                   className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                 >
                   No teachers found.
                 </td>
               </tr>
             ) : (
-              paginatedTeachers.map((teacher) => (
-                <tr
-                  key={teacher.id}
-                  className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
-                >
-                  <td className="px-3 py-3">
-                    <span className="block truncate font-black text-slate-900">
-                      {teacher.nom || "-"}
-                    </span>
-                  </td>
+              paginatedTeachers.map((teacher) => {
+                const fullName = `${teacher.nom || ""} ${
+                  teacher.prenom || ""
+                }`.trim();
 
-                  <td className="px-3 py-3">
-                    <span className="block truncate">
-                      {teacher.prenom || "-"}
-                    </span>
-                  </td>
+                const department =
+                  teacher.departement?.nom ||
+                  teacher.departementNom ||
+                  teacher.nomDepartement ||
+                  "-";
 
-                  <td className="px-3 py-3">
-                    <span className="block truncate">
-                      {teacher.email || "-"}
-                    </span>
-                  </td>
+                return (
+                  <tr
+                    key={teacher.id}
+                    className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
+                  >
+                    <td className="px-3 py-3">
+                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
+                        <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                          <GraduationCap size={17} />
+                        </div>
 
-                  <td className="px-3 py-3">
-                    <span className="block truncate">
-                      {teacher.specialite || "-"}
-                    </span>
-                  </td>
+                        <span className="truncate font-black text-slate-900">
+                          {fullName || "-"}
+                        </span>
+                      </div>
+                    </td>
 
-                  <td className="px-3 py-3">
-                    <span className="block truncate">
-                      {teacher.departement?.nom ||
-                        teacher.departementNom ||
-                        teacher.nomDepartement ||
-                        "-"}
-                    </span>
-                  </td>
+                    <td className="px-3 py-3">
+                      <span className="block truncate">
+                        {teacher.email || "-"}
+                      </span>
+                    </td>
 
-                  <td className="px-3 py-3">
-                    <div className="flex flex-nowrap justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setViewTeacher(teacher)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
-                      >
-                        <Eye size={14} />
-                        View
-                      </button>
+                    <td className="px-3 py-3">
+                      <span className="block truncate font-semibold text-slate-600">
+                        {teacher.specialite || "-"}
+                      </span>
+                    </td>
 
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTeacher(teacher)}
-                        disabled={!teacher.id}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <Pencil size={14} />
-                        Edit
-                      </button>
+                    <td className="px-3 py-3">
+                      <span className="inline-flex max-w-full rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
+                        <span className="truncate">{department}</span>
+                      </span>
+                    </td>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(teacher.id)}
-                        disabled={deletingId === teacher.id}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {deletingId === teacher.id ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={14} />
-                        )}
-                        {deletingId === teacher.id ? "Deleting" : "Delete"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    <td className="px-3 py-3">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setViewTeacher(teacher)}
+                          title="View"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+                        >
+                          <Eye size={15} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTeacher(teacher)}
+                          disabled={!teacher.id}
+                          title="Edit"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Pencil size={15} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(teacher.id)}
+                          disabled={deletingId === teacher.id}
+                          title="Archive"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {deletingId === teacher.id ? (
+                            <Loader2 size={15} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={15} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-xs font-semibold text-slate-500">
             Page{" "}
             <span className="font-black text-slate-800">{currentPage}</span> of{" "}
             <span className="font-black text-slate-800">{totalPages}</span>
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={goToPreviousPage}
               disabled={currentPage === 1}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -597,9 +613,7 @@ export default function AllTeachers() {
 
             <button
               type="button"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
+              onClick={goToNextPage}
               disabled={currentPage === totalPages}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             >

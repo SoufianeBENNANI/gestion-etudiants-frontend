@@ -97,7 +97,10 @@ export default function AllModels() {
     });
   }, [models, searchTerm]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredModels.length / itemsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredModels.length / itemsPerPage)
+  );
 
   const paginatedModels = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -116,7 +119,12 @@ export default function AllModels() {
 
   const formatDate = (date) => {
     if (!date) return "N/A";
-    return new Date(date).toLocaleString();
+
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const handleSearchChange = (e) => {
@@ -175,7 +183,12 @@ export default function AllModels() {
       return false;
     }
 
-    if (payload.accuracy !== null && (payload.accuracy < 0 || payload.accuracy > 100)) {
+    if (
+      payload.accuracy !== null &&
+      (Number.isNaN(payload.accuracy) ||
+        payload.accuracy < 0 ||
+        payload.accuracy > 100)
+    ) {
       alert("Accuracy must be between 0 and 100");
       return false;
     }
@@ -272,7 +285,7 @@ export default function AllModels() {
     }
   };
 
-  const handleArchiveModel = async (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Archive this model?")) return;
 
     try {
@@ -305,11 +318,11 @@ export default function AllModels() {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-7 py-7 text-white shadow-sm">
+      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
         <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-cyan-500/20 blur-3xl" />
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-blue-500/10 blur-3xl" />
 
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-cyan-300 ring-1 ring-white/15">
               <Brain size={28} />
@@ -342,7 +355,7 @@ export default function AllModels() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="Search model..."
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72 lg:w-80"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
 
@@ -428,7 +441,7 @@ export default function AllModels() {
 
       {/* TABLE */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600">
               <Brain size={20} />
@@ -462,122 +475,126 @@ export default function AllModels() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[950px] table-fixed border-collapse">
-            <thead>
-              <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-1/5 px-5 py-3 font-black">Model Name</th>
-                <th className="w-1/5 px-5 py-3 font-black">Version</th>
-                <th className="w-1/5 px-5 py-3 font-black">Accuracy</th>
-                <th className="w-1/5 px-5 py-3 font-black">Created At</th>
-                <th className="w-1/5 px-5 py-3 font-black">Action</th>
+        <table className="w-full table-fixed border-collapse">
+          <thead>
+            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
+              <th className="w-[28%] px-3 py-3 font-black">Model</th>
+              <th className="w-[14%] px-3 py-3 font-black">Version</th>
+              <th className="w-[14%] px-3 py-3 font-black">Accuracy</th>
+              <th className="w-[18%] px-3 py-3 font-black">Created</th>
+              <th className="w-[26%] px-3 py-3 font-black">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="px-5 py-8 text-center">
+                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
+                    <Loader2 size={18} className="animate-spin" />
+                    Loading AI models...
+                  </div>
+                </td>
               </tr>
-            </thead>
+            ) : filteredModels.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="5"
+                  className="px-5 py-8 text-center text-sm font-bold text-slate-600"
+                >
+                  No AI models found.
+                </td>
+              </tr>
+            ) : (
+              paginatedModels.map((model) => {
+                const modelName = model.name || "No name";
+                const version = model.version || "N/A";
+                const accuracy =
+                  model.accuracy !== null && model.accuracy !== undefined
+                    ? `${model.accuracy}%`
+                    : "N/A";
 
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="5" className="px-5 py-8 text-center">
-                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
-                      <Loader2 size={18} className="animate-spin" />
-                      Loading AI models...
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredModels.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="px-5 py-8 text-center text-sm font-bold text-slate-600"
+                return (
+                  <tr
+                    key={model.id}
+                    className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
                   >
-                    No AI models found.
-                  </td>
-                </tr>
-              ) : (
-                paginatedModels.map((model) => {
-                  const modelName = model.name || "No name";
-                  const version = model.version || "N/A";
-                  const accuracy =
-                    model.accuracy !== null && model.accuracy !== undefined
-                      ? `${model.accuracy}%`
-                      : "N/A";
+                    <td className="px-3 py-3">
+                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
+                        <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 sm:flex">
+                          <Brain size={17} />
+                        </div>
 
-                  return (
-                    <tr
-                      key={model.id}
-                      className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
-                    >
-                      <td className="px-5 py-3">
-                        <span className="font-black text-slate-900">
+                        <span className="truncate font-black text-slate-900">
                           {modelName}
                         </span>
-                      </td>
+                      </div>
+                    </td>
 
-                      <td className="px-5 py-3">
-                        <span className="font-bold text-slate-700">
-                          {version}
-                        </span>
-                      </td>
+                    <td className="px-3 py-3">
+                      <span className="truncate font-bold text-slate-700">
+                        {version}
+                      </span>
+                    </td>
 
-                      <td className="px-5 py-3">
-                        <span className="font-bold text-slate-700">
-                          {accuracy}
-                        </span>
-                      </td>
+                    <td className="px-3 py-3">
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-600">
+                        {accuracy}
+                      </span>
+                    </td>
 
-                      <td className="px-5 py-3">
-                        <span className="font-bold text-slate-700">
-                          {formatDate(model.createdAt)}
-                        </span>
-                      </td>
+                    <td className="px-3 py-3">
+                      <span className="text-xs font-bold text-slate-600">
+                        {formatDate(model.createdAt)}
+                      </span>
+                    </td>
 
-                      <td className="px-5 py-3">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleViewClick(model)}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
-                          >
-                            <Eye size={14} />
-                            View
-                          </button>
+                    <td className="px-3 py-3">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleViewClick(model)}
+                          title="View"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+                        >
+                          <Eye size={15} />
+                        </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleEditClick(model)}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800"
-                          >
-                            <Pencil size={14} />
-                            Edit
-                          </button>
+                        <button
+                          type="button"
+                          onClick={() => handleEditClick(model)}
+                          title="Edit"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white"
+                        >
+                          <Pencil size={15} />
+                        </button>
 
-                          <button
-                            type="button"
-                            onClick={() => handleArchiveModel(model.id)}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-red-700"
-                          >
-                            <Trash2 size={14} />
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(model.id)}
+                          title="Archive"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-xs font-semibold text-slate-500">
             Page{" "}
             <span className="font-black text-slate-800">{currentPage}</span>{" "}
             of <span className="font-black text-slate-800">{totalPages}</span>
           </p>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={goToPreviousPage}

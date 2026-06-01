@@ -14,6 +14,8 @@ import {
   Activity,
   Wand2,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -35,9 +37,6 @@ export default function StudentPerformance() {
       setLoading(true);
 
       const data = await getStudentPerformance();
-
-      console.log("Performance data:", data);
-
       setPerformances(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Load student performance error:", error);
@@ -111,6 +110,14 @@ export default function StudentPerformance() {
 
   const showingFrom = filteredPerformances.length === 0 ? 0 : startIndex + 1;
   const showingTo = Math.min(endIndex, filteredPerformances.length);
+
+  const visiblePages = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  ).slice(
+    Math.max(safeCurrentPage - 3, 0),
+    Math.min(safeCurrentPage + 2, totalPages)
+  );
 
   const goToPreviousPage = () => {
     setCurrentPage((page) => Math.max(1, page - 1));
@@ -213,7 +220,11 @@ export default function StudentPerformance() {
 
   const formatDate = (date) => {
     if (!date) return "-";
-    return new Date(date).toLocaleString();
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const getRiskBarClass = (risk, hasPrediction) => {
@@ -275,37 +286,37 @@ export default function StudentPerformance() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-8 py-8 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="absolute bottom-0 right-32 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
+        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <BarChart3 size={34} />
+        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
+              <BarChart3 size={28} />
             </div>
 
             <div>
-              <p className="text-sm font-medium text-blue-200">
+              <p className="text-xs font-bold text-blue-200">
                 Students Management
               </p>
 
-              <h1 className="mt-1 text-3xl font-black tracking-tight">
+              <h1 className="mt-1 text-2xl font-black tracking-tight">
                 Performance Students
               </h1>
 
-              <p className="mt-2 text-sm text-slate-300">
+              <p className="mt-2 text-xs text-slate-300">
                 Analyse AI des moyennes, absences, risques et recommandations.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
             <div className="relative">
               <Search
-                size={18}
+                size={17}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
               />
 
@@ -314,7 +325,7 @@ export default function StudentPerformance() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search student..."
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-3 pl-11 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
 
@@ -322,12 +333,12 @@ export default function StudentPerformance() {
               type="button"
               onClick={loadPerformance}
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? (
-                <Loader2 size={18} className="animate-spin" />
+                <Loader2 size={17} className="animate-spin" />
               ) : (
-                <RefreshCcw size={18} />
+                <RefreshCcw size={17} />
               )}
               Refresh
             </button>
@@ -335,7 +346,7 @@ export default function StudentPerformance() {
         </div>
       </div>
 
-      {/* STATS - SMALL CARDS */}
+      {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {statsCards.map((card, index) => {
           const Icon = card.icon;
@@ -344,40 +355,34 @@ export default function StudentPerformance() {
           return (
             <div
               key={index}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="flex items-start justify-between">
+              <div className="mb-5 flex items-center justify-between">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${style.icon}`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${style.icon}`}
                 >
-                  <Icon size={21} />
+                  <Icon size={22} />
                 </div>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-[11px] font-bold ${style.badge}`}
+                  className={`rounded-full px-3 py-1.5 text-xs font-black ${style.badge}`}
                 >
                   {card.badge}
                 </span>
               </div>
 
-              <div className="mt-5">
-                <h2 className="text-base font-bold text-slate-900">
-                  {card.title}
-                </h2>
+              <p className="text-sm font-black text-slate-950">
+                {card.title}
+              </p>
 
-                <p
-                  className={`mt-2 truncate font-black tracking-tight text-slate-950 ${
-                    card.mediumText ? "text-xl" : "text-3xl"
-                  }`}
-                  title={String(card.value)}
-                >
-                  {loading ? (
-                    <Loader2 className="animate-spin" size={26} />
-                  ) : (
-                    card.value
-                  )}
-                </p>
-              </div>
+              <h2
+                className={`mt-3 truncate font-black text-slate-950 ${
+                  card.mediumText ? "text-xl" : "text-2xl"
+                }`}
+                title={String(card.value)}
+              >
+                {loading ? "..." : card.value}
+              </h2>
             </div>
           );
         })}
@@ -385,24 +390,24 @@ export default function StudentPerformance() {
 
       {/* GRAPH + SUMMARY */}
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                <Activity size={23} />
+                <Activity size={22} />
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <h2 className="text-lg font-black text-slate-900">
                   Risk Score Overview
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-xs font-semibold text-slate-500">
                   Vue globale du risque IA pour tous les étudiants.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200">
+            <div className="rounded-xl bg-slate-50 px-4 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200">
               {predictedStudents.length} predicted / {performances.length} students
             </div>
           </div>
@@ -436,14 +441,14 @@ export default function StudentPerformance() {
             </div>
           </div>
 
-          <div className="max-h-[420px] space-y-4 overflow-y-auto pr-2">
+          <div className="max-h-[360px] space-y-4 overflow-y-auto pr-2">
             {loading ? (
-              <div className="flex h-72 items-center justify-center gap-2 text-sm font-bold text-slate-500">
-                <Loader2 className="animate-spin" size={20} />
+              <div className="flex h-60 items-center justify-center gap-2 text-sm font-bold text-slate-500">
+                <Loader2 className="animate-spin" size={18} />
                 Loading graph...
               </div>
             ) : filteredPerformances.length === 0 ? (
-              <div className="flex h-72 items-center justify-center text-sm font-bold text-slate-500">
+              <div className="flex h-60 items-center justify-center text-sm font-bold text-slate-500">
                 No performance data found.
               </div>
             ) : (
@@ -457,17 +462,17 @@ export default function StudentPerformance() {
                     className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
                   >
                     <div className="mb-3 flex items-center justify-between gap-4">
-                      <div>
-                        <p className="font-black text-slate-900">
+                      <div className="min-w-0">
+                        <p className="truncate font-black text-slate-900">
                           {item.nom} {item.prenom}
                         </p>
-                        <p className="text-xs font-semibold text-slate-500">
+                        <p className="truncate text-xs font-semibold text-slate-500">
                           {item.email}
                         </p>
                       </div>
 
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-black ${
+                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
                           hasPrediction
                             ? "bg-blue-50 text-blue-600"
                             : "bg-slate-200 text-slate-600"
@@ -495,23 +500,23 @@ export default function StudentPerformance() {
           </div>
         </div>
 
-        <div className="rounded-[1.7rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
-              <Sparkles size={23} />
+              <Sparkles size={22} />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900">AI Summary</h2>
-              <p className="text-sm text-slate-500">
+              <h2 className="text-lg font-black text-slate-900">AI Summary</h2>
+              <p className="text-xs font-semibold text-slate-500">
                 Résumé automatique des performances.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm font-bold text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-bold text-slate-500">
                 Nombre total d’étudiants
               </p>
               <p className="mt-2 text-2xl font-black text-slate-900">
@@ -519,8 +524,8 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm font-bold text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-bold text-slate-500">
                 Étudiants avec prédiction
               </p>
               <p className="mt-2 text-2xl font-black text-blue-600">
@@ -528,8 +533,8 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm font-bold text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-bold text-slate-500">
                 Moyenne générale
               </p>
               <p className="mt-2 text-2xl font-black text-slate-900">
@@ -537,8 +542,8 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-5">
-              <p className="text-sm font-bold text-slate-500">
+            <div className="rounded-2xl bg-slate-50 p-4">
+              <p className="text-xs font-bold text-slate-500">
                 Étudiants à risque
               </p>
               <p className="mt-2 text-2xl font-black text-rose-600">
@@ -550,230 +555,228 @@ export default function StudentPerformance() {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-100 bg-slate-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Brain size={22} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <Brain size={20} />
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-lg font-black text-slate-900">
                 Students Performance Table
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Tous les étudiants actifs avec leur état IA.
+              <p className="mt-0.5 text-xs text-slate-500">
+                Showing {showingFrom} to {showingTo} of{" "}
+                {filteredPerformances.length} results
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="rounded-2xl bg-white px-4 py-2 text-sm font-bold text-slate-600 ring-1 ring-slate-200">
-              Showing {showingFrom} to {showingTo} of{" "}
-              {filteredPerformances.length} results
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-slate-600">Rows:</span>
 
-            <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-slate-200">
-              <span className="text-sm font-bold text-slate-600">Rows:</span>
-
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="bg-transparent text-sm font-black text-slate-800 outline-none"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-              </select>
-            </div>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 p-10 font-bold text-slate-600">
-            <Loader2 className="animate-spin" size={20} />
+          <div className="flex items-center justify-center gap-2 p-10 text-sm font-bold text-slate-600">
+            <Loader2 className="animate-spin" size={18} />
             Loading performance...
           </div>
         ) : filteredPerformances.length === 0 ? (
-          <div className="p-10 text-center font-bold text-slate-600">
+          <div className="p-10 text-center text-sm font-bold text-slate-600">
             No performance data found.
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1100px] border-collapse">
-                <thead>
-                  <tr className="bg-white text-left text-sm text-slate-600">
-                    <th className="px-6 py-4 font-black">Student</th>
-                    <th className="px-6 py-4 font-black">Email</th>
-                    <th className="px-6 py-4 font-black">Average</th>
-                    <th className="px-6 py-4 font-black">Absences</th>
-                    <th className="px-6 py-4 font-black">Prediction</th>
-                    <th className="px-6 py-4 font-black">Risk Score</th>
-                    <th className="px-6 py-4 font-black">Level</th>
-                    <th className="px-6 py-4 font-black">Status</th>
-                    <th className="px-6 py-4 font-black">Date</th>
-                    <th className="px-6 py-4 text-right font-black">Action</th>
-                  </tr>
-                </thead>
+            <table className="w-full table-fixed border-collapse">
+              <thead>
+                <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
+                  <th className="w-[19%] px-2 py-3 font-black">Student</th>
+                  <th className="w-[20%] px-2 py-3 font-black">Email</th>
+                  <th className="w-[8%] px-2 py-3 font-black">Avg</th>
+                  <th className="w-[8%] px-2 py-3 font-black">Abs.</th>
+                  <th className="w-[17%] px-2 py-3 font-black">Prediction</th>
+                  <th className="w-[12%] px-2 py-3 font-black">Risk</th>
+                  <th className="w-[8%] px-2 py-3 font-black">Status</th>
+                  <th className="w-[8%] px-2 py-3 font-black">Action</th>
+                </tr>
+              </thead>
 
-                <tbody>
-                  {paginatedPerformances.map((item) => {
-                    const fullName =
-                      `${item.nom || ""} ${item.prenom || ""}`.trim() ||
-                      "Unknown Student";
+              <tbody>
+                {paginatedPerformances.map((item) => {
+                  const fullName =
+                    `${item.nom || ""} ${item.prenom || ""}`.trim() ||
+                    "Unknown Student";
 
-                    const badge = getStatusBadge(
-                      item.status,
-                      item.scoreRisque,
-                      item.hasPrediction
-                    );
+                  const badge = getStatusBadge(
+                    item.status,
+                    item.scoreRisque,
+                    item.hasPrediction
+                  );
 
-                    const risk = Number(item.scoreRisque || 0);
+                  const risk = Number(item.scoreRisque || 0);
 
-                    return (
-                      <tr
-                        key={item.studentId}
-                        className="border-t border-slate-100 text-sm text-slate-700 transition hover:bg-slate-50"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                            <p className="font-black text-slate-900">
-                              {fullName}
-                            </p>
+                  return (
+                    <tr
+                      key={item.studentId}
+                      className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <td className="px-2 py-3">
+                        <div className="mx-auto flex max-w-full items-center justify-center gap-2">
+                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                            <Users size={17} />
                           </div>
-                        </td>
 
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <Mail size={16} className="text-slate-400" />
-                            {item.email || "-"}
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-4">
-                          <span className="font-black text-slate-900">
-                            {item.hasPrediction ? item.moyenne ?? 0 : "-"}
+                          <span className="truncate font-black text-slate-900">
+                            {fullName}
                           </span>
-                        </td>
+                        </div>
+                      </td>
 
-                        <td className="px-6 py-4">
-                          {item.hasPrediction ? item.absences ?? 0 : "-"}
-                        </td>
+                      <td className="px-2 py-3">
+                        <div className="mx-auto flex max-w-full items-center justify-center gap-1">
+                          <Mail size={14} className="shrink-0 text-slate-400" />
+                          <span className="truncate">{item.email || "-"}</span>
+                        </div>
+                      </td>
 
-                        <td className="px-6 py-4">
-                          <span className="font-bold text-slate-700">
-                            {item.prediction || "-"}
-                          </span>
-                        </td>
+                      <td className="px-2 py-3 font-black text-slate-900">
+                        {item.hasPrediction ? item.moyenne ?? 0 : "-"}
+                      </td>
 
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-                              <div
-                                className={`h-full rounded-full ${getRiskBarClass(
-                                  risk,
+                      <td className="px-2 py-3">
+                        {item.hasPrediction ? item.absences ?? 0 : "-"}
+                      </td>
+
+                      <td className="px-2 py-3">
+                        <span className="block truncate font-bold text-slate-700">
+                          {item.prediction || "-"}
+                        </span>
+                      </td>
+
+                      <td className="px-2 py-3">
+                        <div className="mx-auto flex max-w-[100px] items-center gap-2">
+                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                            <div
+                              className={`h-full rounded-full ${getRiskBarClass(
+                                risk,
+                                item.hasPrediction
+                              )}`}
+                              style={{
+                                width: `${
                                   item.hasPrediction
-                                )}`}
-                                style={{
-                                  width: `${
-                                    item.hasPrediction
-                                      ? Math.min(100, risk)
-                                      : 100
-                                  }%`,
-                                }}
-                              />
-                            </div>
-
-                            <span className="text-xs font-black text-slate-600">
-                              {item.hasPrediction ? `${risk}%` : "-"}
-                            </span>
+                                    ? Math.min(100, risk)
+                                    : 100
+                                }%`,
+                              }}
+                            />
                           </div>
-                        </td>
 
-                        <td className="px-6 py-4">
-                          {item.hasPrediction ? item.niveau || "-" : "-"}
-                        </td>
-
-                        <td className="px-6 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-black ring-1 ${badge.className}`}
-                          >
-                            {badge.text}
+                          <span className="text-xs font-black text-slate-600">
+                            {item.hasPrediction ? `${risk}%` : "-"}
                           </span>
-                        </td>
+                        </div>
+                      </td>
 
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <CalendarDays size={16} className="text-slate-400" />
-                            <span className="whitespace-nowrap">
-                              {formatDate(item.date)}
-                            </span>
-                          </div>
-                        </td>
+                      <td className="px-2 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${badge.className}`}
+                        >
+                          {badge.text}
+                        </span>
+                      </td>
 
-                        <td className="px-6 py-4 text-right">
-                          {!item.hasPrediction ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleGeneratePrediction(item.studentId)
-                              }
-                              disabled={predictingId === item.studentId}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              {predictingId === item.studentId ? (
-                                <Loader2 size={16} className="animate-spin" />
-                              ) : (
-                                <Wand2 size={16} />
-                              )}
+                      <td className="px-2 py-3">
+                        {!item.hasPrediction ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleGeneratePrediction(item.studentId)
+                            }
+                            disabled={predictingId === item.studentId}
+                            title="Generate Prediction"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {predictingId === item.studentId ? (
+                              <Loader2 size={15} className="animate-spin" />
+                            ) : (
+                              <Wand2 size={15} />
+                            )}
+                          </button>
+                        ) : (
+                          <span
+                            title="Generated"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"
+                          >
+                            <Brain size={15} />
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-                              {predictingId === item.studentId
-                                ? "Generating..."
-                                : "Generate"}
-                            </button>
-                          ) : (
-                            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-200">
-                              Generated
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex flex-col gap-4 border-t border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm font-bold text-slate-600">
-                Page {safeCurrentPage} of {totalPages}
+            {/* PAGINATION */}
+            <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+              <p className="text-xs font-semibold text-slate-500">
+                Page{" "}
+                <span className="font-black text-slate-800">
+                  {safeCurrentPage}
+                </span>{" "}
+                of{" "}
+                <span className="font-black text-slate-800">{totalPages}</span>
               </p>
 
-              <div className="flex items-center justify-end gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={goToPreviousPage}
                   disabled={safeCurrentPage === 1}
-                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
+                  <ChevronLeft size={16} />
                   Previous
                 </button>
 
-                <div className="flex h-12 min-w-12 items-center justify-center rounded-2xl bg-slate-900 px-4 text-sm font-black text-white shadow-sm">
-                  {safeCurrentPage}
-                </div>
+                {visiblePages.map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
+                      safeCurrentPage === page
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
 
                 <button
                   type="button"
                   onClick={goToNextPage}
                   disabled={safeCurrentPage === totalPages}
-                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
