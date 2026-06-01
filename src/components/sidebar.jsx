@@ -246,16 +246,16 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           {openMenus.ai && !collapsed && (
             <div className="ml-6 mt-3 space-y-2 border-l border-white/10 pl-4">
               <Link
-                to="/admin/ai/models"
-                className={aiSubItemClass("/admin/ai/models")}
+                to="/admin/AImodels"
+                className={aiSubItemClass("/admin/AImodels")}
               >
                 <Cpu size={17} />
                 <span>Models</span>
               </Link>
 
               <Link
-                to="/admin/ai/logs"
-                className={aiSubItemClass("/admin/ai/logs")}
+                to="/admin/AIlogs"
+                className={aiSubItemClass("/admin/AIlogs")}
               >
                 <ScrollText size={17} />
                 <span>Logs</span>

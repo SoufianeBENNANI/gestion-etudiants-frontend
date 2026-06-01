@@ -26,11 +26,14 @@ import AllClasses from "../modules/metier/admin/classes/pages/AllClasses";
 // Courses pages
 import AllCourses from "../modules/metier/admin/courses/pages/AllCourses";
 
-// Departements pages
+// Departments pages
 import AllDepartements from "../modules/metier/admin/departements/pages/AllDepartements";
 
 // Teachers pages
 import AllTeachers from "../modules/metier/admin/teachers/pages/AllTeachers";
+
+// AI Models pages
+import AllModels from "../modules/metier/admin/AImodels/pages/AllModels";
 
 function AppRoutes() {
   return (
@@ -69,12 +72,16 @@ function AppRoutes() {
           {/* COURSES */}
           <Route path="courses" element={<AllCourses />} />
 
-          {/* DEPARTEMENTS */}
+          {/* DEPARTMENTS */}
           <Route path="departements" element={<AllDepartements />} />
           <Route path="departments" element={<AllDepartements />} />
 
           {/* TEACHERS */}
           <Route path="teachers" element={<AllTeachers />} />
+
+          {/* AI MODELS */}
+          <Route path="AImodels" element={<AllModels />} />
+
         </Route>
 
         {/* TEACHER */}
