@@ -36,6 +36,9 @@ import AllTeachers from "../modules/metier/admin/teachers/pages/AllTeachers";
 import AllModels from "../modules/metier/admin/AImodels/pages/AllModels";
 import Alllogs from "../modules/metier/admin/AIlogs/pages/Alllogs";
 
+//Grade pages
+import AllGrades from "../modules/metier/admin/grades/pages/AllGrades";
+
 
 function AppRoutes() {
   return (
@@ -84,6 +87,9 @@ function AppRoutes() {
           {/* AI */}
           <Route path="AImodels" element={<AllModels />} />
           <Route path="AIlogs" element={<Alllogs />} />
+
+          {/* GRADE */}
+          <Route path="/admin/grades" element={<AllGrades />} />
         </Route>
 
         {/* TEACHER */}
