@@ -8,7 +8,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../modules/metier/admin/pages/AdminDashboard";
 import TeacherDashboard from "../modules/metier/teacher/TeacherDashboard";
 import StudentDashboard from "../modules/metier/admin/students/pages/StudentDashboard";
-import ManagerDashboard from "../modules/metier/admin/manager/pages/ManagerDashboard";
+import ManagerDashboard from "../modules/metier/Manager/ManagerDashboard";
 
 // Students pages
 import StudentOverview from "../modules/metier/admin/students/pages/StudentOverview";
@@ -38,6 +38,9 @@ import Alllogs from "../modules/metier/admin/AIlogs/pages/Alllogs";
 
 //Grade pages
 import AllGrades from "../modules/metier/admin/grades/pages/AllGrades";
+
+//Payement pages
+import AllPayements from "../modules/metier/admin/payments/pages/AllPayements";
 
 
 function AppRoutes() {
@@ -90,6 +93,9 @@ function AppRoutes() {
 
           {/* GRADE */}
           <Route path="/admin/grades" element={<AllGrades />} />
+
+          {/* PAYEMENT */}
+          <Route path="/admin/payments" element={<AllPayements />} />
         </Route>
 
         {/* TEACHER */}
