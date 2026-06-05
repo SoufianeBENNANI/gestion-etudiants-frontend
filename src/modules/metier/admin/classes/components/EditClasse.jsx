@@ -138,7 +138,7 @@ export default function EditClasse({
               ) : (
                 <Save size={17} />
               )}
-              Save
+              Update
             </button>
           </div>
         </form>

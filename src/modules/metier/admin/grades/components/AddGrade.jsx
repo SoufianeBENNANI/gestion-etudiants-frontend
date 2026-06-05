@@ -148,12 +148,12 @@ export default function AddGrade({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-full bg-[#081633] px-6 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0d1f47] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
-                <Loader2 size={17} className="animate-spin" />
+                <Loader2 size={18} className="animate-spin" />
               ) : (
-                <Save size={17} />
+                <Save size={18} />
               )}
               Save
             </button>

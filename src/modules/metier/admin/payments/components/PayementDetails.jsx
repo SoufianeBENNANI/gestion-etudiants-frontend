@@ -28,7 +28,7 @@ export default function PayementDetails({ payement, onClose }) {
     },
     {
       label: "Amount",
-      value: `${amount} DH`,
+      value: amount !== "N/A" ? `${amount} DH` : "N/A",
       icon: DollarSign,
     },
     {
@@ -107,12 +107,12 @@ export default function PayementDetails({ payement, onClose }) {
                   <Icon size={20} />
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-black uppercase text-slate-400">
                     {item.label}
                   </p>
 
-                  <p className="mt-1 text-sm font-black text-slate-900">
+                  <p className="mt-1 truncate text-sm font-black text-slate-900">
                     {item.value}
                   </p>
                 </div>

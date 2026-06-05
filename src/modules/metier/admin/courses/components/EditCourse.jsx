@@ -1,4 +1,4 @@
-import { X, Loader2, Pencil } from "lucide-react";
+import { X, Loader2, Pencil, Save } from "lucide-react";
 
 export default function EditCourse({
   course,
@@ -107,13 +107,16 @@ export default function EditCourse({
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">
-            
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-full bg-[#081633] px-6 py-3 text-sm font-black text-white shadow-sm transition hover:bg-[#0d1f47] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Save size={18} />
+              )}
               Update
             </button>
           </div>

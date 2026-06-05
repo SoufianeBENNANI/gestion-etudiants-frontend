@@ -199,52 +199,52 @@ export default function AllPayements() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative">
-              <Search
-                size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-              />
-
               <input
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder="Search payment..."
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
+                className="w-full rounded-2xl border border-white/15 bg-white/10 py-3 pl-12 pr-4 text-sm font-bold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-[360px]"
+              />
+
+              <Search
+                size={17}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
               />
             </div>
 
             <button
               type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {downloading ? (
-                <Loader2 size={17} className="animate-spin" />
-              ) : (
-                <FileDown size={17} />
-              )}
-              PDF
-            </button>
-
-            <button
-              type="button"
               onClick={fetchPayements}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
-              <RefreshCcw size={17} />
+              <RefreshCcw size={18} />
               Refresh
             </button>
 
             <button
               type="button"
               onClick={() => setShowArchiveDialog(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-5 py-3 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
-              <Archive size={17} />
+              <Archive size={18} />
               Archive
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-500/40 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {downloading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <FileDown size={18} />
+              )}
+              PDF
             </button>
           </div>
         </div>
