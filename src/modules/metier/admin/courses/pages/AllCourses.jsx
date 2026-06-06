@@ -17,7 +17,6 @@ import {
   getAllCourses,
   getArchivedCourses,
   addCourse,
-  deleteCourse,
   updateCourse,
 } from "../services/courseService";
 
@@ -25,6 +24,7 @@ import AddCourse from "../components/AddCourse";
 import CourseDetails from "../components/CourseDetails";
 import EditCourse from "../components/EditCourse";
 import ArchivedCourses from "../components/ArchivedCourses";
+import DeleteCourse from "../components/DeleteCourse";
 
 export default function AllCourses() {
   const [courses, setCourses] = useState([]);
@@ -33,16 +33,16 @@ export default function AllCourses() {
   const [loading, setLoading] = useState(false);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
   const [viewCourse, setViewCourse] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courseToDelete, setCourseToDelete] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
-  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
 
   const emptyCourseForm = {
     nom: "",
@@ -201,7 +201,6 @@ export default function AllCourses() {
       setCourses((prev) => [newCourse, ...prev]);
       handleCloseAddDialog();
 
-      alert("Course added successfully");
     } catch (error) {
       console.error("Error adding course:", error);
       alert("Error while adding the course");
@@ -266,42 +265,11 @@ export default function AllCourses() {
       );
 
       handleCloseEditDialog();
-      alert("Course updated successfully");
     } catch (error) {
       console.error("Error updating course:", error);
       alert("Error while updating the course");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Archive this course?")) return;
-
-    try {
-      await deleteCourse(id);
-
-      setArchivedCount((prev) => prev + 1);
-
-      setCourses((prev) => {
-        const updatedCourses = prev.filter((course) => course.id !== id);
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedCourses.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedCourses;
-      });
-
-      alert("Course archived successfully");
-    } catch (error) {
-      console.error("Error archiving course:", error);
-      alert("Error while archiving the course");
     }
   };
 
@@ -551,9 +519,10 @@ export default function AllCourses() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(course.id)}
-                          title="Archive"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                          onClick={() => setCourseToDelete(course)}
+                          disabled={!course.id}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -632,6 +601,17 @@ export default function AllCourses() {
         onClose={handleCloseEditDialog}
         onChange={handleChangeEditForm}
         onSubmit={handleUpdateCourse}
+      />
+
+      <DeleteCourse
+        open={!!courseToDelete}
+        course={courseToDelete}
+        onClose={() => setCourseToDelete(null)}
+        onDeleted={(deletedId) => {
+          setCourses((prev) => prev.filter((course) => course.id !== deletedId));
+          setArchivedCount((prev) => prev + 1);
+          setCourseToDelete(null);
+        }}
       />
 
       <ArchivedCourses

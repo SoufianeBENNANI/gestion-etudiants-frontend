@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Trash2,
   Pencil,
@@ -17,7 +18,6 @@ import {
 import {
   getAllStudents,
   addStudent,
-  deleteStudent,
   updateStudent,
   searchStudentsByName,
   downloadStudentsPdf,
@@ -30,12 +30,13 @@ import StudentDetails from "./StudentDetails";
 import EditStudent from "./EditStudent";
 
 export default function AllStudents() {
+  const navigate = useNavigate();
+
   const [students, setStudents] = useState([]);
   const [totalStudents, setTotalStudents] = useState(0);
   const [archivedCount, setArchivedCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState(null);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
@@ -168,7 +169,6 @@ export default function AllStudents() {
 
       handleCloseAddDialog();
 
-      alert("Student added successfully");
     } catch (error) {
       console.error("Add student error:", error);
       alert("Error while adding the student");
@@ -190,53 +190,11 @@ export default function AllStudents() {
       );
 
       setSelectedStudent(null);
-      alert("Student updated successfully");
     } catch (error) {
       console.error("Update student error:", error);
       alert("Error while updating the student");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to archive this student?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setDeletingId(id);
-
-      await deleteStudent(id);
-
-      setStudents((prevStudents) => {
-        const updatedStudents = prevStudents.filter(
-          (student) => student.id !== id
-        );
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedStudents.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedStudents;
-      });
-
-      setTotalStudents((prev) => Math.max(prev - 1, 0));
-      setArchivedCount((prev) => prev + 1);
-
-      alert("Student archived successfully");
-    } catch (error) {
-      console.error("Archive student error:", error);
-      alert("Error while archiving the student");
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -547,16 +505,14 @@ export default function AllStudents() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(student.id)}
-                          disabled={deletingId === student.id}
-                          title="Archive"
+                          onClick={() =>
+                            navigate(`/admin/students/delete/${student.id}`)
+                          }
+                          disabled={!student.id}
+                          title="Delete"
                           className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {deletingId === student.id ? (
-                            <Loader2 size={15} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={15} />
-                          )}
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>

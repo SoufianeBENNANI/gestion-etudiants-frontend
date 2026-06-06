@@ -14,6 +14,7 @@ import ManagerDashboard from "../modules/metier/Manager/ManagerDashboard";
 import StudentOverview from "../modules/metier/admin/students/pages/StudentOverview";
 import AllStudents from "../modules/metier/admin/students/pages/AllStudents";
 import AddStudent from "../modules/metier/admin/students/pages/AddStudent";
+import DeleteStudent from "../modules/metier/admin/students/pages/DeleteStudent";
 import ArchivedStudents from "../modules/metier/admin/students/pages/ArchivedStudents";
 import StudentPerformance from "../modules/metier/admin/students/pages/StudentPerformance";
 import StudentAttendance from "../modules/metier/admin/students/pages/StudentAttendance";
@@ -42,7 +43,6 @@ import AllGrades from "../modules/metier/admin/grades/pages/AllGrades";
 //Payement pages
 import AllPayements from "../modules/metier/admin/payments/pages/AllPayements";
 
-
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -65,6 +65,7 @@ function AppRoutes() {
           <Route path="students" element={<StudentOverview />} />
           <Route path="students/all" element={<AllStudents />} />
           <Route path="students/add" element={<AddStudent />} />
+          <Route path="students/delete/:id" element={<DeleteStudent />} />
           <Route path="students/archive" element={<ArchivedStudents />} />
           <Route path="students/performance" element={<StudentPerformance />} />
           <Route path="students/attendance" element={<StudentAttendance />} />

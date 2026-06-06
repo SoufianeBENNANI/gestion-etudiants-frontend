@@ -116,7 +116,6 @@ export default function StudentOverview() {
       handleCloseAddDialog();
       await loadStats();
 
-      alert("Student added successfully");
     } catch (error) {
       console.error("Add student error:", error);
       alert("Error while adding student");

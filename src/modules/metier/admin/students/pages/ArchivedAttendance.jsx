@@ -119,7 +119,6 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
         onRestored(restoredAttendance || attendance);
       }
 
-      alert("Attendance restored successfully");
     } catch (error) {
       console.error("Error restoring attendance:", error);
       alert("Error while restoring attendance");

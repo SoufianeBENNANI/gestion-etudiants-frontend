@@ -51,7 +51,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
   }, [archivedCourses, searchTerm]);
 
   const handleRestore = async (course) => {
-    if (!window.confirm("Restore this course?")) return;
+    
 
     try {
       setRestoringId(course.id);
@@ -66,7 +66,6 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
         onRestored(restoredCourse || course);
       }
 
-      alert("Course restored successfully");
     } catch (error) {
       console.error("Error restoring course:", error);
       alert("Error while restoring the course");

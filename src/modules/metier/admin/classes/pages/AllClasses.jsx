@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Search,
   Pencil,
@@ -19,7 +18,6 @@ import {
   getAllClasses,
   getArchivedClasses,
   addClasse,
-  deleteClasse,
   updateClasse,
 } from "../services/classeService";
 
@@ -27,26 +25,25 @@ import AddClasse from "../components/AddClasse";
 import ClasseDetails from "../components/ClasseDetails";
 import EditClasse from "../components/EditClasse";
 import ArchivedClasses from "../components/ArchivedClasses";
+import DeleteClasse from "../components/DeleteClasse";
 
 export default function AllClasses() {
-  const navigate = useNavigate();
-
   const [classes, setClasses] = useState([]);
   const [archivedCount, setArchivedCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
   const [viewClasse, setViewClasse] = useState(null);
   const [selectedClasse, setSelectedClasse] = useState(null);
+  const [classeToDelete, setClasseToDelete] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
-  const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
 
   const [addFormData, setAddFormData] = useState({
     nom: "",
@@ -182,7 +179,6 @@ export default function AllClasses() {
       setClasses((prev) => [newClasse, ...prev]);
       handleCloseAddDialog();
 
-      alert("Class added successfully");
     } catch (error) {
       console.error("Error adding class:", error);
       alert("Error while adding the class");
@@ -251,42 +247,11 @@ export default function AllClasses() {
       );
 
       handleCloseEditDialog();
-      alert("Class updated successfully");
     } catch (error) {
       console.error("Error updating class:", error);
       alert("Error while updating the class");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Archive this class?")) return;
-
-    try {
-      await deleteClasse(id);
-
-      setArchivedCount((prev) => prev + 1);
-
-      setClasses((prev) => {
-        const updatedClasses = prev.filter((classe) => classe.id !== id);
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedClasses.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedClasses;
-      });
-
-      alert("Class archived successfully");
-    } catch (error) {
-      console.error("Error archiving class:", error);
-      alert("Error while archiving the class");
     }
   };
 
@@ -543,9 +508,10 @@ export default function AllClasses() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(classe.id)}
-                          title="Archive"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                          onClick={() => setClasseToDelete(classe)}
+                          disabled={!classe.id}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -624,6 +590,17 @@ export default function AllClasses() {
         onClose={handleCloseEditDialog}
         onChange={handleChangeEditForm}
         onSubmit={handleUpdateClasse}
+      />
+
+      <DeleteClasse
+        open={!!classeToDelete}
+        classe={classeToDelete}
+        onClose={() => setClasseToDelete(null)}
+        onDeleted={(deletedId) => {
+          setClasses((prev) => prev.filter((classe) => classe.id !== deletedId));
+          setArchivedCount((prev) => prev + 1);
+          setClasseToDelete(null);
+        }}
       />
 
       <ArchivedClasses

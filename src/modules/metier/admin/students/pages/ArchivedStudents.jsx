@@ -53,7 +53,7 @@ export default function ArchivedStudents({ open, onClose, onRestored }) {
   }, [students, searchTerm]);
 
   const handleRestore = async (student) => {
-    if (!window.confirm("Restore this student?")) return;
+    if (!student?.id) return;
 
     try {
       setRestoringId(student.id);
@@ -65,11 +65,8 @@ export default function ArchivedStudents({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredStudent || student);
       }
-
-      alert("Student restored successfully");
     } catch (error) {
       console.error("Error restoring student:", error);
-      alert("Error while restoring the student");
     } finally {
       setRestoringId(null);
     }
@@ -233,7 +230,7 @@ export default function ArchivedStudents({ open, onClose, onRestored }) {
                         ) : (
                           <RotateCcw size={16} />
                         )}
-                        Restore
+                        {restoringId === student.id ? "Restoring..." : "Restore"}
                       </button>
                     </td>
                   </tr>

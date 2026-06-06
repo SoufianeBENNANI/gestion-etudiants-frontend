@@ -57,7 +57,6 @@ export default function StudentPerformance() {
       await generateStudentPrediction(id);
       await loadPerformance();
 
-      alert("Prediction generated successfully");
     } catch (error) {
       console.error("Generate prediction error:", error);
       alert("Error while generating prediction");

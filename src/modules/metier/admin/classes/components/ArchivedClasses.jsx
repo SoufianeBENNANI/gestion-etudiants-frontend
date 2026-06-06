@@ -61,7 +61,6 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
         onRestored(restoredClasse || classe);
       }
 
-      alert("Class restored successfully");
     } catch (error) {
       console.error("Error restoring class:", error);
       alert("Error while restoring the class");
