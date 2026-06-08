@@ -68,8 +68,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
   });
 
   const handleRestore = async (grade) => {
-    if (!window.confirm("Restore this grade?")) return;
-
+    
     try {
       setRestoringId(grade.id);
 
@@ -81,7 +80,6 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
         onRestored(restoredGrade || grade);
       }
 
-      alert("Grade restored successfully");
     } catch (error) {
       console.error("Error restoring grade:", error);
       alert("Error while restoring the grade");

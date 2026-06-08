@@ -17,7 +17,6 @@ import {
   getAllDepartements,
   getArchivedDepartements,
   addDepartement,
-  deleteDepartement,
   updateDepartement,
 } from "../service/departementService";
 
@@ -25,6 +24,7 @@ import AddDepartement from "../components/AddDepartement";
 import DepartementDetails from "../components/DepartementDetails";
 import EditDepartement from "../components/EditDepartement";
 import ArchivedDepartement from "../components/ArchivedDepartement";
+import DeleteDepartement from "../components/DeleteDepartement";
 
 export default function AllDepartements() {
   const [departements, setDepartements] = useState([]);
@@ -35,6 +35,7 @@ export default function AllDepartements() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [viewDepartement, setViewDepartement] = useState(null);
   const [selectedDepartement, setSelectedDepartement] = useState(null);
+  const [departementToDelete, setDepartementToDelete] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
@@ -193,7 +194,6 @@ export default function AllDepartements() {
       setDepartements((prev) => [newDepartement, ...prev]);
       handleCloseAddDialog();
 
-      alert("Department added successfully");
     } catch (error) {
       console.error("Error adding department:", error);
       alert("Error while adding the department");
@@ -262,44 +262,11 @@ export default function AllDepartements() {
       );
 
       handleCloseEditDialog();
-      alert("Department updated successfully");
     } catch (error) {
       console.error("Error updating department:", error);
       alert("Error while updating the department");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Archive this department?")) return;
-
-    try {
-      await deleteDepartement(id);
-
-      setArchivedCount((prev) => prev + 1);
-
-      setDepartements((prev) => {
-        const updatedDepartements = prev.filter(
-          (departement) => departement.id !== id
-        );
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedDepartements.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedDepartements;
-      });
-
-      alert("Department archived successfully");
-    } catch (error) {
-      console.error("Error archiving department:", error);
-      alert("Error while archiving the department");
     }
   };
 
@@ -544,9 +511,10 @@ export default function AllDepartements() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(departement.id)}
-                          title="Archive"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                          onClick={() => setDepartementToDelete(departement)}
+                          disabled={!departement.id}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -583,11 +551,10 @@ export default function AllDepartements() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${currentPage === page
                     ? "bg-slate-900 text-white shadow-sm"
                     : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 {page}
               </button>
@@ -628,6 +595,20 @@ export default function AllDepartements() {
         onClose={handleCloseEditDialog}
         onChange={handleChangeEditForm}
         onSubmit={handleUpdateDepartement}
+      />
+
+      <DeleteDepartement
+        open={!!departementToDelete}
+        departement={departementToDelete}
+        onClose={() => setDepartementToDelete(null)}
+        onDeleted={(deletedId) => {
+          setDepartements((prev) =>
+            prev.filter((departement) => departement.id !== deletedId)
+          );
+
+          setArchivedCount((prev) => prev + 1);
+          setDepartementToDelete(null);
+        }}
       />
 
       <ArchivedDepartement

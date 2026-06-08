@@ -37,11 +37,14 @@ import AllTeachers from "../modules/metier/admin/teachers/pages/AllTeachers";
 import AllModels from "../modules/metier/admin/AImodels/pages/AllModels";
 import Alllogs from "../modules/metier/admin/AIlogs/pages/Alllogs";
 
-//Grade pages
+// Grade pages
 import AllGrades from "../modules/metier/admin/grades/pages/AllGrades";
 
-//Payement pages
+// Payement pages
 import AllPayements from "../modules/metier/admin/payments/pages/AllPayements";
+
+// Settings pages
+import Settings from "../modules/metier/settings/pages/Settings";
 
 function AppRoutes() {
   return (
@@ -93,10 +96,13 @@ function AppRoutes() {
           <Route path="AIlogs" element={<Alllogs />} />
 
           {/* GRADE */}
-          <Route path="/admin/grades" element={<AllGrades />} />
+          <Route path="grades" element={<AllGrades />} />
 
           {/* PAYEMENT */}
-          <Route path="/admin/payments" element={<AllPayements />} />
+          <Route path="payments" element={<AllPayements />} />
+
+          {/* SETTINGS */}
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* TEACHER */}
@@ -128,6 +134,9 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
+
+        {/* SETTINGS */}
+        <Route path="settings" element={<Settings />} />
 
         {/* ERROR */}
         <Route path="/unauthorized" element={<h1>Accès refusé</h1>} />

@@ -62,9 +62,9 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
 
       const departmentName = String(
         teacher.departement?.nom ||
-          teacher.departementNom ||
-          teacher.nomDepartement ||
-          ""
+        teacher.departementNom ||
+        teacher.nomDepartement ||
+        ""
       );
 
       return `${lastName} ${firstName} ${email} ${speciality} ${departmentName}`
@@ -74,7 +74,6 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
   }, [archivedTeachers, searchTerm]);
 
   const handleRestore = async (teacher) => {
-    if (!window.confirm("Restore this teacher?")) return;
 
     try {
       setRestoringId(teacher.id);
@@ -89,7 +88,6 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
         onRestored(restoredTeacher || teacher);
       }
 
-      alert("Teacher restored successfully");
     } catch (error) {
       console.error("Restore teacher error:", error);
       console.error("Status:", error.response?.status);

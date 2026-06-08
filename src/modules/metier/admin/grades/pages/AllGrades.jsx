@@ -19,7 +19,6 @@ import api from "../../../../../api/axios";
 
 import {
   addGrade,
-  deleteGrade,
   getAllGrades,
   getArchivedGrades,
   updateGrade,
@@ -29,6 +28,7 @@ import AddGrade from "../components/AddGrade";
 import EditGrade from "../components/EditGrade";
 import GradeDetails from "../components/GradeDetails";
 import ArchivedGrade from "../components/ArchivedGrade";
+import DeleteGrade from "../components/DeleteGrade";
 
 export default function AllGrades() {
   const [grades, setGrades] = useState([]);
@@ -44,6 +44,7 @@ export default function AllGrades() {
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [viewGrade, setViewGrade] = useState(null);
+  const [gradeToDelete, setGradeToDelete] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
@@ -271,7 +272,6 @@ export default function AllGrades() {
       setGrades((prev) => [newGrade, ...prev]);
       handleCloseAddDialog();
 
-      alert("Grade added successfully");
     } catch (error) {
       console.error("Error adding grade:", error);
       alert("Error while adding grade");
@@ -323,42 +323,11 @@ export default function AllGrades() {
       );
 
       handleCloseEditDialog();
-      alert("Grade updated successfully");
     } catch (error) {
       console.error("Error updating grade:", error);
       alert("Error while updating grade");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Archive this grade?")) return;
-
-    try {
-      await deleteGrade(id);
-
-      setArchivedCount((prev) => prev + 1);
-
-      setGrades((prev) => {
-        const updatedGrades = prev.filter((grade) => grade.id !== id);
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedGrades.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedGrades;
-      });
-
-      alert("Grade archived successfully");
-    } catch (error) {
-      console.error("Error archiving grade:", error);
-      alert("Error while archiving grade");
     }
   };
 
@@ -620,9 +589,10 @@ export default function AllGrades() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(grade.id)}
-                          title="Archive"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                          onClick={() => setGradeToDelete(grade)}
+                          disabled={!grade.id}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -659,11 +629,10 @@ export default function AllGrades() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${currentPage === page
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 {page}
               </button>
@@ -709,6 +678,16 @@ export default function AllGrades() {
 
       <GradeDetails grade={viewGrade} onClose={() => setViewGrade(null)} />
 
+      <DeleteGrade
+        open={!!gradeToDelete}
+        grade={gradeToDelete}
+        onClose={() => setGradeToDelete(null)}
+        onDeleted={(deletedId) => {
+          setGrades((prev) => prev.filter((grade) => grade.id !== deletedId));
+          setArchivedCount((prev) => prev + 1);
+          setGradeToDelete(null);
+        }}
+      />
       <ArchivedGrade
         open={openArchiveDialog}
         onClose={() => setOpenArchiveDialog(false)}

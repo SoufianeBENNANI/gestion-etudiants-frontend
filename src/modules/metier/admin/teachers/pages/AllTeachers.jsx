@@ -18,7 +18,6 @@ import {
 import {
   getAllTeachers,
   addTeacher,
-  deleteTeacher,
   updateTeacher,
   searchTeachersByName,
   downloadTeachersPdf,
@@ -29,6 +28,7 @@ import AddTeacher from "../components/AddTeacher";
 import ArchivedTeachers from "../components/ArchivedTeachers";
 import TeacherDetails from "../components/TeacherDetails";
 import EditTeacher from "../components/EditTeacher";
+import DeleteTeacher from "../components/DeleteTeacher";
 
 export default function AllTeachers() {
   const [teachers, setTeachers] = useState([]);
@@ -36,7 +36,7 @@ export default function AllTeachers() {
   const [archivedCount, setArchivedCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState(null);
+  const [teacherToDelete, setTeacherToDelete] = useState(null);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
@@ -176,7 +176,6 @@ export default function AllTeachers() {
 
       handleCloseAddDialog();
 
-      alert("Teacher added successfully.");
     } catch (error) {
       console.error("Add teacher error:", error);
       alert("Error while adding the teacher.");
@@ -201,55 +200,11 @@ export default function AllTeachers() {
 
       setSelectedTeacher(null);
 
-      alert("Teacher updated successfully.");
     } catch (error) {
       console.error("Update teacher error:", error);
       alert("Error while updating the teacher.");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!id) return;
-
-    const confirmed = window.confirm(
-      "Are you sure you want to archive this teacher?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setDeletingId(id);
-
-      await deleteTeacher(id);
-
-      setTeachers((prevTeachers) => {
-        const updatedTeachers = prevTeachers.filter(
-          (teacher) => teacher.id !== id
-        );
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedTeachers.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedTeachers;
-      });
-
-      setTotalTeachers((prev) => Math.max(prev - 1, 0));
-      setArchivedCount((prev) => prev + 1);
-
-      alert("Teacher archived successfully.");
-    } catch (error) {
-      console.error("Archive teacher error:", error);
-      alert("Error while archiving the teacher.");
-    } finally {
-      setDeletingId(null);
     }
   };
 
@@ -489,9 +444,8 @@ export default function AllTeachers() {
               </tr>
             ) : (
               paginatedTeachers.map((teacher) => {
-                const fullName = `${teacher.nom || ""} ${
-                  teacher.prenom || ""
-                }`.trim();
+                const fullName = `${teacher.nom || ""} ${teacher.prenom || ""
+                  }`.trim();
 
                 const department =
                   teacher.departement?.nom ||
@@ -557,16 +511,12 @@ export default function AllTeachers() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(teacher.id)}
-                          disabled={deletingId === teacher.id}
-                          title="Archive"
+                          onClick={() => setTeacherToDelete(teacher)}
+                          disabled={!teacher.id}
+                          title="Delete"
                           className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {deletingId === teacher.id ? (
-                            <Loader2 size={15} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={15} />
-                          )}
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -601,11 +551,10 @@ export default function AllTeachers() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${currentPage === page
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 {page}
               </button>
@@ -645,6 +594,17 @@ export default function AllTeachers() {
         onSubmit={handleUpdateTeacher}
       />
 
+      <DeleteTeacher
+        open={!!teacherToDelete}
+        teacher={teacherToDelete}
+        onClose={() => setTeacherToDelete(null)}
+        onDeleted={(deletedId) => {
+          setTeachers((prev) => prev.filter((teacher) => teacher.id !== deletedId));
+          setTotalTeachers((prev) => Math.max(prev - 1, 0));
+          setArchivedCount((prev) => prev + 1);
+          setTeacherToDelete(null);
+        }}
+      />
       <ArchivedTeachers
         open={openArchiveDialog}
         onClose={() => setOpenArchiveDialog(false)}

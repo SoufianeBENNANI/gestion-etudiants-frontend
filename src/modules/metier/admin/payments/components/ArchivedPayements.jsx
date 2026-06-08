@@ -97,7 +97,6 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
         onRestored(restoredPayement || payement);
       }
 
-      alert("Payment restored successfully");
     } catch (error) {
       console.error("Error restoring payment:", error);
       alert("Error while restoring the payment");

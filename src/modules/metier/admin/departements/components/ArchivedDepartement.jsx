@@ -53,7 +53,6 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
   }, [archivedDepartements, searchTerm]);
 
   const handleRestore = async (departement) => {
-    if (!window.confirm("Restore this department?")) return;
 
     try {
       setRestoringId(departement.id);
@@ -68,7 +67,6 @@ export default function ArchivedDepartement({ open, onClose, onRestored }) {
         onRestored(restoredDepartement || departement);
       }
 
-      alert("Department restored successfully");
     } catch (error) {
       console.error("Error restoring department:", error);
       alert("Error while restoring the department");

@@ -15,7 +15,6 @@ import {
 
 import {
   addModel,
-  deleteModel,
   getAllModels,
   getArchivedModels,
   updateModel,
@@ -25,6 +24,7 @@ import AddModel from "../components/AddModel";
 import EditModel from "../components/EditModel";
 import ModelDetails from "../components/ModelDetails";
 import ArchivedModel from "../components/ArchivedModel";
+import DeleteModel from "../components/DeleteModel";
 
 export default function AllModels() {
   const [models, setModels] = useState([]);
@@ -35,6 +35,7 @@ export default function AllModels() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [viewModel, setViewModel] = useState(null);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [modelToDelete, setModelToDelete] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
@@ -211,7 +212,7 @@ export default function AllModels() {
       setModels((prev) => [newModel, ...prev]);
       handleCloseAddDialog();
 
-      alert("Model added successfully");
+      
     } catch (error) {
       console.error("Error adding AI model:", error);
       alert("Error while adding the model");
@@ -276,42 +277,11 @@ export default function AllModels() {
       );
 
       handleCloseEditDialog();
-      alert("Model updated successfully");
     } catch (error) {
       console.error("Error updating AI model:", error);
       alert("Error while updating the model");
     } finally {
       setSavingUpdate(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Archive this model?")) return;
-
-    try {
-      await deleteModel(id);
-
-      setArchivedCount((prev) => prev + 1);
-
-      setModels((prev) => {
-        const updatedModels = prev.filter((model) => model.id !== id);
-
-        const newTotalPages = Math.max(
-          1,
-          Math.ceil(updatedModels.length / itemsPerPage)
-        );
-
-        if (currentPage > newTotalPages) {
-          setCurrentPage(newTotalPages);
-        }
-
-        return updatedModels;
-      });
-
-      alert("Model archived successfully");
-    } catch (error) {
-      console.error("Error archiving AI model:", error);
-      alert("Error while archiving the model");
     }
   };
 
@@ -571,9 +541,10 @@ export default function AllModels() {
 
                         <button
                           type="button"
-                          onClick={() => handleDelete(model.id)}
-                          title="Archive"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                          onClick={() => setModelToDelete(model)}
+                          disabled={!model.id}
+                          title="Delete"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -610,11 +581,10 @@ export default function AllModels() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${currentPage === page
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
               >
                 {page}
               </button>
@@ -654,6 +624,17 @@ export default function AllModels() {
         onSubmit={handleUpdateModel}
       />
 
+      <DeleteModel
+        open={!!modelToDelete}
+        model={modelToDelete}
+        onClose={() => setModelToDelete(null)}
+        onDeleted={(deletedId) => {
+          setModels((prev) => prev.filter((model) => model.id !== deletedId));
+          setArchivedCount((prev) => prev + 1);
+          setModelToDelete(null);
+        }}
+      />
+      
       <ArchivedModel
         open={openArchiveDialog}
         onClose={() => setOpenArchiveDialog(false)}

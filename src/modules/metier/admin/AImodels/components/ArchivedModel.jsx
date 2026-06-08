@@ -52,7 +52,6 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
   }, [archivedModels, searchTerm]);
 
   const handleRestore = async (model) => {
-    if (!window.confirm("Restore this model?")) return;
 
     try {
       setRestoringId(model.id);
@@ -65,7 +64,6 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
         onRestored(restoredModel || model);
       }
 
-      alert("Model restored successfully");
     } catch (error) {
       console.error("Error restoring model:", error);
       alert("Error while restoring the model");
