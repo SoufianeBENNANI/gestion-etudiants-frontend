@@ -1,4 +1,46 @@
+import { useEffect, useState } from "react";
 import { X, Loader2, Pencil, Save } from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Edit Course",
+    subtitle: "Update course information.",
+
+    courseName: "Course Name",
+    description: "Description",
+    credits: "Credits",
+    creditsHelp: "Credits must be greater than 0.",
+
+    update: "Update",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Modifier le cours",
+    subtitle: "Modifier les informations du cours.",
+
+    courseName: "Nom du cours",
+    description: "Description",
+    credits: "Crédits",
+    creditsHelp: "Les crédits doivent être supérieurs à 0.",
+
+    update: "Modifier",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "تعديل الدورة",
+    subtitle: "تعديل معلومات الدورة.",
+
+    courseName: "اسم الدورة",
+    description: "الوصف",
+    credits: "الأرصدة",
+    creditsHelp: "يجب أن تكون الأرصدة أكبر من 0.",
+
+    update: "تحديث",
+  },
+};
 
 export default function EditCourse({
   course,
@@ -8,12 +50,34 @@ export default function EditCourse({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!course) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -32,16 +96,14 @@ export default function EditCourse({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Edit Course
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Update course information.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -58,7 +120,7 @@ export default function EditCourse({
         <form onSubmit={onSubmit} className="grid gap-5 p-6">
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Course Name
+              {t.courseName}
             </label>
 
             <input
@@ -73,7 +135,7 @@ export default function EditCourse({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Description
+              {t.description}
             </label>
 
             <textarea
@@ -88,7 +150,7 @@ export default function EditCourse({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Credits
+              {t.credits}
             </label>
 
             <input
@@ -102,7 +164,7 @@ export default function EditCourse({
             />
 
             <p className="mt-1 text-xs font-semibold text-slate-400">
-              Credits must be greater than 0.
+              {t.creditsHelp}
             </p>
           </div>
 
@@ -117,7 +179,8 @@ export default function EditCourse({
               ) : (
                 <Save size={18} />
               )}
-              Update
+
+              {t.update}
             </button>
           </div>
         </form>

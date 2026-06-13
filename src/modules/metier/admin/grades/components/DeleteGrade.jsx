@@ -1,10 +1,87 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 import { deleteGrade } from "../services/gradeService";
 
+const translations = {
+  EN: {
+    title: "Delete Grade",
+    subtitle: "Confirm grade deletion.",
+
+    confirmQuestion: "Are you sure you want to delete this grade?",
+    gradeText: "Grade",
+    removedText: "will be removed from the list.",
+
+    deleting: "Deleting...",
+    deleteGrade: "Delete Grade",
+
+    selectedStudent: "Selected student",
+    selectedCourse: "Selected course",
+    notAvailable: "N/A",
+
+    archiveError: "Error while archiving grade",
+  },
+
+  FR: {
+    title: "Supprimer la note",
+    subtitle: "Confirmer la suppression de la note.",
+
+    confirmQuestion: "Êtes-vous sûr de vouloir supprimer cette note ?",
+    gradeText: "La note",
+    removedText: "sera supprimée de la liste.",
+
+    deleting: "Suppression...",
+    deleteGrade: "Supprimer la note",
+
+    selectedStudent: "Étudiant sélectionné",
+    selectedCourse: "Cours sélectionné",
+    notAvailable: "N/A",
+
+    archiveError: "Erreur lors de l’archivage de la note",
+  },
+
+  AR: {
+    title: "حذف النقطة",
+    subtitle: "تأكيد حذف النقطة.",
+
+    confirmQuestion: "هل أنت متأكد أنك تريد حذف هذه النقطة؟",
+    gradeText: "النقطة",
+    removedText: "سيتم حذفها من القائمة.",
+
+    deleting: "جاري الحذف...",
+    deleteGrade: "حذف النقطة",
+
+    selectedStudent: "الطالب المحدد",
+    selectedCourse: "المادة المحددة",
+    notAvailable: "N/A",
+
+    archiveError: "حدث خطأ أثناء أرشفة النقطة",
+  },
+};
+
 export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!grade?.id || deleting) return;
@@ -19,7 +96,7 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
       }
     } catch (error) {
       console.error("Delete grade error:", error);
-      alert("Error while archiving grade");
+      alert(t.archiveError);
     } finally {
       setDeleting(false);
     }
@@ -31,7 +108,7 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
     grade.studentName ||
     `${grade.student?.prenom || ""} ${grade.student?.nom || ""}`.trim() ||
     grade.student?.name ||
-    "Selected student";
+    t.selectedStudent;
 
   const courseName =
     grade.courseName ||
@@ -39,10 +116,13 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
     grade.courses?.name ||
     grade.course?.nom ||
     grade.course?.name ||
-    "Selected course";
+    t.selectedCourse;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       <div className="w-full max-w-md overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-2xl">
         <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-6 py-5 text-white">
           <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
@@ -54,9 +134,9 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
               </div>
 
               <div>
-                <h2 className="text-lg font-black">Delete Grade</h2>
+                <h2 className="text-lg font-black">{t.title}</h2>
                 <p className="mt-1 text-xs font-semibold text-red-100">
-                  Confirm grade deletion.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -81,11 +161,12 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
 
               <div>
                 <p className="text-sm font-black text-slate-900">
-                  Are you sure you want to delete this grade?
+                  {t.confirmQuestion}
                 </p>
 
                 <p className="mt-2 text-sm font-semibold text-slate-600">
-                  Grade {grade.note ?? "N/A"}/20 will be removed from the list.
+                  {t.gradeText} {grade.note ?? t.notAvailable}/20{" "}
+                  {t.removedText}
                 </p>
 
                 <p className="mt-2 line-clamp-2 text-xs font-semibold text-slate-500">
@@ -104,12 +185,12 @@ export default function DeleteGrade({ open, grade, onClose, onDeleted }) {
             {deleting ? (
               <>
                 <Loader2 size={17} className="animate-spin" />
-                Deleting...
+                {t.deleting}
               </>
             ) : (
               <>
                 <Trash2 size={17} />
-                Delete Grade
+                {t.deleteGrade}
               </>
             )}
           </button>

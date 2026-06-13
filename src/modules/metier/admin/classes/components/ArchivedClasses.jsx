@@ -11,11 +11,118 @@ import {
 
 import { getArchivedClasses, restoreClasse } from "../services/classeService";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Archived Classes",
+    subtitle: "View and restore archived class records.",
+
+    listTitle: "Archived Classes List",
+    showing: "Showing",
+    archivedClasses: "archived classes",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+    restore: "Restore",
+
+    className: "Class Name",
+    level: "Level",
+    academicYear: "Academic Year",
+    action: "Action",
+
+    loadingClasses: "Loading archived classes...",
+    noClasses: "No archived classes found.",
+
+    noName: "No name",
+    notDefined: "Not defined",
+
+    confirmRestore: "Restore this class?",
+    restoreError: "Error while restoring the class",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Classes archivées",
+    subtitle: "Voir et restaurer les classes archivées.",
+
+    listTitle: "Liste des classes archivées",
+    showing: "Affichage de",
+    archivedClasses: "classes archivées",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+    restore: "Restaurer",
+
+    className: "Nom de la classe",
+    level: "Niveau",
+    academicYear: "Année scolaire",
+    action: "Action",
+
+    loadingClasses: "Chargement des classes archivées...",
+    noClasses: "Aucune classe archivée trouvée.",
+
+    noName: "Sans nom",
+    notDefined: "Non défini",
+
+    confirmRestore: "Restaurer cette classe ?",
+    restoreError: "Erreur lors de la restauration de la classe",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "الأقسام المؤرشفة",
+    subtitle: "عرض واستعادة سجلات الأقسام المؤرشفة.",
+
+    listTitle: "قائمة الأقسام المؤرشفة",
+    showing: "عرض",
+    archivedClasses: "أقسام مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+    restore: "استعادة",
+
+    className: "اسم القسم",
+    level: "المستوى",
+    academicYear: "السنة الدراسية",
+    action: "الإجراء",
+
+    loadingClasses: "جاري تحميل الأقسام المؤرشفة...",
+    noClasses: "لا توجد أقسام مؤرشفة.",
+
+    noName: "بدون اسم",
+    notDefined: "غير محدد",
+
+    confirmRestore: "هل تريد استعادة هذا القسم؟",
+    restoreError: "حدث خطأ أثناء استعادة القسم",
+  },
+};
+
 export default function ArchivedClasses({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [classes, setClasses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedClasses = async () => {
     try {
@@ -48,7 +155,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
   });
 
   const handleRestore = async (classe) => {
-    if (!window.confirm("Restore this class?")) return;
+    if (!window.confirm(t.confirmRestore)) return;
 
     try {
       setRestoringId(classe.id);
@@ -60,10 +167,9 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredClasse || classe);
       }
-
     } catch (error) {
       console.error("Error restoring class:", error);
-      alert("Error while restoring the class");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -75,6 +181,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -93,15 +200,15 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Classes
+                  {t.title}
                 </h2>
 
                 <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived class records.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -125,11 +232,11 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Classes List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredClasses.length} archived classes
+                {t.showing} {filteredClasses.length} {t.archivedClasses}
               </p>
             </div>
           </div>
@@ -145,7 +252,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 sm:w-72"
               />
             </div>
@@ -161,7 +268,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -171,10 +278,18 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
           <table className="w-full min-w-[850px] table-fixed border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-1/4 px-5 py-3 font-black">Class Name</th>
-                <th className="w-1/4 px-5 py-3 font-black">Level</th>
-                <th className="w-1/4 px-5 py-3 font-black">Academic Year</th>
-                <th className="w-1/4 px-5 py-3 font-black">Action</th>
+                <th className="w-1/4 px-5 py-3 font-black">
+                  {t.className}
+                </th>
+                <th className="w-1/4 px-5 py-3 font-black">
+                  {t.level}
+                </th>
+                <th className="w-1/4 px-5 py-3 font-black">
+                  {t.academicYear}
+                </th>
+                <th className="w-1/4 px-5 py-3 font-black">
+                  {t.action}
+                </th>
               </tr>
             </thead>
 
@@ -184,7 +299,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
                   <td colSpan="4" className="px-5 py-8 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived classes...
+                      {t.loadingClasses}
                     </div>
                   </td>
                 </tr>
@@ -194,14 +309,14 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
                     colSpan="4"
                     className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived classes found.
+                    {t.noClasses}
                   </td>
                 </tr>
               ) : (
                 filteredClasses.map((classe) => {
-                  const className = classe.nom || classe.name || "No name";
-                  const level = classe.niveau || classe.level || "Not defined";
-                  const year = classe.annee || "Not defined";
+                  const className = classe.nom || classe.name || t.noName;
+                  const level = classe.niveau || classe.level || t.notDefined;
+                  const year = classe.annee || t.notDefined;
 
                   return (
                     <tr
@@ -234,7 +349,7 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
                           ) : (
                             <RotateCcw size={14} />
                           )}
-                          Restore
+                          {t.restore}
                         </button>
                       </td>
                     </tr>
@@ -244,8 +359,6 @@ export default function ArchivedClasses({ open, onClose, onRestored }) {
             </tbody>
           </table>
         </div>
-
-
       </div>
     </div>
   );

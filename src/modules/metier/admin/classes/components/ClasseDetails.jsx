@@ -1,16 +1,80 @@
+import { useEffect, useState } from "react";
 import { Eye, X } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Class Details",
+    subtitle: "View selected class information.",
+
+    className: "Class Name",
+    level: "Level",
+    academicYear: "Academic Year",
+
+    noName: "No name",
+    notDefined: "Not defined",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Détails de la classe",
+    subtitle: "Voir les informations de la classe sélectionnée.",
+
+    className: "Nom de la classe",
+    level: "Niveau",
+    academicYear: "Année scolaire",
+
+    noName: "Sans nom",
+    notDefined: "Non défini",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "تفاصيل القسم",
+    subtitle: "عرض معلومات القسم المحدد.",
+
+    className: "اسم القسم",
+    level: "المستوى",
+    academicYear: "السنة الدراسية",
+
+    noName: "بدون اسم",
+    notDefined: "غير محدد",
+  },
+};
+
 export default function ClasseDetails({ classe, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!classe) return null;
 
-  const className = classe.nom || classe.name || classe.className || "No name";
-  const level = classe.niveau || classe.level || classe.grade || "Not defined";
-  const year = classe.annee || "Not defined";
+  const className = classe.nom || classe.name || classe.className || t.noName;
+  const level = classe.niveau || classe.level || classe.grade || t.notDefined;
+  const year = classe.annee || t.notDefined;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-3xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -28,13 +92,15 @@ export default function ClasseDetails({ classe, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
+
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Class Details
+                  {t.title}
                 </h2>
+
                 <p className="mt-2 text-xs text-slate-300">
-                  View selected class information.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -50,24 +116,23 @@ export default function ClasseDetails({ classe, onClose }) {
         </div>
 
         <div className="grid gap-5 p-6 md:grid-cols-3">
-          <div className="rounded-2xl bg-slate-50 p-5">
-            <p className="text-xs font-black text-slate-500">Class Name</p>
-            <h3 className="mt-2 text-lg font-black text-slate-900">
-              {className}
-            </h3>
-          </div>
-
-          <div className="rounded-2xl bg-slate-50 p-5">
-            <p className="text-xs font-black text-slate-500">Level</p>
-            <h3 className="mt-2 text-lg font-black text-slate-900">{level}</h3>
-          </div>
-
-          <div className="rounded-2xl bg-slate-50 p-5">
-            <p className="text-xs font-black text-slate-500">Academic Year</p>
-            <h3 className="mt-2 text-lg font-black text-slate-900">{year}</h3>
-          </div>
+          <InfoCard label={t.className} value={className} />
+          <InfoCard label={t.level} value={level} />
+          <InfoCard label={t.academicYear} value={year} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoCard({ label, value }) {
+  return (
+    <div className="rounded-2xl bg-slate-50 p-5">
+      <p className="text-xs font-black text-slate-500">{label}</p>
+
+      <h3 className="mt-2 text-lg font-black text-slate-900">
+        {value}
+      </h3>
     </div>
   );
 }

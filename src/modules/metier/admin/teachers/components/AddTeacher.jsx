@@ -1,4 +1,79 @@
+import { useEffect, useState } from "react";
 import { X, GraduationCap, Loader2, Save } from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Teachers Management",
+    title: "Add Teacher",
+    subtitle: "Create a new teacher record",
+
+    lastName: "Last Name",
+    lastNamePlaceholder: "Enter last name",
+
+    firstName: "First Name",
+    firstNamePlaceholder: "Enter first name",
+
+    email: "Email",
+    emailPlaceholder: "teacher@gmail.com",
+
+    speciality: "Speciality",
+    specialityPlaceholder: "Example: Mathematics",
+
+    departmentId: "Department ID",
+    departmentIdPlaceholder: "Example: 1",
+
+    save: "Save",
+    saving: "Saving...",
+  },
+
+  FR: {
+    management: "Gestion des enseignants",
+    title: "Ajouter un enseignant",
+    subtitle: "Créer un nouveau dossier enseignant",
+
+    lastName: "Nom",
+    lastNamePlaceholder: "Entrer le nom",
+
+    firstName: "Prénom",
+    firstNamePlaceholder: "Entrer le prénom",
+
+    email: "Email",
+    emailPlaceholder: "teacher@gmail.com",
+
+    speciality: "Spécialité",
+    specialityPlaceholder: "Exemple : Mathématiques",
+
+    departmentId: "ID du département",
+    departmentIdPlaceholder: "Exemple : 1",
+
+    save: "Enregistrer",
+    saving: "Enregistrement...",
+  },
+
+  AR: {
+    management: "إدارة الأساتذة",
+    title: "إضافة أستاذ",
+    subtitle: "إنشاء سجل أستاذ جديد",
+
+    lastName: "الاسم العائلي",
+    lastNamePlaceholder: "أدخل الاسم العائلي",
+
+    firstName: "الاسم الشخصي",
+    firstNamePlaceholder: "أدخل الاسم الشخصي",
+
+    email: "البريد الإلكتروني",
+    emailPlaceholder: "teacher@gmail.com",
+
+    speciality: "التخصص",
+    specialityPlaceholder: "مثال: الرياضيات",
+
+    departmentId: "معرف القسم",
+    departmentIdPlaceholder: "مثال: 1",
+
+    save: "حفظ",
+    saving: "جاري الحفظ...",
+  },
+};
 
 export default function AddTeacher({
   open,
@@ -8,12 +83,34 @@ export default function AddTeacher({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -32,16 +129,14 @@ export default function AddTeacher({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Teachers Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add Teacher
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Create a new teacher record
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -59,7 +154,7 @@ export default function AddTeacher({
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Last Name
+                {t.lastName}
               </label>
 
               <input
@@ -68,14 +163,14 @@ export default function AddTeacher({
                 value={formData.nom || ""}
                 onChange={onChange}
                 required
-                placeholder="Enter last name"
+                placeholder={t.lastNamePlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
             </div>
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                First Name
+                {t.firstName}
               </label>
 
               <input
@@ -84,7 +179,7 @@ export default function AddTeacher({
                 value={formData.prenom || ""}
                 onChange={onChange}
                 required
-                placeholder="Enter first name"
+                placeholder={t.firstNamePlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
             </div>
@@ -92,7 +187,7 @@ export default function AddTeacher({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Email
+              {t.email}
             </label>
 
             <input
@@ -101,14 +196,14 @@ export default function AddTeacher({
               value={formData.email || ""}
               onChange={onChange}
               required
-              placeholder="teacher@gmail.com"
+              placeholder={t.emailPlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
             />
           </div>
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Speciality
+              {t.speciality}
             </label>
 
             <input
@@ -117,14 +212,14 @@ export default function AddTeacher({
               value={formData.specialite || ""}
               onChange={onChange}
               required
-              placeholder="Example: Mathematics"
+              placeholder={t.specialityPlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
             />
           </div>
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Department ID
+              {t.departmentId}
             </label>
 
             <input
@@ -132,7 +227,7 @@ export default function AddTeacher({
               name="departementId"
               value={formData.departementId || ""}
               onChange={onChange}
-              placeholder="Example: 1"
+              placeholder={t.departmentIdPlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
             />
           </div>
@@ -148,7 +243,8 @@ export default function AddTeacher({
               ) : (
                 <Save size={18} />
               )}
-              {saving ? "Saving..." : "Save"}
+
+              {saving ? t.saving : t.save}
             </button>
           </div>
         </form>

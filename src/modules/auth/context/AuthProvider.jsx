@@ -9,38 +9,60 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!keycloak.authenticated) {
-      setLoading(false);
-      return;
-    }
+    const loadAuth = () => {
+      try {
+        if (!keycloak?.authenticated) {
+          setUser(null);
+          setRoles([]);
+          setLoading(false);
+          return;
+        }
 
-    const parsed = keycloak.tokenParsed;
+        const parsed = keycloak.tokenParsed;
 
-    console.log("TOKEN:", parsed);
+        console.log("TOKEN:", parsed);
 
-    if (!parsed) {
-      setLoading(false);
-      return;
-    }
+        if (!parsed) {
+          setUser(null);
+          setRoles([]);
+          setLoading(false);
+          return;
+        }
 
-    setUser(parsed);
+        setUser(parsed);
 
-    // IMPORTANT : récupérer TOUS les rôles
-    const clientRoles = Object.values(parsed?.resource_access || {})
-      .flatMap(c => c.roles || []);
+        const realmRoles = parsed?.realm_access?.roles || [];
 
-    const realmRoles = parsed?.realm_access?.roles || [];
+        const clientRoles = Object.values(parsed?.resource_access || {}).flatMap(
+          (client) => client?.roles || []
+        );
 
-    const allRoles = [...realmRoles, ...clientRoles];
+        const allRoles = Array.from(new Set([...realmRoles, ...clientRoles]));
 
-    console.log("ALL ROLES:", allRoles);
+        console.log("ALL ROLES:", allRoles);
 
-    setRoles(allRoles);
-    setLoading(false);
+        setRoles(allRoles);
+        setLoading(false);
+      } catch (error) {
+        console.error("Auth loading error:", error);
+        setUser(null);
+        setRoles([]);
+        setLoading(false);
+      }
+    };
+
+    loadAuth();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, roles, keycloak, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        roles,
+        keycloak,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

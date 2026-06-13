@@ -14,11 +14,115 @@ import {
   restoreAttendance,
 } from "../services/attendanceService";
 
+const translations = {
+  EN: {
+    management: "Students Management",
+    title: "Archived Attendance",
+    subtitle: "View and restore archived attendance records.",
+
+    listTitle: "Archived Attendance List",
+    showing: "Showing",
+    archivedAttendanceRecords: "archived attendance records",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+    restore: "Restore",
+
+    student: "Student",
+    email: "Email",
+    date: "Date",
+    status: "Status",
+    studentId: "Student ID",
+    action: "Action",
+
+    loading: "Loading archived attendance...",
+    empty: "No archived attendance found.",
+
+    confirmRestore: "Restore this attendance record?",
+    restoreError: "Error while restoring attendance",
+  },
+
+  FR: {
+    management: "Gestion des étudiants",
+    title: "Présences archivées",
+    subtitle: "Voir et restaurer les enregistrements de présence archivés.",
+
+    listTitle: "Liste des présences archivées",
+    showing: "Affichage de",
+    archivedAttendanceRecords: "enregistrements de présence archivés",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+    restore: "Restaurer",
+
+    student: "Étudiant",
+    email: "Email",
+    date: "Date",
+    status: "Statut",
+    studentId: "ID étudiant",
+    action: "Action",
+
+    loading: "Chargement des présences archivées...",
+    empty: "Aucune présence archivée trouvée.",
+
+    confirmRestore: "Restaurer cet enregistrement de présence ?",
+    restoreError: "Erreur lors de la restauration de la présence",
+  },
+
+  AR: {
+    management: "إدارة الطلاب",
+    title: "الحضور المؤرشف",
+    subtitle: "عرض واستعادة سجلات الحضور المؤرشفة.",
+
+    listTitle: "قائمة الحضور المؤرشف",
+    showing: "عرض",
+    archivedAttendanceRecords: "سجلات حضور مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+    restore: "استعادة",
+
+    student: "الطالب",
+    email: "البريد الإلكتروني",
+    date: "التاريخ",
+    status: "الحالة",
+    studentId: "معرف الطالب",
+    action: "الإجراء",
+
+    loading: "جاري تحميل الحضور المؤرشف...",
+    empty: "لا توجد سجلات حضور مؤرشفة.",
+
+    confirmRestore: "هل تريد استعادة سجل الحضور هذا؟",
+    restoreError: "حدث خطأ أثناء استعادة الحضور",
+  },
+};
+
 export default function ArchivedAttendance({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [attendances, setAttendances] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedAttendances = async () => {
     try {
@@ -104,7 +208,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
   }, [attendances, searchTerm]);
 
   const handleRestore = async (attendance) => {
-    if (!window.confirm("Restore this attendance record?")) return;
+    if (!window.confirm(t.confirmRestore)) return;
 
     try {
       setRestoringId(attendance.id);
@@ -118,10 +222,9 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredAttendance || attendance);
       }
-
     } catch (error) {
       console.error("Error restoring attendance:", error);
-      alert("Error while restoring attendance");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -133,6 +236,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-6xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -151,15 +255,15 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Students Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Attendance
+                  {t.title}
                 </h2>
 
                 <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived attendance records.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -183,11 +287,12 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Attendance List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredAttendances.length} archived attendance records
+                {t.showing} {filteredAttendances.length}{" "}
+                {t.archivedAttendanceRecords}
               </p>
             </div>
           </div>
@@ -203,7 +308,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 sm:w-72"
               />
             </div>
@@ -219,7 +324,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -229,12 +334,14 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
           <table className="w-full min-w-[900px] border-collapse">
             <thead>
               <tr className="bg-white text-left text-sm text-slate-600">
-                <th className="px-6 py-4 font-black">Student</th>
-                <th className="px-6 py-4 font-black">Email</th>
-                <th className="px-6 py-4 font-black">Date</th>
-                <th className="px-6 py-4 font-black">Status</th>
-                <th className="px-6 py-4 font-black">Student ID</th>
-                <th className="px-6 py-4 text-right font-black">Action</th>
+                <th className="px-6 py-4 font-black">{t.student}</th>
+                <th className="px-6 py-4 font-black">{t.email}</th>
+                <th className="px-6 py-4 font-black">{t.date}</th>
+                <th className="px-6 py-4 font-black">{t.status}</th>
+                <th className="px-6 py-4 font-black">{t.studentId}</th>
+                <th className="px-6 py-4 text-right font-black">
+                  {t.action}
+                </th>
               </tr>
             </thead>
 
@@ -244,7 +351,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
                   <td colSpan="6" className="px-6 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 font-bold text-slate-600">
                       <Loader2 size={20} className="animate-spin" />
-                      Loading archived attendance...
+                      {t.loading}
                     </div>
                   </td>
                 </tr>
@@ -254,7 +361,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
                     colSpan="6"
                     className="px-6 py-10 text-center font-bold text-slate-600"
                   >
-                    No archived attendance found.
+                    {t.empty}
                   </td>
                 </tr>
               ) : (
@@ -295,7 +402,7 @@ export default function ArchivedAttendance({ open, onClose, onRestored }) {
                         ) : (
                           <RotateCcw size={16} />
                         )}
-                        Restore
+                        {t.restore}
                       </button>
                     </td>
                   </tr>

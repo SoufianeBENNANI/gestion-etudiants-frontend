@@ -15,11 +15,118 @@ import {
   restoreTeacher,
 } from "../service/teacherService";
 
+const translations = {
+  EN: {
+    management: "Teachers Management",
+    title: "Archived Teachers",
+    subtitle: "View and restore archived teacher records.",
+
+    listTitle: "Archived Teachers List",
+    showing: "Showing",
+    archivedTeachers: "archived teachers",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+
+    lastName: "Last Name",
+    firstName: "First Name",
+    email: "Email",
+    speciality: "Speciality",
+    department: "Department",
+    action: "Action",
+
+    loadingTeachers: "Loading archived teachers...",
+    noTeachers: "No archived teachers found.",
+
+    restore: "Restore",
+
+    loadError: "Error while loading archived teachers",
+    restoreError: "Error while restoring teacher",
+  },
+
+  FR: {
+    management: "Gestion des enseignants",
+    title: "Enseignants archivés",
+    subtitle: "Voir et restaurer les dossiers enseignants archivés.",
+
+    listTitle: "Liste des enseignants archivés",
+    showing: "Affichage de",
+    archivedTeachers: "enseignants archivés",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+
+    lastName: "Nom",
+    firstName: "Prénom",
+    email: "Email",
+    speciality: "Spécialité",
+    department: "Département",
+    action: "Action",
+
+    loadingTeachers: "Chargement des enseignants archivés...",
+    noTeachers: "Aucun enseignant archivé trouvé.",
+
+    restore: "Restaurer",
+
+    loadError: "Erreur lors du chargement des enseignants archivés",
+    restoreError: "Erreur lors de la restauration de l’enseignant",
+  },
+
+  AR: {
+    management: "إدارة الأساتذة",
+    title: "الأساتذة المؤرشفون",
+    subtitle: "عرض واستعادة سجلات الأساتذة المؤرشفة.",
+
+    listTitle: "قائمة الأساتذة المؤرشفين",
+    showing: "عرض",
+    archivedTeachers: "أساتذة مؤرشفين",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+
+    lastName: "الاسم العائلي",
+    firstName: "الاسم الشخصي",
+    email: "البريد الإلكتروني",
+    speciality: "التخصص",
+    department: "القسم",
+    action: "الإجراء",
+
+    loadingTeachers: "جاري تحميل الأساتذة المؤرشفين...",
+    noTeachers: "لا يوجد أساتذة مؤرشفون.",
+
+    restore: "استعادة",
+
+    loadError: "حدث خطأ أثناء تحميل الأساتذة المؤرشفين",
+    restoreError: "حدث خطأ أثناء استعادة الأستاذ",
+  },
+};
+
 export default function ArchivedTeachers({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [archivedTeachers, setArchivedTeachers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const normalizeTeachers = (data) => {
     if (Array.isArray(data)) return data;
@@ -39,7 +146,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
       console.error("Status:", error.response?.status);
       console.error("Response:", error.response?.data);
 
-      alert("Error while loading archived teachers");
+      alert(t.loadError);
       setArchivedTeachers([]);
     } finally {
       setLoading(false);
@@ -62,9 +169,9 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
 
       const departmentName = String(
         teacher.departement?.nom ||
-        teacher.departementNom ||
-        teacher.nomDepartement ||
-        ""
+          teacher.departementNom ||
+          teacher.nomDepartement ||
+          ""
       );
 
       return `${lastName} ${firstName} ${email} ${speciality} ${departmentName}`
@@ -74,7 +181,6 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
   }, [archivedTeachers, searchTerm]);
 
   const handleRestore = async (teacher) => {
-
     try {
       setRestoringId(teacher.id);
 
@@ -87,13 +193,12 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredTeacher || teacher);
       }
-
     } catch (error) {
       console.error("Restore teacher error:", error);
       console.error("Status:", error.response?.status);
       console.error("Response:", error.response?.data);
 
-      alert("Error while restoring teacher");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -105,6 +210,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -123,16 +229,14 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Teachers Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Teachers
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived teacher records.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -155,11 +259,11 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Teachers List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredTeachers.length} archived teachers
+                {t.showing} {filteredTeachers.length} {t.archivedTeachers}
               </p>
             </div>
           </div>
@@ -175,7 +279,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 sm:w-72"
               />
             </div>
@@ -191,7 +295,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -201,12 +305,20 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-[15%] px-4 py-4 font-black">Last Name</th>
-                <th className="w-[15%] px-4 py-4 font-black">First Name</th>
-                <th className="w-[24%] px-4 py-4 font-black">Email</th>
-                <th className="w-[16%] px-4 py-4 font-black">Speciality</th>
-                <th className="w-[15%] px-4 py-4 font-black">Department</th>
-                <th className="w-[15%] px-4 py-4 font-black">Action</th>
+                <th className="w-[15%] px-4 py-4 font-black">
+                  {t.lastName}
+                </th>
+                <th className="w-[15%] px-4 py-4 font-black">
+                  {t.firstName}
+                </th>
+                <th className="w-[24%] px-4 py-4 font-black">{t.email}</th>
+                <th className="w-[16%] px-4 py-4 font-black">
+                  {t.speciality}
+                </th>
+                <th className="w-[15%] px-4 py-4 font-black">
+                  {t.department}
+                </th>
+                <th className="w-[15%] px-4 py-4 font-black">{t.action}</th>
               </tr>
             </thead>
 
@@ -216,7 +328,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
                   <td colSpan="6" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived teachers...
+                      {t.loadingTeachers}
                     </div>
                   </td>
                 </tr>
@@ -226,7 +338,7 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
                     colSpan="6"
                     className="px-5 py-10 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived teachers found.
+                    {t.noTeachers}
                   </td>
                 </tr>
               ) : (
@@ -280,7 +392,8 @@ export default function ArchivedTeachers({ open, onClose, onRestored }) {
                         ) : (
                           <RotateCcw size={16} />
                         )}
-                        Restore
+
+                        {t.restore}
                       </button>
                     </td>
                   </tr>

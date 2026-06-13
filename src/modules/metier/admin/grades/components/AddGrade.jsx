@@ -1,6 +1,75 @@
+import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, X } from "lucide-react";
 
 const semestreOptions = ["S1", "S2", "S3", "S4", "S5", "S6"];
+
+const translations = {
+  EN: {
+    management: "Evaluation Management",
+    title: "Add Grade",
+    subtitle: "Add the note, semester, student and course.",
+
+    note: "Note",
+    notePlaceholder: "Ex: 15.5",
+
+    semester: "Semester",
+    selectSemester: "Select semester",
+
+    student: "Student",
+    selectStudent: "Select student",
+    studentFallback: "Student",
+
+    course: "Course",
+    selectCourse: "Select course",
+    courseFallback: "Course",
+
+    save: "Save",
+  },
+
+  FR: {
+    management: "Gestion des évaluations",
+    title: "Ajouter une note",
+    subtitle: "Ajouter la note, le semestre, l’étudiant et le cours.",
+
+    note: "Note",
+    notePlaceholder: "Ex : 15.5",
+
+    semester: "Semestre",
+    selectSemester: "Sélectionner le semestre",
+
+    student: "Étudiant",
+    selectStudent: "Sélectionner l’étudiant",
+    studentFallback: "Étudiant",
+
+    course: "Cours",
+    selectCourse: "Sélectionner le cours",
+    courseFallback: "Cours",
+
+    save: "Enregistrer",
+  },
+
+  AR: {
+    management: "إدارة التقييمات",
+    title: "إضافة نقطة",
+    subtitle: "إضافة النقطة والفصل والطالب والمادة.",
+
+    note: "النقطة",
+    notePlaceholder: "مثال: 15.5",
+
+    semester: "الفصل",
+    selectSemester: "اختر الفصل",
+
+    student: "الطالب",
+    selectStudent: "اختر الطالب",
+    studentFallback: "طالب",
+
+    course: "المادة",
+    selectCourse: "اختر المادة",
+    courseFallback: "مادة",
+
+    save: "حفظ",
+  },
+};
 
 export default function AddGrade({
   open,
@@ -12,12 +81,34 @@ export default function AddGrade({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -35,14 +126,12 @@ export default function AddGrade({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Evaluation Management
+                  {t.management}
                 </p>
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add Grade
+                  {t.title}
                 </h2>
-                <p className="mt-2 text-xs text-slate-300">
-                  Add the note, semester, student and course.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -60,14 +149,14 @@ export default function AddGrade({
           <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Note
+                {t.note}
               </label>
               <input
                 type="number"
                 name="note"
                 value={formData.note || ""}
                 onChange={onChange}
-                placeholder="Ex: 15.5"
+                placeholder={t.notePlaceholder}
                 min="0"
                 max="20"
                 step="0.01"
@@ -78,7 +167,7 @@ export default function AddGrade({
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Semester
+                {t.semester}
               </label>
               <select
                 name="semestre"
@@ -87,7 +176,7 @@ export default function AddGrade({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select semester</option>
+                <option value="">{t.selectSemester}</option>
                 {semestreOptions.map((semestre) => (
                   <option key={semestre} value={semestre}>
                     {semestre}
@@ -98,7 +187,7 @@ export default function AddGrade({
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Student
+                {t.student}
               </label>
               <select
                 name="studentId"
@@ -107,12 +196,12 @@ export default function AddGrade({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select student</option>
+                <option value="">{t.selectStudent}</option>
                 {students.map((student) => {
                   const fullName =
                     `${student.prenom || ""} ${student.nom || ""}`.trim() ||
                     student.name ||
-                    `Student #${student.id}`;
+                    `${t.studentFallback} #${student.id}`;
 
                   return (
                     <option key={student.id} value={student.id}>
@@ -125,7 +214,7 @@ export default function AddGrade({
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Course
+                {t.course}
               </label>
               <select
                 name="courseId"
@@ -134,10 +223,10 @@ export default function AddGrade({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select course</option>
+                <option value="">{t.selectCourse}</option>
                 {courses.map((course) => (
                   <option key={course.id} value={course.id}>
-                    {course.nom || course.name || `Course #${course.id}`}
+                    {course.nom || course.name || `${t.courseFallback} #${course.id}`}
                   </option>
                 ))}
               </select>
@@ -155,7 +244,7 @@ export default function AddGrade({
               ) : (
                 <Save size={18} />
               )}
-              Save
+              {t.save}
             </button>
           </div>
         </form>

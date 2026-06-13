@@ -1,10 +1,72 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 import { deleteCourse } from "../services/courseService";
 
+const translations = {
+  EN: {
+    title: "Delete Course",
+    subtitle: "Confirm course deletion.",
+
+    confirmQuestion: "Are you sure you want to delete this course?",
+    removedText: "will be removed from the list.",
+
+    deleteCourse: "Delete Course",
+    deleting: "Deleting...",
+
+    selectedCourse: "Selected course",
+  },
+
+  FR: {
+    title: "Supprimer le cours",
+    subtitle: "Confirmer la suppression du cours.",
+
+    confirmQuestion: "Êtes-vous sûr de vouloir supprimer ce cours ?",
+    removedText: "sera supprimé de la liste.",
+
+    deleteCourse: "Supprimer le cours",
+    deleting: "Suppression...",
+
+    selectedCourse: "Cours sélectionné",
+  },
+
+  AR: {
+    title: "حذف الدورة",
+    subtitle: "تأكيد حذف الدورة.",
+
+    confirmQuestion: "هل أنت متأكد أنك تريد حذف هذه الدورة؟",
+    removedText: "سيتم حذفها من القائمة.",
+
+    deleteCourse: "حذف الدورة",
+    deleting: "جاري الحذف...",
+
+    selectedCourse: "الدورة المحددة",
+  },
+};
+
 export default function DeleteCourse({ open, course, onClose, onDeleted }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!course?.id || deleting) return;
@@ -26,10 +88,13 @@ export default function DeleteCourse({ open, course, onClose, onDeleted }) {
 
   if (!open || !course) return null;
 
-  const courseName = course.nom || course.name || "Selected course";
+  const courseName = course.nom || course.name || t.selectedCourse;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       <div className="w-full max-w-md overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-2xl">
         <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-6 py-5 text-white">
           <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
@@ -41,9 +106,10 @@ export default function DeleteCourse({ open, course, onClose, onDeleted }) {
               </div>
 
               <div>
-                <h2 className="text-lg font-black">Delete Course</h2>
+                <h2 className="text-lg font-black">{t.title}</h2>
+
                 <p className="mt-1 text-xs font-semibold text-red-100">
-                  Confirm course deletion.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -68,11 +134,11 @@ export default function DeleteCourse({ open, course, onClose, onDeleted }) {
 
               <div>
                 <p className="text-sm font-black text-slate-900">
-                  Are you sure you want to delete this course?
+                  {t.confirmQuestion}
                 </p>
 
                 <p className="mt-2 text-sm font-semibold text-slate-600">
-                  {courseName} will be removed from the list.
+                  {courseName} {t.removedText}
                 </p>
               </div>
             </div>
@@ -87,12 +153,12 @@ export default function DeleteCourse({ open, course, onClose, onDeleted }) {
             {deleting ? (
               <>
                 <Loader2 size={17} className="animate-spin" />
-                Deleting...
+                {t.deleting}
               </>
             ) : (
               <>
                 <Trash2 size={17} />
-                Delete Course
+                {t.deleteCourse}
               </>
             )}
           </button>

@@ -18,11 +18,115 @@ import {
   restorePayementAdmin,
 } from "../services/payementService";
 
+const translations = {
+  EN: {
+    management: "Payment Management",
+    title: "Archived Payments",
+    subtitle: "View and restore archived payment records.",
+
+    listTitle: "Archived Payments List",
+    showing: "Showing",
+    archivedPayments: "archived payments",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+
+    student: "Student",
+    amount: "Amount",
+    mode: "Mode",
+    date: "Date",
+    status: "Status",
+    action: "Action",
+
+    loadingPayments: "Loading archived payments...",
+    noPayments: "No archived payments found.",
+
+    restore: "Restore",
+    restoreConfirm: "Restore this payment?",
+    restoreError: "Error while restoring the payment",
+  },
+
+  FR: {
+    management: "Gestion des paiements",
+    title: "Paiements archivés",
+    subtitle: "Voir et restaurer les paiements archivés.",
+
+    listTitle: "Liste des paiements archivés",
+    showing: "Affichage de",
+    archivedPayments: "paiements archivés",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+
+    student: "Étudiant",
+    amount: "Montant",
+    mode: "Mode",
+    date: "Date",
+    status: "Statut",
+    action: "Action",
+
+    loadingPayments: "Chargement des paiements archivés...",
+    noPayments: "Aucun paiement archivé trouvé.",
+
+    restore: "Restaurer",
+    restoreConfirm: "Restaurer ce paiement ?",
+    restoreError: "Erreur lors de la restauration du paiement",
+  },
+
+  AR: {
+    management: "إدارة المدفوعات",
+    title: "المدفوعات المؤرشفة",
+    subtitle: "عرض واستعادة سجلات المدفوعات المؤرشفة.",
+
+    listTitle: "قائمة المدفوعات المؤرشفة",
+    showing: "عرض",
+    archivedPayments: "مدفوعات مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+
+    student: "الطالب",
+    amount: "المبلغ",
+    mode: "الطريقة",
+    date: "التاريخ",
+    status: "الحالة",
+    action: "الإجراء",
+
+    loadingPayments: "جاري تحميل المدفوعات المؤرشفة...",
+    noPayments: "لا توجد مدفوعات مؤرشفة.",
+
+    restore: "استعادة",
+    restoreConfirm: "هل تريد استعادة هذا الدفع؟",
+    restoreError: "حدث خطأ أثناء استعادة الدفع",
+  },
+};
+
 export default function ArchivedPayements({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [payements, setPayements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const getAmount = (payement) => {
     return payement.amount ?? payement.montant ?? "N/A";
@@ -84,7 +188,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
   }, [payements, searchTerm]);
 
   const handleRestore = async (payement) => {
-    if (!window.confirm("Restore this payment?")) return;
+    if (!window.confirm(t.restoreConfirm)) return;
 
     try {
       setRestoringId(payement.id);
@@ -96,10 +200,9 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredPayement || payement);
       }
-
     } catch (error) {
       console.error("Error restoring payment:", error);
-      alert("Error while restoring the payment");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -111,6 +214,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-6xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -129,16 +233,14 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Payment Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Payments
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived payment records.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -161,11 +263,11 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Payments List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredPayements.length} archived payments
+                {t.showing} {filteredPayements.length} {t.archivedPayments}
               </p>
             </div>
           </div>
@@ -181,7 +283,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 sm:w-72"
               />
             </div>
@@ -197,7 +299,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -207,12 +309,12 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-[25%] px-4 py-4 font-black">Student</th>
-                <th className="w-[15%] px-4 py-4 font-black">Amount</th>
-                <th className="w-[17%] px-4 py-4 font-black">Mode</th>
-                <th className="w-[17%] px-4 py-4 font-black">Date</th>
-                <th className="w-[13%] px-4 py-4 font-black">Status</th>
-                <th className="w-[13%] px-4 py-4 font-black">Action</th>
+                <th className="w-[25%] px-4 py-4 font-black">{t.student}</th>
+                <th className="w-[15%] px-4 py-4 font-black">{t.amount}</th>
+                <th className="w-[17%] px-4 py-4 font-black">{t.mode}</th>
+                <th className="w-[17%] px-4 py-4 font-black">{t.date}</th>
+                <th className="w-[13%] px-4 py-4 font-black">{t.status}</th>
+                <th className="w-[13%] px-4 py-4 font-black">{t.action}</th>
               </tr>
             </thead>
 
@@ -222,7 +324,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
                   <td colSpan="6" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived payments...
+                      {t.loadingPayments}
                     </div>
                   </td>
                 </tr>
@@ -232,7 +334,7 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
                     colSpan="6"
                     className="px-5 py-10 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived payments found.
+                    {t.noPayments}
                   </td>
                 </tr>
               ) : (
@@ -301,7 +403,8 @@ export default function ArchivedPayements({ open, onClose, onRestored }) {
                           ) : (
                             <RotateCcw size={16} />
                           )}
-                          Restore
+
+                          {t.restore}
                         </button>
                       </td>
                     </tr>

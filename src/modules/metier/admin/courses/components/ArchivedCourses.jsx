@@ -11,11 +11,118 @@ import {
 
 import { getArchivedCourses, restoreCourse } from "../services/courseService";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Archived Courses",
+    subtitle: "View and restore archived course records.",
+
+    listTitle: "Archived Courses List",
+    showing: "Showing",
+    archivedCourses: "archived courses",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+
+    courseName: "Course Name",
+    description: "Description",
+    credits: "Credits",
+    action: "Action",
+
+    loadingCourses: "Loading archived courses...",
+    noCourses: "No archived courses found.",
+
+    noName: "No name",
+    noDescription: "No description",
+    notDefined: "Not defined",
+
+    restore: "Restore",
+    restoreError: "Error while restoring the course",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Cours archivés",
+    subtitle: "Voir et restaurer les cours archivés.",
+
+    listTitle: "Liste des cours archivés",
+    showing: "Affichage de",
+    archivedCourses: "cours archivés",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+
+    courseName: "Nom du cours",
+    description: "Description",
+    credits: "Crédits",
+    action: "Action",
+
+    loadingCourses: "Chargement des cours archivés...",
+    noCourses: "Aucun cours archivé trouvé.",
+
+    noName: "Sans nom",
+    noDescription: "Sans description",
+    notDefined: "Non défini",
+
+    restore: "Restaurer",
+    restoreError: "Erreur lors de la restauration du cours",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "الدورات المؤرشفة",
+    subtitle: "عرض واستعادة سجلات الدورات المؤرشفة.",
+
+    listTitle: "قائمة الدورات المؤرشفة",
+    showing: "عرض",
+    archivedCourses: "دورات مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+
+    courseName: "اسم الدورة",
+    description: "الوصف",
+    credits: "الأرصدة",
+    action: "الإجراء",
+
+    loadingCourses: "جاري تحميل الدورات المؤرشفة...",
+    noCourses: "لا توجد دورات مؤرشفة.",
+
+    noName: "بدون اسم",
+    noDescription: "بدون وصف",
+    notDefined: "غير محدد",
+
+    restore: "استعادة",
+    restoreError: "حدث خطأ أثناء استعادة الدورة",
+  },
+};
+
 export default function ArchivedCourses({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [archivedCourses, setArchivedCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedCourses = async () => {
     try {
@@ -51,8 +158,6 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
   }, [archivedCourses, searchTerm]);
 
   const handleRestore = async (course) => {
-    
-
     try {
       setRestoringId(course.id);
 
@@ -65,10 +170,9 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredCourse || course);
       }
-
     } catch (error) {
       console.error("Error restoring course:", error);
-      alert("Error while restoring the course");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -80,6 +184,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -98,15 +203,15 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Courses
+                  {t.title}
                 </h2>
 
                 <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived course records.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -130,11 +235,11 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Courses List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredCourses.length} archived courses
+                {t.showing} {filteredCourses.length} {t.archivedCourses}
               </p>
             </div>
           </div>
@@ -150,7 +255,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 sm:w-72"
               />
             </div>
@@ -166,7 +271,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -177,16 +282,16 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
                 <th className="w-[25%] px-5 py-4 font-black">
-                  Course Name
+                  {t.courseName}
                 </th>
                 <th className="w-[35%] px-5 py-4 font-black">
-                  Description
+                  {t.description}
                 </th>
                 <th className="w-[15%] px-5 py-4 font-black">
-                  Credits
+                  {t.credits}
                 </th>
                 <th className="w-[25%] px-5 py-4 font-black">
-                  Action
+                  {t.action}
                 </th>
               </tr>
             </thead>
@@ -197,7 +302,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
                   <td colSpan="4" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived courses...
+                      {t.loadingCourses}
                     </div>
                   </td>
                 </tr>
@@ -207,7 +312,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
                     colSpan="4"
                     className="px-5 py-10 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived courses found.
+                    {t.noCourses}
                   </td>
                 </tr>
               ) : (
@@ -218,19 +323,19 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
                   >
                     <td className="px-5 py-4">
                       <span className="font-black text-slate-900">
-                        {course.nom || course.name || "No name"}
+                        {course.nom || course.name || t.noName}
                       </span>
                     </td>
 
                     <td className="px-5 py-4">
                       <span className="line-clamp-1">
-                        {course.description || "No description"}
+                        {course.description || t.noDescription}
                       </span>
                     </td>
 
                     <td className="px-5 py-4">
                       <span className="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
-                        {course.credits ?? "Not defined"}
+                        {course.credits ?? t.notDefined}
                       </span>
                     </td>
 
@@ -246,7 +351,7 @@ export default function ArchivedCourses({ open, onClose, onRestored }) {
                         ) : (
                           <RotateCcw size={16} />
                         )}
-                        Restore
+                        {t.restore}
                       </button>
                     </td>
                   </tr>

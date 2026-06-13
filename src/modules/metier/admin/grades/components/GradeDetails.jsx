@@ -1,16 +1,89 @@
-import { Eye, X, GraduationCap, User, BookOpen, CalendarDays } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Eye,
+  X,
+  GraduationCap,
+  User,
+  BookOpen,
+  CalendarDays,
+} from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Evaluation Management",
+    title: "Grade Details",
+    subtitle: "View selected grade information.",
+
+    note: "Note",
+    semester: "Semester",
+    student: "Student",
+    course: "Course",
+    createdAt: "Created At",
+
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Gestion des évaluations",
+    title: "Détails de la note",
+    subtitle: "Voir les informations de la note sélectionnée.",
+
+    note: "Note",
+    semester: "Semestre",
+    student: "Étudiant",
+    course: "Cours",
+    createdAt: "Créé le",
+
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "إدارة التقييمات",
+    title: "تفاصيل النقطة",
+    subtitle: "عرض معلومات النقطة المحددة.",
+
+    note: "النقطة",
+    semester: "الفصل",
+    student: "الطالب",
+    course: "المادة",
+    createdAt: "تاريخ الإنشاء",
+
+    notAvailable: "N/A",
+  },
+};
 
 export default function GradeDetails({ grade, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!grade) return null;
 
-  const note = grade.note ?? "N/A";
-  const semestre = grade.semestre || "N/A";
+  const note = grade.note ?? t.notAvailable;
+  const semestre = grade.semestre || t.notAvailable;
 
   const studentName =
     grade.studentName ||
     `${grade.student?.prenom || ""} ${grade.student?.nom || ""}`.trim() ||
     grade.student?.name ||
-    "N/A";
+    t.notAvailable;
 
   const courseName =
     grade.courseName ||
@@ -18,16 +91,17 @@ export default function GradeDetails({ grade, onClose }) {
     grade.course?.nom ||
     grade.courses?.name ||
     grade.course?.name ||
-    "N/A";
+    t.notAvailable;
 
   const createdAt = grade.createdAt
     ? new Date(grade.createdAt).toLocaleDateString("en-GB")
-    : "N/A";
+    : t.notAvailable;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-3xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -45,14 +119,12 @@ export default function GradeDetails({ grade, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Evaluation Management
+                  {t.management}
                 </p>
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Grade Details
+                  {t.title}
                 </h2>
-                <p className="mt-2 text-xs text-slate-300">
-                  View selected grade information.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -70,7 +142,7 @@ export default function GradeDetails({ grade, onClose }) {
           <div className="rounded-2xl bg-slate-50 p-5 md:col-span-2">
             <div className="flex items-center gap-2 text-slate-500">
               <GraduationCap size={17} />
-              <p className="text-xs font-black uppercase">Note</p>
+              <p className="text-xs font-black uppercase">{t.note}</p>
             </div>
 
             <h3 className="mt-2 text-3xl font-black text-emerald-600">
@@ -81,7 +153,7 @@ export default function GradeDetails({ grade, onClose }) {
           <div className="rounded-2xl bg-slate-50 p-5">
             <div className="flex items-center gap-2 text-slate-500">
               <CalendarDays size={17} />
-              <p className="text-xs font-black uppercase">Semester</p>
+              <p className="text-xs font-black uppercase">{t.semester}</p>
             </div>
 
             <h3 className="mt-2 text-lg font-black text-slate-900">
@@ -92,7 +164,7 @@ export default function GradeDetails({ grade, onClose }) {
           <div className="rounded-2xl bg-slate-50 p-5">
             <div className="flex items-center gap-2 text-slate-500">
               <User size={17} />
-              <p className="text-xs font-black uppercase">Student</p>
+              <p className="text-xs font-black uppercase">{t.student}</p>
             </div>
 
             <h3 className="mt-2 text-lg font-black text-slate-900">
@@ -103,7 +175,7 @@ export default function GradeDetails({ grade, onClose }) {
           <div className="rounded-2xl bg-slate-50 p-5">
             <div className="flex items-center gap-2 text-slate-500">
               <BookOpen size={17} />
-              <p className="text-xs font-black uppercase">Course</p>
+              <p className="text-xs font-black uppercase">{t.course}</p>
             </div>
 
             <h3 className="mt-2 text-lg font-black text-slate-900">
@@ -113,7 +185,7 @@ export default function GradeDetails({ grade, onClose }) {
 
           <div className="rounded-2xl bg-slate-50 p-5">
             <p className="text-xs font-black uppercase text-slate-500">
-              Created At
+              {t.createdAt}
             </p>
 
             <h3 className="mt-2 text-lg font-black text-slate-900">

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   X,
   CreditCard,
@@ -7,42 +8,110 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Payment Management",
+    title: "Payment Details",
+    subtitle: "Full payment information",
+
+    student: "Student",
+    amount: "Amount",
+    paymentMode: "Payment Mode",
+    paymentDate: "Payment Date",
+    status: "Status",
+
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Gestion des paiements",
+    title: "Détails du paiement",
+    subtitle: "Informations complètes du paiement",
+
+    student: "Étudiant",
+    amount: "Montant",
+    paymentMode: "Mode de paiement",
+    paymentDate: "Date de paiement",
+    status: "Statut",
+
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "إدارة المدفوعات",
+    title: "تفاصيل الدفع",
+    subtitle: "معلومات الدفع الكاملة",
+
+    student: "الطالب",
+    amount: "المبلغ",
+    paymentMode: "طريقة الدفع",
+    paymentDate: "تاريخ الدفع",
+    status: "الحالة",
+
+    notAvailable: "N/A",
+  },
+};
+
 export default function PayementDetails({ payement, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!payement) return null;
 
   const studentName =
+    `${payement.studentNom || ""} ${payement.studentPrenom || ""}`.trim() ||
+    `${payement.student?.nom || ""} ${payement.student?.prenom || ""}`.trim() ||
+    `${payement.etudiant?.nom || ""} ${payement.etudiant?.prenom || ""}`.trim() ||
     payement.studentName ||
-    `${payement.student?.prenom || ""} ${payement.student?.nom || ""}`.trim() ||
-    "N/A";
+    payement.etudiantName ||
+    t.notAvailable;
 
-  const amount = payement.amount ?? payement.montant ?? "N/A";
-  const mode = payement.modePayement ?? payement.mode ?? "N/A";
-  const date = payement.datePayement ?? payement.date ?? "N/A";
-  const status = payement.statut ?? payement.status ?? "N/A";
+  const amount = payement.amount ?? payement.montant ?? t.notAvailable;
+  const mode = payement.modePayement ?? payement.mode ?? t.notAvailable;
+  const date = payement.datePayement ?? payement.date ?? t.notAvailable;
+  const status = payement.statut ?? payement.status ?? t.notAvailable;
 
   const items = [
     {
-      label: "Student",
+      label: t.student,
       value: studentName,
       icon: User,
     },
     {
-      label: "Amount",
-      value: amount !== "N/A" ? `${amount} DH` : "N/A",
+      label: t.amount,
+      value: amount !== t.notAvailable ? `${amount} DH` : t.notAvailable,
       icon: DollarSign,
     },
     {
-      label: "Payment Mode",
+      label: t.paymentMode,
       value: mode,
       icon: CreditCard,
     },
     {
-      label: "Payment Date",
+      label: t.paymentDate,
       value: date,
       icon: CalendarDays,
     },
     {
-      label: "Status",
+      label: t.status,
       value: status,
       icon: BadgeCheck,
     },
@@ -52,6 +121,7 @@ export default function PayementDetails({ payement, onClose }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-lg overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -70,16 +140,14 @@ export default function PayementDetails({ payement, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Payment Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-xl font-black tracking-tight">
-                  Payment Details
+                  {t.title}
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-300">
-                  Full payment information
-                </p>
+                <p className="mt-1 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -119,17 +187,6 @@ export default function PayementDetails({ payement, onClose }) {
               </div>
             );
           })}
-        </div>
-
-        {/* FOOTER */}
-        <div className="flex justify-end border-t border-slate-100 bg-slate-50 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>

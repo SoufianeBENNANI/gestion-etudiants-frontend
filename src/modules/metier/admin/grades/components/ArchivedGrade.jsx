@@ -11,11 +11,115 @@ import {
 
 import { getArchivedGrades, restoreGrade } from "../services/gradeService";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Archived Grades",
+    subtitle: "View and restore archived grade records.",
+
+    listTitle: "Archived Grades List",
+    showing: "Showing",
+    archivedGrades: "archived grades",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+
+    student: "Student",
+    course: "Course",
+    semester: "Semester",
+    note: "Note",
+    action: "Action",
+
+    loadingGrades: "Loading archived grades...",
+    noGrades: "No archived grades found.",
+
+    restore: "Restore",
+    restoreError: "Error while restoring the grade",
+
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Notes archivées",
+    subtitle: "Voir et restaurer les notes archivées.",
+
+    listTitle: "Liste des notes archivées",
+    showing: "Affichage de",
+    archivedGrades: "notes archivées",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+
+    student: "Étudiant",
+    course: "Cours",
+    semester: "Semestre",
+    note: "Note",
+    action: "Action",
+
+    loadingGrades: "Chargement des notes archivées...",
+    noGrades: "Aucune note archivée trouvée.",
+
+    restore: "Restaurer",
+    restoreError: "Erreur lors de la restauration de la note",
+
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "النقط المؤرشفة",
+    subtitle: "عرض واستعادة سجلات النقط المؤرشفة.",
+
+    listTitle: "قائمة النقط المؤرشفة",
+    showing: "عرض",
+    archivedGrades: "نقط مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+
+    student: "الطالب",
+    course: "المادة",
+    semester: "الفصل",
+    note: "النقطة",
+    action: "الإجراء",
+
+    loadingGrades: "جاري تحميل النقط المؤرشفة...",
+    noGrades: "لا توجد نقط مؤرشفة.",
+
+    restore: "استعادة",
+    restoreError: "حدث خطأ أثناء استعادة النقطة",
+
+    notAvailable: "N/A",
+  },
+};
+
 export default function ArchivedGrades({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [grades, setGrades] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedGrades = async () => {
     try {
@@ -41,7 +145,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
     return (
       grade.studentName ||
       `${grade.student?.prenom || ""} ${grade.student?.nom || ""}`.trim() ||
-      "N/A"
+      t.notAvailable
     );
   };
 
@@ -52,7 +156,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
       grade.course?.nom ||
       grade.courses?.name ||
       grade.course?.name ||
-      "N/A"
+      t.notAvailable
     );
   };
 
@@ -68,7 +172,6 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
   });
 
   const handleRestore = async (grade) => {
-    
     try {
       setRestoringId(grade.id);
 
@@ -79,10 +182,9 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredGrade || grade);
       }
-
     } catch (error) {
       console.error("Error restoring grade:", error);
-      alert("Error while restoring the grade");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -94,6 +196,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-6xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -112,16 +215,14 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Academics Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Grades
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived grade records.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -144,11 +245,11 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Grades List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredGrades.length} archived grades
+                {t.showing} {filteredGrades.length} {t.archivedGrades}
               </p>
             </div>
           </div>
@@ -164,7 +265,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100 sm:w-72"
               />
             </div>
@@ -180,7 +281,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -190,11 +291,11 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
           <table className="w-full min-w-[950px] table-fixed border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-1/5 px-5 py-3 font-black">Student</th>
-                <th className="w-1/5 px-5 py-3 font-black">Course</th>
-                <th className="w-1/5 px-5 py-3 font-black">Semester</th>
-                <th className="w-1/5 px-5 py-3 font-black">Note</th>
-                <th className="w-1/5 px-5 py-3 font-black">Action</th>
+                <th className="w-1/5 px-5 py-3 font-black">{t.student}</th>
+                <th className="w-1/5 px-5 py-3 font-black">{t.course}</th>
+                <th className="w-1/5 px-5 py-3 font-black">{t.semester}</th>
+                <th className="w-1/5 px-5 py-3 font-black">{t.note}</th>
+                <th className="w-1/5 px-5 py-3 font-black">{t.action}</th>
               </tr>
             </thead>
 
@@ -204,7 +305,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
                   <td colSpan="5" className="px-5 py-8 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived grades...
+                      {t.loadingGrades}
                     </div>
                   </td>
                 </tr>
@@ -214,13 +315,13 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
                     colSpan="5"
                     className="px-5 py-8 text-center text-sm font-bold text-slate-600"
                   >
-                    No archived grades found.
+                    {t.noGrades}
                   </td>
                 </tr>
               ) : (
                 filteredGrades.map((grade) => {
-                  const note = grade.note ?? "N/A";
-                  const semestre = grade.semestre || "N/A";
+                  const note = grade.note ?? t.notAvailable;
+                  const semestre = grade.semestre || t.notAvailable;
                   const studentName = getStudentName(grade);
                   const courseName = getCourseName(grade);
 
@@ -265,7 +366,7 @@ export default function ArchivedGrades({ open, onClose, onRestored }) {
                           ) : (
                             <RotateCcw size={14} />
                           )}
-                          Restore
+                          {t.restore}
                         </button>
                       </td>
                     </tr>

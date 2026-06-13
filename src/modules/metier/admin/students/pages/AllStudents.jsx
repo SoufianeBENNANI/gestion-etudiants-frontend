@@ -29,8 +29,148 @@ import ArchivedStudents from "./ArchivedStudents";
 import StudentDetails from "./StudentDetails";
 import EditStudent from "./EditStudent";
 
+const translations = {
+  EN: {
+    management: "Students Management",
+    title: "All Students",
+    subtitle: "Manage, view and archive student records.",
+    search: "Search by last name...",
+    add: "Add",
+    archive: "Archive",
+    pdf: "PDF",
+
+    records: "Records",
+    results: "Results",
+    status: "Status",
+    totalStudents: "Total Students",
+    displayedStudents: "Displayed Students",
+    archived: "Archived",
+
+    studentsList: "Students List",
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    students: "students",
+    rows: "Rows:",
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
+
+    student: "Student",
+    email: "Email",
+    gender: "Gender",
+    phone: "Phone",
+    address: "Address",
+    actions: "Actions",
+
+    loadingStudents: "Loading students...",
+    noStudents: "No students found.",
+    loadError: "Error while loading students",
+    addError: "Error while adding the student",
+    updateError: "Error while updating the student",
+
+    view: "View",
+    edit: "Edit",
+    delete: "Delete",
+  },
+
+  FR: {
+    management: "Gestion des étudiants",
+    title: "Tous les étudiants",
+    subtitle: "Gérer, consulter et archiver les dossiers des étudiants.",
+    search: "Rechercher par nom...",
+    add: "Ajouter",
+    archive: "Archive",
+    pdf: "PDF",
+
+    records: "Dossiers",
+    results: "Résultats",
+    status: "Statut",
+    totalStudents: "Total étudiants",
+    displayedStudents: "Étudiants affichés",
+    archived: "Archivés",
+
+    studentsList: "Liste des étudiants",
+    showing: "Affichage",
+    to: "à",
+    of: "sur",
+    students: "étudiants",
+    rows: "Lignes :",
+    page: "Page",
+    previous: "Précédent",
+    next: "Suivant",
+
+    student: "Étudiant",
+    email: "Email",
+    gender: "Genre",
+    phone: "Téléphone",
+    address: "Adresse",
+    actions: "Actions",
+
+    loadingStudents: "Chargement des étudiants...",
+    noStudents: "Aucun étudiant trouvé.",
+    loadError: "Erreur lors du chargement des étudiants",
+    addError: "Erreur lors de l’ajout de l’étudiant",
+    updateError: "Erreur lors de la modification de l’étudiant",
+
+    view: "Voir",
+    edit: "Modifier",
+    delete: "Supprimer",
+  },
+
+  AR: {
+    management: "إدارة الطلاب",
+    title: "كل الطلاب",
+    subtitle: "إدارة وعرض وأرشفة سجلات الطلاب.",
+    search: "البحث بالاسم...",
+    add: "إضافة",
+    archive: "الأرشيف",
+    pdf: "PDF",
+
+    records: "السجلات",
+    results: "النتائج",
+    status: "الحالة",
+    totalStudents: "إجمالي الطلاب",
+    displayedStudents: "الطلاب المعروضون",
+    archived: "المؤرشفون",
+
+    studentsList: "قائمة الطلاب",
+    showing: "عرض",
+    to: "إلى",
+    of: "من",
+    students: "طلاب",
+    rows: "الأسطر:",
+    page: "الصفحة",
+    previous: "السابق",
+    next: "التالي",
+
+    student: "الطالب",
+    email: "البريد الإلكتروني",
+    gender: "الجنس",
+    phone: "الهاتف",
+    address: "العنوان",
+    actions: "الإجراءات",
+
+    loadingStudents: "جاري تحميل الطلاب...",
+    noStudents: "لا يوجد طلاب.",
+    loadError: "حدث خطأ أثناء تحميل الطلاب",
+    addError: "حدث خطأ أثناء إضافة الطالب",
+    updateError: "حدث خطأ أثناء تعديل الطالب",
+
+    view: "عرض",
+    edit: "تعديل",
+    delete: "حذف",
+  },
+};
+
 export default function AllStudents() {
   const navigate = useNavigate();
+
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
 
   const [students, setStudents] = useState([]);
   const [totalStudents, setTotalStudents] = useState(0);
@@ -61,6 +201,44 @@ export default function AllStudents() {
     adresse: "",
   });
 
+  const cardStyle = {
+    backgroundColor: "var(--card-bg)",
+    borderColor: "var(--border-color)",
+    color: "var(--text-color)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
+  const inputStyle = {
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text-color)",
+    borderColor: "var(--border-color)",
+  };
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage = event.detail || localStorage.getItem("app-language") || "EN";
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   const loadArchivedCount = async () => {
     try {
       const data = await getArchivedStudents();
@@ -85,7 +263,7 @@ export default function AllStudents() {
       await loadArchivedCount();
     } catch (error) {
       console.error("Load students error:", error);
-      alert("Error while loading students");
+      alert(t.loadError);
       setStudents([]);
       setTotalStudents(0);
     } finally {
@@ -168,10 +346,9 @@ export default function AllStudents() {
       setTotalStudents((prev) => prev + 1);
 
       handleCloseAddDialog();
-
     } catch (error) {
       console.error("Add student error:", error);
-      alert("Error while adding the student");
+      alert(t.addError);
     } finally {
       setSavingAdd(false);
     }
@@ -192,7 +369,7 @@ export default function AllStudents() {
       setSelectedStudent(null);
     } catch (error) {
       console.error("Update student error:", error);
-      alert("Error while updating the student");
+      alert(t.updateError);
     } finally {
       setSavingUpdate(false);
     }
@@ -210,6 +387,11 @@ export default function AllStudents() {
 
   const endStudent = Math.min(currentPage * itemsPerPage, students.length);
 
+  const visiblePages = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
+
   const goToPreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
@@ -223,16 +405,29 @@ export default function AllStudents() {
     setCurrentPage(1);
   };
 
-  const visiblePages = Array.from(
-    { length: totalPages },
-    (_, index) => index + 1
-  ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
-
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        color: "var(--text-color)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        style={{
+          borderColor: "var(--border-color)",
+          background:
+            "linear-gradient(135deg, var(--secondary-color), #020617)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
+          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
+        />
+
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -243,15 +438,15 @@ export default function AllStudents() {
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Students Management
+                {t.management}
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                All Students
+                {t.title}
               </h1>
 
               <p className="mt-2 text-xs text-slate-300">
-                Manage, view and archive student records.
+                {t.subtitle}
               </p>
             </div>
           </div>
@@ -267,7 +462,7 @@ export default function AllStudents() {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search by last name..."
+                placeholder={t.search}
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
 
@@ -285,7 +480,7 @@ export default function AllStudents() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Plus size={17} />
-              Add
+              {t.add}
             </button>
 
             <button
@@ -294,16 +489,16 @@ export default function AllStudents() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Archive size={17} />
-              Archive
+              {t.archive}
             </button>
 
             <button
               type="button"
               onClick={downloadStudentsPdf}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-red-500/40"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:opacity-80"
             >
               <FileDown size={17} />
-              PDF
+              {t.pdf}
             </button>
           </div>
         </div>
@@ -311,90 +506,124 @@ export default function AllStudents() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Users size={22} />
             </div>
 
-            <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
-              Records
+            <span
+              className="rounded-full px-3 py-1.5 text-xs font-black"
+              style={{
+                backgroundColor: "var(--section-bg)",
+                color: "var(--primary-color)",
+              }}
+            >
+              {t.records}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Total Students</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.totalStudents}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {totalStudents}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <Search size={22} />
             </div>
 
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-              Results
+              {t.results}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">
-            Displayed Students
+          <p className="text-sm font-black" style={textStyle}>
+            {t.displayedStudents}
           </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {students.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-600 text-white">
               <AlertTriangle size={22} />
             </div>
 
             <span className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-500">
-              Status
+              {t.status}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Archived</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.archived}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {archivedCount}
           </h2>
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        style={cardStyle}
+      >
+        <div
+          className="flex flex-col gap-3 border-b px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Users size={20} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">
-                Students List
+              <h2 className="text-lg font-black" style={textStyle}>
+                {t.studentsList}
               </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
-                Showing {startStudent} to {endStudent} of {students.length}{" "}
-                students
+              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+                {t.showing} {startStudent} {t.to} {endStudent} {t.of}{" "}
+                {students.length} {t.students}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-slate-600">Rows:</span>
+            <span className="text-xs font-black" style={mutedTextStyle}>
+              {t.rows}
+            </span>
 
             <select
               value={itemsPerPage}
               onChange={handleChangeItemsPerPage}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="rounded-xl border px-3 py-2 text-xs font-bold outline-none transition"
+              style={inputStyle}
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -406,13 +635,19 @@ export default function AllStudents() {
 
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="w-[15%] px-2 py-3 font-black">Student</th>
-              <th className="w-[20%] px-2 py-3 font-black">Email</th>
-              <th className="w-[10%] px-2 py-3 font-black">Gender</th>
-              <th className="w-[14%] px-2 py-3 font-black">Phone</th>
-              <th className="w-[17%] px-2 py-3 font-black">Address</th>
-              <th className="w-[24%] px-2 py-3 font-black">Actions</th>
+            <tr
+              className="text-center text-[11px] uppercase tracking-wide"
+              style={{
+                backgroundColor: "var(--card-bg)",
+                color: "var(--muted-text)",
+              }}
+            >
+              <th className="w-[15%] px-2 py-3 font-black">{t.student}</th>
+              <th className="w-[20%] px-2 py-3 font-black">{t.email}</th>
+              <th className="w-[10%] px-2 py-3 font-black">{t.gender}</th>
+              <th className="w-[14%] px-2 py-3 font-black">{t.phone}</th>
+              <th className="w-[17%] px-2 py-3 font-black">{t.address}</th>
+              <th className="w-[24%] px-2 py-3 font-black">{t.actions}</th>
             </tr>
           </thead>
 
@@ -420,19 +655,21 @@ export default function AllStudents() {
             {loading ? (
               <tr>
                 <td colSpan="6" className="px-5 py-8 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
+                  <div
+                    className="flex items-center justify-center gap-2 text-sm font-bold"
+                    style={mutedTextStyle}
+                  >
                     <Loader2 size={18} className="animate-spin" />
-                    Loading students...
+                    {t.loadingStudents}
                   </div>
                 </td>
               </tr>
             ) : students.length === 0 ? (
               <tr>
-                <td
-                  colSpan="6"
-                  className="px-5 py-8 text-center text-sm font-bold text-slate-600"
-                >
-                  No students found.
+                <td colSpan="6" className="px-5 py-8 text-center">
+                  <span className="text-sm font-bold" style={mutedTextStyle}>
+                    {t.noStudents}
+                  </span>
                 </td>
               </tr>
             ) : (
@@ -444,40 +681,53 @@ export default function AllStudents() {
                 return (
                   <tr
                     key={student.id}
-                    className="border-t border-slate-100 text-center text-xs text-slate-700 transition hover:bg-slate-50 xl:text-sm"
+                    className="border-t text-center text-xs transition xl:text-sm"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-color)",
+                    }}
                   >
                     <td className="px-2 py-3">
                       <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                        <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                        <div
+                          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
+                          style={{ backgroundColor: "var(--primary-color)" }}
+                        >
                           <Users size={17} />
                         </div>
 
-                        <span className="truncate font-black text-slate-900">
+                        <span className="truncate font-black" style={textStyle}>
                           {fullName || "-"}
                         </span>
                       </div>
                     </td>
 
                     <td className="px-2 py-3">
-                      <span className="block truncate">
+                      <span className="block truncate" style={mutedTextStyle}>
                         {student.email || "-"}
                       </span>
                     </td>
 
                     <td className="px-2 py-3">
-                      <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-black text-blue-600">
+                      <span
+                        className="inline-flex rounded-full px-2.5 py-1 text-xs font-black"
+                        style={{
+                          backgroundColor: "var(--section-bg)",
+                          color: "var(--primary-color)",
+                        }}
+                      >
                         {student.genre || "-"}
                       </span>
                     </td>
 
                     <td className="px-2 py-3">
-                      <span className="block truncate">
+                      <span className="block truncate" style={mutedTextStyle}>
                         {student.telephone || "-"}
                       </span>
                     </td>
 
                     <td className="px-2 py-3">
-                      <span className="block truncate">
+                      <span className="block truncate" style={mutedTextStyle}>
                         {student.adresse || "-"}
                       </span>
                     </td>
@@ -487,8 +737,9 @@ export default function AllStudents() {
                         <button
                           type="button"
                           onClick={() => setViewStudent(student)}
-                          title="View"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+                          title={t.view}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-white transition hover:opacity-80"
+                          style={{ backgroundColor: "var(--primary-color)" }}
                         >
                           <Eye size={15} />
                         </button>
@@ -497,8 +748,13 @@ export default function AllStudents() {
                           type="button"
                           onClick={() => setSelectedStudent(student)}
                           disabled={!student.id}
-                          title="Edit"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          title={t.edit}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
+                          style={{
+                            backgroundColor: "var(--section-bg)",
+                            borderColor: "var(--border-color)",
+                            color: "var(--text-color)",
+                          }}
                         >
                           <Pencil size={15} />
                         </button>
@@ -509,8 +765,8 @@ export default function AllStudents() {
                             navigate(`/admin/students/delete/${student.id}`)
                           }
                           disabled={!student.id}
-                          title="Delete"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          title={t.delete}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -524,11 +780,19 @@ export default function AllStudents() {
         </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-xs font-semibold text-slate-500">
-            Page{" "}
-            <span className="font-black text-slate-800">{currentPage}</span>{" "}
-            of <span className="font-black text-slate-800">{totalPages}</span>
+        <div
+          className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.page}{" "}
+            <span className="font-black" style={textStyle}>
+              {currentPage}
+            </span>{" "}
+            {t.of}{" "}
+            <span className="font-black" style={textStyle}>
+              {totalPages}
+            </span>
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -536,10 +800,11 @@ export default function AllStudents() {
               type="button"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
               <ChevronLeft size={16} />
-              Previous
+              {t.previous}
             </button>
 
             {visiblePages.map((page) => (
@@ -547,11 +812,16 @@ export default function AllStudents() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                style={{
+                  backgroundColor:
+                    currentPage === page
+                      ? "var(--secondary-color)"
+                      : "var(--input-bg)",
+                  borderColor: "var(--border-color)",
+                  color:
+                    currentPage === page ? "#ffffff" : "var(--text-color)",
+                }}
               >
                 {page}
               </button>
@@ -561,9 +831,10 @@ export default function AllStudents() {
               type="button"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
-              Next
+              {t.next}
               <ChevronRight size={16} />
             </button>
           </div>

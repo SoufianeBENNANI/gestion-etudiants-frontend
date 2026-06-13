@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import {
@@ -21,18 +21,128 @@ import {
   ScrollText,
 } from "lucide-react";
 
-import logo from "../assets/LogoSchool.png";
+const logo = "/images/LogoSchool.png";
+
+const translations = {
+  EN: {
+    dashboard: "Dashboard",
+
+    academics: "Academics",
+    students: "Students",
+    overview: "Overview",
+    allStudents: "All Students",
+    performance: "Performance",
+    attendance: "Attendance",
+    aiPredictions: "AI Predictions",
+
+    classes: "Classes",
+    courses: "Courses",
+    departments: "Departments",
+    teachers: "Teachers",
+
+    ai: "AI",
+    models: "Models",
+    logs: "Logs",
+
+    evaluation: "Evaluation",
+    grades: "Grades",
+
+    finance: "Finance",
+    payments: "Payments",
+
+    settings: "Settings",
+  },
+
+  FR: {
+    dashboard: "Tableau de bord",
+
+    academics: "Académique",
+    students: "Étudiants",
+    overview: "Vue d’ensemble",
+    allStudents: "Tous les étudiants",
+    performance: "Performance",
+    attendance: "Présence",
+    aiPredictions: "Prédictions IA",
+
+    classes: "Classes",
+    courses: "Cours",
+    departments: "Départements",
+    teachers: "Professeurs",
+
+    ai: "IA",
+    models: "Modèles",
+    logs: "Journaux",
+
+    evaluation: "Évaluation",
+    grades: "Notes",
+
+    finance: "Finance",
+    payments: "Paiements",
+
+    settings: "Paramètres",
+  },
+
+  AR: {
+    dashboard: "لوحة التحكم",
+
+    academics: "الأكاديمي",
+    students: "الطلاب",
+    overview: "نظرة عامة",
+    allStudents: "كل الطلاب",
+    performance: "الأداء",
+    attendance: "الحضور",
+    aiPredictions: "توقعات الذكاء الاصطناعي",
+
+    classes: "الأقسام",
+    courses: "الدورات",
+    departments: "الشعب",
+    teachers: "الأساتذة",
+
+    ai: "الذكاء الاصطناعي",
+    models: "النماذج",
+    logs: "السجلات",
+
+    evaluation: "التقييم",
+    grades: "النقاط",
+
+    finance: "المالية",
+    payments: "المدفوعات",
+
+    settings: "الإعدادات",
+  },
+};
 
 export default function Sidebar({ collapsed, setCollapsed }) {
   const { pathname } = useLocation();
 
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [openMenus, setOpenMenus] = useState({
-    academics: true,
-    students: true,
+    academics: false,
+    students: false,
     evaluation: false,
     finance: false,
     ai: false,
   });
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const toggleMenu = (menu) => {
     setOpenMenus((prev) => ({
@@ -81,8 +191,13 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <div
-      className={`h-screen bg-[#081028] text-white transition-all duration-300 flex flex-col
-      ${collapsed ? "w-20" : "w-72"}`}
+      className={`h-screen transition-all duration-300 flex flex-col
+  ${collapsed ? "w-20" : "w-72"}`}
+      style={{
+        backgroundColor: "var(--sidebar-bg)",
+        color: "var(--sidebar-text)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between p-5">
@@ -103,7 +218,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* DASHBOARD */}
         <Link to="/admin" className={itemClass("/admin")}>
           <LayoutDashboard size={20} />
-          {!collapsed && <span>Dashboard</span>}
+          {!collapsed && <span>{t.dashboard}</span>}
         </Link>
 
         {/* ACADEMICS */}
@@ -114,7 +229,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           >
             <div className="flex items-center gap-3">
               <BookOpen size={20} />
-              {!collapsed && <span>Academics</span>}
+              {!collapsed && <span>{t.academics}</span>}
             </div>
 
             {!collapsed &&
@@ -134,7 +249,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               >
                 <div className="flex items-center gap-3">
                   <Users size={18} />
-                  <span>Students</span>
+                  <span>{t.students}</span>
                 </div>
 
                 {openMenus.students ? (
@@ -152,7 +267,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                     className={studentSubItemClass("/admin/students")}
                   >
                     <LayoutDashboard size={17} />
-                    <span>Overview</span>
+                    <span>{t.overview}</span>
                   </Link>
 
                   <Link
@@ -160,7 +275,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                     className={studentSubItemClass("/admin/students/all")}
                   >
                     <Users size={17} />
-                    <span>All Students</span>
+                    <span>{t.allStudents}</span>
                   </Link>
 
                   <Link
@@ -170,7 +285,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                     )}
                   >
                     <BarChart3 size={17} />
-                    <span>Performance</span>
+                    <span>{t.performance}</span>
                   </Link>
 
                   <Link
@@ -180,7 +295,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                     )}
                   >
                     <Bell size={17} />
-                    <span>Attendance</span>
+                    <span>{t.attendance}</span>
                   </Link>
 
                   <Link
@@ -190,19 +305,19 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                     )}
                   >
                     <Brain size={17} />
-                    <span>AI Predictions</span>
+                    <span>{t.aiPredictions}</span>
                   </Link>
                 </div>
               )}
 
               <Link to="/admin/classes" className={itemClass("/admin/classes")}>
                 <Layers size={18} />
-                {!collapsed && <span>Classes</span>}
+                {!collapsed && <span>{t.classes}</span>}
               </Link>
 
               <Link to="/admin/courses" className={itemClass("/admin/courses")}>
                 <BookOpen size={18} />
-                {!collapsed && <span>Courses</span>}
+                {!collapsed && <span>{t.courses}</span>}
               </Link>
 
               <Link
@@ -210,7 +325,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 className={itemClass("/admin/departments")}
               >
                 <Building2 size={18} />
-                {!collapsed && <span>Departments</span>}
+                {!collapsed && <span>{t.departments}</span>}
               </Link>
 
               <Link
@@ -218,7 +333,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 className={itemClass("/admin/teachers")}
               >
                 <GraduationCap size={18} />
-                {!collapsed && <span>Teachers</span>}
+                {!collapsed && <span>{t.teachers}</span>}
               </Link>
             </div>
           )}
@@ -232,7 +347,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           >
             <div className="flex items-center gap-3">
               <Brain size={20} />
-              {!collapsed && <span>AI</span>}
+              {!collapsed && <span>{t.ai}</span>}
             </div>
 
             {!collapsed &&
@@ -250,7 +365,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 className={aiSubItemClass("/admin/AImodels")}
               >
                 <Cpu size={17} />
-                <span>Models</span>
+                <span>{t.models}</span>
               </Link>
 
               <Link
@@ -258,7 +373,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 className={aiSubItemClass("/admin/AIlogs")}
               >
                 <ScrollText size={17} />
-                <span>Logs</span>
+                <span>{t.logs}</span>
               </Link>
             </div>
           )}
@@ -272,7 +387,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           >
             <div className="flex items-center gap-3">
               <ClipboardList size={20} />
-              {!collapsed && <span>Evaluation</span>}
+              {!collapsed && <span>{t.evaluation}</span>}
             </div>
 
             {!collapsed &&
@@ -287,7 +402,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <div className="ml-6 mt-3 space-y-3 pl-4">
               <Link to="/admin/grades" className={itemClass("/admin/grades")}>
                 <ClipboardList size={18} />
-                {!collapsed && <span>Grades</span>}
+                {!collapsed && <span>{t.grades}</span>}
               </Link>
             </div>
           )}
@@ -301,7 +416,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
           >
             <div className="flex items-center gap-3">
               <DollarSign size={20} />
-              {!collapsed && <span>Finance</span>}
+              {!collapsed && <span>{t.finance}</span>}
             </div>
 
             {!collapsed &&
@@ -319,7 +434,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
                 className={itemClass("/admin/payments")}
               >
                 <DollarSign size={18} />
-                {!collapsed && <span>Payments</span>}
+                {!collapsed && <span>{t.payments}</span>}
               </Link>
             </div>
           )}
@@ -330,7 +445,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       <div className="p-3">
         <Link to="/admin/settings" className={itemClass("/admin/settings")}>
           <Settings size={20} />
-          {!collapsed && <span>Settings</span>}
+          {!collapsed && <span>{t.settings}</span>}
         </Link>
       </div>
     </div>

@@ -1,4 +1,58 @@
+import { useEffect, useState } from "react";
 import { X, Brain, Loader2, Save } from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Artificial Intelligence",
+    title: "Edit AI Model",
+    subtitle: "Update AI model information",
+
+    modelName: "Model Name",
+    modelNamePlaceholder: "Model name",
+
+    version: "Version",
+    versionPlaceholder: "Model version",
+
+    accuracy: "Accuracy",
+    accuracyPlaceholder: "Accuracy",
+
+    update: "Update",
+  },
+
+  FR: {
+    management: "Intelligence artificielle",
+    title: "Modifier le modèle IA",
+    subtitle: "Modifier les informations du modèle d’IA",
+
+    modelName: "Nom du modèle",
+    modelNamePlaceholder: "Nom du modèle",
+
+    version: "Version",
+    versionPlaceholder: "Version du modèle",
+
+    accuracy: "Précision",
+    accuracyPlaceholder: "Précision",
+
+    update: "Modifier",
+  },
+
+  AR: {
+    management: "الذكاء الاصطناعي",
+    title: "تعديل نموذج الذكاء الاصطناعي",
+    subtitle: "تعديل معلومات نموذج الذكاء الاصطناعي",
+
+    modelName: "اسم النموذج",
+    modelNamePlaceholder: "اسم النموذج",
+
+    version: "الإصدار",
+    versionPlaceholder: "إصدار النموذج",
+
+    accuracy: "الدقة",
+    accuracyPlaceholder: "الدقة",
+
+    update: "تحديث",
+  },
+};
 
 export default function EditModel({
   model,
@@ -8,12 +62,34 @@ export default function EditModel({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!model) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -32,16 +108,14 @@ export default function EditModel({
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Artificial Intelligence
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Edit AI Model
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Update AI model information
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -58,7 +132,7 @@ export default function EditModel({
         <form onSubmit={onSubmit} className="grid gap-5 p-6">
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Model Name
+              {t.modelName}
             </label>
 
             <input
@@ -66,7 +140,7 @@ export default function EditModel({
               name="name"
               value={formData.name || ""}
               onChange={onChange}
-              placeholder="Model name"
+              placeholder={t.modelNamePlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               required
             />
@@ -74,7 +148,7 @@ export default function EditModel({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Version
+              {t.version}
             </label>
 
             <input
@@ -82,7 +156,7 @@ export default function EditModel({
               name="version"
               value={formData.version || ""}
               onChange={onChange}
-              placeholder="Model version"
+              placeholder={t.versionPlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               required
             />
@@ -90,7 +164,7 @@ export default function EditModel({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Accuracy
+              {t.accuracy}
             </label>
 
             <input
@@ -98,7 +172,7 @@ export default function EditModel({
               name="accuracy"
               value={formData.accuracy || ""}
               onChange={onChange}
-              placeholder="Accuracy"
+              placeholder={t.accuracyPlaceholder}
               min="0"
               max="100"
               step="0.01"
@@ -118,7 +192,7 @@ export default function EditModel({
               ) : (
                 <Save size={18} />
               )}
-              Update
+              {t.update}
             </button>
           </div>
         </form>

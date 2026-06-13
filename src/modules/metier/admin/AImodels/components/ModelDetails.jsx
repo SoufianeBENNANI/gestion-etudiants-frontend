@@ -1,23 +1,90 @@
+import { useEffect, useState } from "react";
 import { X, Brain, Cpu, Percent, CalendarDays } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Artificial Intelligence",
+    title: "Model Details",
+    subtitle: "View AI model information",
+
+    modelName: "Model Name",
+    version: "Version",
+    accuracy: "Accuracy",
+    createdAt: "Created At",
+
+    noName: "No name",
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Intelligence artificielle",
+    title: "Détails du modèle",
+    subtitle: "Voir les informations du modèle d’IA",
+
+    modelName: "Nom du modèle",
+    version: "Version",
+    accuracy: "Précision",
+    createdAt: "Créé le",
+
+    noName: "Sans nom",
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "الذكاء الاصطناعي",
+    title: "تفاصيل النموذج",
+    subtitle: "عرض معلومات نموذج الذكاء الاصطناعي",
+
+    modelName: "اسم النموذج",
+    version: "الإصدار",
+    accuracy: "الدقة",
+    createdAt: "تاريخ الإنشاء",
+
+    noName: "بدون اسم",
+    notAvailable: "N/A",
+  },
+};
+
 export default function ModelDetails({ model, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!model) return null;
 
-  const modelName = model.name || "No name";
-  const version = model.version || "N/A";
+  const modelName = model.name || t.noName;
+  const version = model.version || t.notAvailable;
   const accuracy =
     model.accuracy !== null && model.accuracy !== undefined
       ? `${model.accuracy}%`
-      : "N/A";
+      : t.notAvailable;
 
   const createdAt = model.createdAt
     ? new Date(model.createdAt).toLocaleString()
-    : "N/A";
+    : t.notAvailable;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -36,16 +103,14 @@ export default function ModelDetails({ model, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Artificial Intelligence
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Model Details
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View AI model information
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -63,7 +128,7 @@ export default function ModelDetails({ model, onClose }) {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
               <Brain size={16} />
-              Model Name
+              {t.modelName}
             </div>
 
             <p className="text-sm font-black text-slate-900">{modelName}</p>
@@ -72,7 +137,7 @@ export default function ModelDetails({ model, onClose }) {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
               <Cpu size={16} />
-              Version
+              {t.version}
             </div>
 
             <p className="text-sm font-semibold text-slate-700">{version}</p>
@@ -81,7 +146,7 @@ export default function ModelDetails({ model, onClose }) {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
               <Percent size={16} />
-              Accuracy
+              {t.accuracy}
             </div>
 
             <p className="text-sm font-semibold text-slate-700">{accuracy}</p>
@@ -90,7 +155,7 @@ export default function ModelDetails({ model, onClose }) {
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-wide text-slate-500">
               <CalendarDays size={16} />
-              Created At
+              {t.createdAt}
             </div>
 
             <p className="text-sm font-semibold text-slate-700">{createdAt}</p>

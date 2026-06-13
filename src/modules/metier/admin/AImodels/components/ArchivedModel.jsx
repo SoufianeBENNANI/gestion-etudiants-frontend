@@ -12,11 +12,115 @@ import {
 
 import { getArchivedModels, restoreModel } from "../service/serviceModels";
 
+const translations = {
+  EN: {
+    management: "Artificial Intelligence",
+    title: "Archived Models",
+    subtitle: "View and restore archived AI model records.",
+
+    listTitle: "Archived Models List",
+    showing: "Showing",
+    archivedModels: "archived models",
+
+    searchPlaceholder: "Search archive...",
+    refresh: "Refresh",
+
+    modelName: "Model Name",
+    version: "Version",
+    accuracy: "Accuracy",
+    action: "Action",
+
+    loadingModels: "Loading archived models...",
+    noModels: "No archived models found.",
+
+    restore: "Restore",
+    restoreError: "Error while restoring the model",
+
+    noName: "No name",
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Intelligence artificielle",
+    title: "Modèles archivés",
+    subtitle: "Voir et restaurer les modèles d’IA archivés.",
+
+    listTitle: "Liste des modèles archivés",
+    showing: "Affichage de",
+    archivedModels: "modèles archivés",
+
+    searchPlaceholder: "Rechercher dans l’archive...",
+    refresh: "Actualiser",
+
+    modelName: "Nom du modèle",
+    version: "Version",
+    accuracy: "Précision",
+    action: "Action",
+
+    loadingModels: "Chargement des modèles archivés...",
+    noModels: "Aucun modèle archivé trouvé.",
+
+    restore: "Restaurer",
+    restoreError: "Erreur lors de la restauration du modèle",
+
+    noName: "Sans nom",
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "الذكاء الاصطناعي",
+    title: "النماذج المؤرشفة",
+    subtitle: "عرض واستعادة سجلات نماذج الذكاء الاصطناعي المؤرشفة.",
+
+    listTitle: "قائمة النماذج المؤرشفة",
+    showing: "عرض",
+    archivedModels: "نماذج مؤرشفة",
+
+    searchPlaceholder: "البحث في الأرشيف...",
+    refresh: "تحديث",
+
+    modelName: "اسم النموذج",
+    version: "الإصدار",
+    accuracy: "الدقة",
+    action: "الإجراء",
+
+    loadingModels: "جاري تحميل النماذج المؤرشفة...",
+    noModels: "لا توجد نماذج مؤرشفة.",
+
+    restore: "استعادة",
+    restoreError: "حدث خطأ أثناء استعادة النموذج",
+
+    noName: "بدون اسم",
+    notAvailable: "N/A",
+  },
+};
+
 export default function ArchivedModel({ open, onClose, onRestored }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [archivedModels, setArchivedModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedModels = async () => {
     try {
@@ -52,7 +156,6 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
   }, [archivedModels, searchTerm]);
 
   const handleRestore = async (model) => {
-
     try {
       setRestoringId(model.id);
 
@@ -63,10 +166,9 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
       if (onRestored) {
         onRestored(restoredModel || model);
       }
-
     } catch (error) {
       console.error("Error restoring model:", error);
-      alert("Error while restoring the model");
+      alert(t.restoreError);
     } finally {
       setRestoringId(null);
     }
@@ -78,6 +180,7 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -96,16 +199,14 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Artificial Intelligence
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Archived Models
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View and restore archived AI model records.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -128,11 +229,11 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
 
             <div>
               <h3 className="text-lg font-black text-slate-900">
-                Archived Models List
+                {t.listTitle}
               </h3>
 
               <p className="mt-1 text-xs text-slate-500">
-                Showing {filteredArchivedModels.length} archived models
+                {t.showing} {filteredArchivedModels.length} {t.archivedModels}
               </p>
             </div>
           </div>
@@ -148,7 +249,7 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search archive..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-semibold text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-100 sm:w-72"
               />
             </div>
@@ -164,7 +265,7 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -174,10 +275,18 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
           <table className="w-full table-fixed border-collapse">
             <thead>
               <tr className="bg-white text-center text-xs uppercase tracking-wide text-slate-500">
-                <th className="w-[30%] px-5 py-4 font-black">Model Name</th>
-                <th className="w-[20%] px-5 py-4 font-black">Version</th>
-                <th className="w-[20%] px-5 py-4 font-black">Accuracy</th>
-                <th className="w-[30%] px-5 py-4 font-black">Action</th>
+                <th className="w-[30%] px-5 py-4 font-black">
+                  {t.modelName}
+                </th>
+                <th className="w-[20%] px-5 py-4 font-black">
+                  {t.version}
+                </th>
+                <th className="w-[20%] px-5 py-4 font-black">
+                  {t.accuracy}
+                </th>
+                <th className="w-[30%] px-5 py-4 font-black">
+                  {t.action}
+                </th>
               </tr>
             </thead>
 
@@ -187,7 +296,7 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
                   <td colSpan="4" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
                       <Loader2 size={18} className="animate-spin" />
-                      Loading archived models...
+                      {t.loadingModels}
                     </div>
                   </td>
                 </tr>
@@ -199,18 +308,18 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
                   >
                     <div className="flex items-center justify-center gap-2">
                       <AlertTriangle size={18} />
-                      No archived models found.
+                      {t.noModels}
                     </div>
                   </td>
                 </tr>
               ) : (
                 filteredArchivedModels.map((model) => {
-                  const modelName = model.name || "No name";
-                  const version = model.version || "N/A";
+                  const modelName = model.name || t.noName;
+                  const version = model.version || t.notAvailable;
                   const accuracy =
                     model.accuracy !== null && model.accuracy !== undefined
                       ? `${model.accuracy}%`
-                      : "N/A";
+                      : t.notAvailable;
 
                   return (
                     <tr
@@ -251,7 +360,7 @@ export default function ArchivedModel({ open, onClose, onRestored }) {
                           ) : (
                             <RotateCcw size={16} />
                           )}
-                          Restore
+                          {t.restore}
                         </button>
                       </td>
                     </tr>

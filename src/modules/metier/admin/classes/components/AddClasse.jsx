@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, X } from "lucide-react";
 
 const niveauOptions = ["Technicien", "Licence", "Master", "Doctorat"];
@@ -17,6 +18,59 @@ const anneeOptions = [
   "2031",
 ];
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Add Class",
+    subtitle: "Add the class name, level and academic year.",
+
+    className: "Class Name",
+    classNamePlaceholder: "Ex: Physics",
+
+    level: "Level",
+    selectLevel: "Select level",
+
+    academicYear: "Academic Year",
+    selectYear: "Select year",
+
+    save: "Save",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Ajouter une classe",
+    subtitle: "Ajouter le nom de la classe, le niveau et l’année scolaire.",
+
+    className: "Nom de la classe",
+    classNamePlaceholder: "Ex: Physique",
+
+    level: "Niveau",
+    selectLevel: "Sélectionner le niveau",
+
+    academicYear: "Année scolaire",
+    selectYear: "Sélectionner l’année",
+
+    save: "Enregistrer",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "إضافة قسم",
+    subtitle: "إضافة اسم القسم، المستوى والسنة الدراسية.",
+
+    className: "اسم القسم",
+    classNamePlaceholder: "مثال: الفيزياء",
+
+    level: "المستوى",
+    selectLevel: "اختر المستوى",
+
+    academicYear: "السنة الدراسية",
+    selectYear: "اختر السنة",
+
+    save: "حفظ",
+  },
+};
+
 export default function AddClasse({
   open,
   formData,
@@ -25,12 +79,34 @@ export default function AddClasse({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -48,13 +124,15 @@ export default function AddClasse({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
+
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add Class
+                  {t.title}
                 </h2>
+
                 <p className="mt-2 text-xs text-slate-300">
-                  Add the class name, level and academic year.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -73,14 +151,15 @@ export default function AddClasse({
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Class Name
+                {t.className}
               </label>
+
               <input
                 type="text"
                 name="nom"
                 value={formData.nom}
                 onChange={onChange}
-                placeholder="Ex: Physics"
+                placeholder={t.classNamePlaceholder}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               />
@@ -88,8 +167,9 @@ export default function AddClasse({
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Level
+                {t.level}
               </label>
+
               <select
                 name="niveau"
                 value={formData.niveau}
@@ -97,7 +177,8 @@ export default function AddClasse({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select level</option>
+                <option value="">{t.selectLevel}</option>
+
                 {niveauOptions.map((niveau) => (
                   <option key={niveau} value={niveau}>
                     {niveau}
@@ -108,8 +189,9 @@ export default function AddClasse({
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Academic Year
+                {t.academicYear}
               </label>
+
               <select
                 name="annee"
                 value={formData.annee}
@@ -117,7 +199,8 @@ export default function AddClasse({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select year</option>
+                <option value="">{t.selectYear}</option>
+
                 {anneeOptions.map((annee) => (
                   <option key={annee} value={annee}>
                     {annee}
@@ -138,7 +221,8 @@ export default function AddClasse({
               ) : (
                 <Save size={17} />
               )}
-              Save
+
+              {t.save}
             </button>
           </div>
         </form>

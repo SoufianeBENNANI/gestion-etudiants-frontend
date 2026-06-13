@@ -1,4 +1,40 @@
+import { useEffect, useState } from "react";
 import { X, Building2, Loader2, Save } from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Optional Management",
+    title: "Edit Department",
+    subtitle: "Update department information",
+
+    departmentName: "Department Name",
+    description: "Description",
+
+    update: "Update",
+  },
+
+  FR: {
+    management: "Gestion optionnelle",
+    title: "Modifier le département",
+    subtitle: "Modifier les informations du département",
+
+    departmentName: "Nom du département",
+    description: "Description",
+
+    update: "Modifier",
+  },
+
+  AR: {
+    management: "الإدارة الاختيارية",
+    title: "تعديل القسم",
+    subtitle: "تعديل معلومات القسم",
+
+    departmentName: "اسم القسم",
+    description: "الوصف",
+
+    update: "تحديث",
+  },
+};
 
 export default function EditDepartement({
   departement,
@@ -8,12 +44,34 @@ export default function EditDepartement({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!departement) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -32,16 +90,14 @@ export default function EditDepartement({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Optional Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Edit Department
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Update department information
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -58,7 +114,7 @@ export default function EditDepartement({
         <form onSubmit={onSubmit} className="grid gap-5 p-6">
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Department Name
+              {t.departmentName}
             </label>
 
             <input
@@ -73,7 +129,7 @@ export default function EditDepartement({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Description
+              {t.description}
             </label>
 
             <textarea
@@ -97,7 +153,8 @@ export default function EditDepartement({
               ) : (
                 <Save size={18} />
               )}
-              Update
+
+              {t.update}
             </button>
           </div>
         </form>

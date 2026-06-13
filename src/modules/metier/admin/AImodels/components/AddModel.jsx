@@ -1,4 +1,58 @@
+import { useEffect, useState } from "react";
 import { X, Brain, Loader2, Save } from "lucide-react";
+
+const translations = {
+  EN: {
+    management: "Artificial Intelligence",
+    title: "Add AI Model",
+    subtitle: "Create a new AI model record",
+
+    modelName: "Model Name",
+    modelNamePlaceholder: "Example: Prediction Model",
+
+    version: "Version",
+    versionPlaceholder: "Example: v1.0",
+
+    accuracy: "Accuracy",
+    accuracyPlaceholder: "Example: 95",
+
+    save: "Save",
+  },
+
+  FR: {
+    management: "Intelligence artificielle",
+    title: "Ajouter un modèle IA",
+    subtitle: "Créer un nouveau modèle d’IA",
+
+    modelName: "Nom du modèle",
+    modelNamePlaceholder: "Exemple : Modèle de prédiction",
+
+    version: "Version",
+    versionPlaceholder: "Exemple : v1.0",
+
+    accuracy: "Précision",
+    accuracyPlaceholder: "Exemple : 95",
+
+    save: "Enregistrer",
+  },
+
+  AR: {
+    management: "الذكاء الاصطناعي",
+    title: "إضافة نموذج ذكاء اصطناعي",
+    subtitle: "إنشاء سجل جديد لنموذج الذكاء الاصطناعي",
+
+    modelName: "اسم النموذج",
+    modelNamePlaceholder: "مثال: نموذج التنبؤ",
+
+    version: "الإصدار",
+    versionPlaceholder: "مثال: v1.0",
+
+    accuracy: "الدقة",
+    accuracyPlaceholder: "مثال: 95",
+
+    save: "حفظ",
+  },
+};
 
 export default function AddModel({
   open,
@@ -8,12 +62,34 @@ export default function AddModel({
   onChange,
   onSubmit,
 }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!open) return null;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -32,16 +108,14 @@ export default function AddModel({
 
               <div>
                 <p className="text-xs font-bold text-cyan-200">
-                  Artificial Intelligence
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Add AI Model
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Create a new AI model record
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -58,7 +132,7 @@ export default function AddModel({
         <form onSubmit={onSubmit} className="grid gap-5 p-6">
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Model Name
+              {t.modelName}
             </label>
 
             <input
@@ -66,7 +140,7 @@ export default function AddModel({
               name="name"
               value={formData.name || ""}
               onChange={onChange}
-              placeholder="Example: Prediction Model"
+              placeholder={t.modelNamePlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               required
             />
@@ -74,7 +148,7 @@ export default function AddModel({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Version
+              {t.version}
             </label>
 
             <input
@@ -82,7 +156,7 @@ export default function AddModel({
               name="version"
               value={formData.version || ""}
               onChange={onChange}
-              placeholder="Example: v1.0"
+              placeholder={t.versionPlaceholder}
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
               required
             />
@@ -90,7 +164,7 @@ export default function AddModel({
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Accuracy
+              {t.accuracy}
             </label>
 
             <input
@@ -98,7 +172,7 @@ export default function AddModel({
               name="accuracy"
               value={formData.accuracy || ""}
               onChange={onChange}
-              placeholder="Example: 95"
+              placeholder={t.accuracyPlaceholder}
               min="0"
               max="100"
               step="0.01"
@@ -118,7 +192,7 @@ export default function AddModel({
               ) : (
                 <Save size={18} />
               )}
-              Save
+              {t.save}
             </button>
           </div>
         </form>

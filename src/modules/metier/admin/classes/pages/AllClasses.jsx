@@ -27,7 +27,159 @@ import EditClasse from "../components/EditClasse";
 import ArchivedClasses from "../components/ArchivedClasses";
 import DeleteClasse from "../components/DeleteClasse";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "All Classes",
+    subtitle: "Manage, view and archive class records.",
+
+    searchPlaceholder: "Search class...",
+    add: "Add",
+    archive: "Archive",
+
+    records: "Records",
+    results: "Results",
+    status: "Status",
+
+    totalClasses: "Total Classes",
+    displayedClasses: "Displayed Classes",
+    archived: "Archived",
+
+    classesList: "Classes List",
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    classes: "classes",
+    rows: "Rows:",
+
+    class: "Class",
+    level: "Level",
+    academicYear: "Academic Year",
+    actions: "Actions",
+
+    loadingClasses: "Loading classes...",
+    noClasses: "No classes found.",
+
+    view: "View",
+    edit: "Edit",
+    delete: "Delete",
+
+    noName: "No name",
+    notDefined: "Not defined",
+
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
+
+    addError: "Error while adding the class",
+    updateError: "Error while updating the class",
+    classIdNotFound: "Class ID not found",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Toutes les classes",
+    subtitle: "Gérer, consulter et archiver les classes.",
+
+    searchPlaceholder: "Rechercher une classe...",
+    add: "Ajouter",
+    archive: "Archive",
+
+    records: "Dossiers",
+    results: "Résultats",
+    status: "Statut",
+
+    totalClasses: "Total classes",
+    displayedClasses: "Classes affichées",
+    archived: "Archivées",
+
+    classesList: "Liste des classes",
+    showing: "Affichage",
+    to: "à",
+    of: "sur",
+    classes: "classes",
+    rows: "Lignes :",
+
+    class: "Classe",
+    level: "Niveau",
+    academicYear: "Année scolaire",
+    actions: "Actions",
+
+    loadingClasses: "Chargement des classes...",
+    noClasses: "Aucune classe trouvée.",
+
+    view: "Voir",
+    edit: "Modifier",
+    delete: "Supprimer",
+
+    noName: "Sans nom",
+    notDefined: "Non défini",
+
+    page: "Page",
+    previous: "Précédent",
+    next: "Suivant",
+
+    addError: "Erreur lors de l’ajout de la classe",
+    updateError: "Erreur lors de la modification de la classe",
+    classIdNotFound: "ID de la classe introuvable",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "كل الأقسام",
+    subtitle: "إدارة وعرض وأرشفة سجلات الأقسام.",
+
+    searchPlaceholder: "البحث عن قسم...",
+    add: "إضافة",
+    archive: "الأرشيف",
+
+    records: "السجلات",
+    results: "النتائج",
+    status: "الحالة",
+
+    totalClasses: "إجمالي الأقسام",
+    displayedClasses: "الأقسام المعروضة",
+    archived: "المؤرشفة",
+
+    classesList: "قائمة الأقسام",
+    showing: "عرض",
+    to: "إلى",
+    of: "من",
+    classes: "أقسام",
+    rows: "الأسطر:",
+
+    class: "القسم",
+    level: "المستوى",
+    academicYear: "السنة الدراسية",
+    actions: "الإجراءات",
+
+    loadingClasses: "جاري تحميل الأقسام...",
+    noClasses: "لا توجد أقسام.",
+
+    view: "عرض",
+    edit: "تعديل",
+    delete: "حذف",
+
+    noName: "بدون اسم",
+    notDefined: "غير محدد",
+
+    page: "الصفحة",
+    previous: "السابق",
+    next: "التالي",
+
+    addError: "حدث خطأ أثناء إضافة القسم",
+    updateError: "حدث خطأ أثناء تعديل القسم",
+    classIdNotFound: "معرف القسم غير موجود",
+  },
+};
+
 export default function AllClasses() {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [classes, setClasses] = useState([]);
   const [archivedCount, setArchivedCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,6 +208,46 @@ export default function AllClasses() {
     niveau: "",
     annee: "",
   });
+
+  const cardStyle = {
+    backgroundColor: "var(--card-bg)",
+    borderColor: "var(--border-color)",
+    color: "var(--text-color)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
+  const inputStyle = {
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text-color)",
+    borderColor: "var(--border-color)",
+  };
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadArchivedCount = async () => {
     try {
@@ -178,10 +370,9 @@ export default function AllClasses() {
 
       setClasses((prev) => [newClasse, ...prev]);
       handleCloseAddDialog();
-
     } catch (error) {
       console.error("Error adding class:", error);
-      alert("Error while adding the class");
+      alert(t.addError);
     } finally {
       setSavingAdd(false);
     }
@@ -228,17 +419,14 @@ export default function AllClasses() {
     e.preventDefault();
 
     if (!selectedClasse?.id) {
-      alert("Class ID not found");
+      alert(t.classIdNotFound);
       return;
     }
 
     try {
       setSavingUpdate(true);
 
-      const updatedClasse = await updateClasse(
-        selectedClasse.id,
-        editFormData
-      );
+      const updatedClasse = await updateClasse(selectedClasse.id, editFormData);
 
       setClasses((prev) =>
         prev.map((classe) =>
@@ -249,17 +437,35 @@ export default function AllClasses() {
       handleCloseEditDialog();
     } catch (error) {
       console.error("Error updating class:", error);
-      alert("Error while updating the class");
+      alert(t.updateError);
     } finally {
       setSavingUpdate(false);
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        color: "var(--text-color)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        style={{
+          borderColor: "var(--border-color)",
+          background:
+            "linear-gradient(135deg, var(--secondary-color), #020617)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
+          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
+        />
+
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -270,16 +476,14 @@ export default function AllClasses() {
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Academics Management
+                {t.management}
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                All Classes
+                {t.title}
               </h1>
 
-              <p className="mt-2 text-xs text-slate-300">
-                Manage, view and archive class records.
-              </p>
+              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
             </div>
           </div>
 
@@ -294,7 +498,7 @@ export default function AllClasses() {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search class..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
@@ -305,7 +509,7 @@ export default function AllClasses() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Plus size={17} />
-              Add
+              {t.add}
             </button>
 
             <button
@@ -314,7 +518,7 @@ export default function AllClasses() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
             >
               <Archive size={17} />
-              Archive
+              {t.archive}
             </button>
           </div>
         </div>
@@ -322,90 +526,124 @@ export default function AllClasses() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <School size={22} />
             </div>
 
-            <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
-              Records
+            <span
+              className="rounded-full px-3 py-1.5 text-xs font-black"
+              style={{
+                backgroundColor: "var(--section-bg)",
+                color: "var(--primary-color)",
+              }}
+            >
+              {t.records}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Total Classes</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.totalClasses}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {classes.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <Search size={22} />
             </div>
 
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-              Results
+              {t.results}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">
-            Displayed Classes
+          <p className="text-sm font-black" style={textStyle}>
+            {t.displayedClasses}
           </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {filteredClasses.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-600 text-white">
               <AlertTriangle size={22} />
             </div>
 
             <span className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-500">
-              Status
+              {t.status}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Archived</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.archived}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {archivedCount}
           </h2>
         </div>
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        style={cardStyle}
+      >
+        <div
+          className="flex flex-col gap-3 border-b px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Layers3 size={20} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">
-                Classes List
+              <h2 className="text-lg font-black" style={textStyle}>
+                {t.classesList}
               </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
-                Showing {startClass} to {endClass} of {filteredClasses.length}{" "}
-                classes
+              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+                {t.showing} {startClass} {t.to} {endClass} {t.of}{" "}
+                {filteredClasses.length} {t.classes}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-slate-600">Rows:</span>
+            <span className="text-xs font-black" style={mutedTextStyle}>
+              {t.rows}
+            </span>
 
             <select
               value={itemsPerPage}
               onChange={handleChangeItemsPerPage}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="rounded-xl border px-3 py-2 text-xs font-bold outline-none transition"
+              style={inputStyle}
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -417,11 +655,19 @@ export default function AllClasses() {
 
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="w-[30%] px-3 py-3 font-black">Class</th>
-              <th className="w-[22%] px-3 py-3 font-black">Level</th>
-              <th className="w-[22%] px-3 py-3 font-black">Academic Year</th>
-              <th className="w-[26%] px-3 py-3 font-black">Actions</th>
+            <tr
+              className="text-center text-[11px] uppercase tracking-wide"
+              style={{
+                backgroundColor: "var(--card-bg)",
+                color: "var(--muted-text)",
+              }}
+            >
+              <th className="w-[30%] px-3 py-3 font-black">{t.class}</th>
+              <th className="w-[22%] px-3 py-3 font-black">{t.level}</th>
+              <th className="w-[22%] px-3 py-3 font-black">
+                {t.academicYear}
+              </th>
+              <th className="w-[26%] px-3 py-3 font-black">{t.actions}</th>
             </tr>
           </thead>
 
@@ -429,59 +675,74 @@ export default function AllClasses() {
             {loading ? (
               <tr>
                 <td colSpan="4" className="px-5 py-8 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
+                  <div
+                    className="flex items-center justify-center gap-2 text-sm font-bold"
+                    style={mutedTextStyle}
+                  >
                     <Loader2 size={18} className="animate-spin" />
-                    Loading classes...
+                    {t.loadingClasses}
                   </div>
                 </td>
               </tr>
             ) : filteredClasses.length === 0 ? (
               <tr>
-                <td
-                  colSpan="4"
-                  className="px-5 py-8 text-center text-sm font-bold text-slate-600"
-                >
-                  No classes found.
+                <td colSpan="4" className="px-5 py-8 text-center">
+                  <span className="text-sm font-bold" style={mutedTextStyle}>
+                    {t.noClasses}
+                  </span>
                 </td>
               </tr>
             ) : (
               paginatedClasses.map((classe) => {
                 const className =
-                  classe.nom || classe.name || classe.className || "No name";
+                  classe.nom || classe.name || classe.className || t.noName;
 
                 const level =
-                  classe.niveau ||
-                  classe.level ||
-                  classe.grade ||
-                  "Not defined";
+                  classe.niveau || classe.level || classe.grade || t.notDefined;
 
-                const year = classe.annee || "Not defined";
+                const year = classe.annee || t.notDefined;
 
                 return (
                   <tr
                     key={classe.id}
-                    className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
+                    className="border-t text-center text-sm transition"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-color)",
+                    }}
                   >
                     <td className="px-3 py-3">
                       <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                        <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                        <div
+                          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
+                          style={{ backgroundColor: "var(--primary-color)" }}
+                        >
                           <Layers3 size={17} />
                         </div>
 
-                        <span className="truncate font-black text-slate-900">
+                        <span className="truncate font-black" style={textStyle}>
                           {className}
                         </span>
                       </div>
                     </td>
 
                     <td className="px-3 py-3">
-                      <span className="block truncate text-sm font-semibold text-slate-600">
+                      <span
+                        className="block truncate text-sm font-semibold"
+                        style={mutedTextStyle}
+                      >
                         {level}
                       </span>
                     </td>
 
                     <td className="px-3 py-3">
-                      <span className="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
+                      <span
+                        className="inline-flex rounded-full px-3 py-1.5 text-xs font-black"
+                        style={{
+                          backgroundColor: "var(--section-bg)",
+                          color: "var(--primary-color)",
+                        }}
+                      >
                         {year}
                       </span>
                     </td>
@@ -491,8 +752,9 @@ export default function AllClasses() {
                         <button
                           type="button"
                           onClick={() => handleViewClick(classe)}
-                          title="View"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+                          title={t.view}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-white transition hover:opacity-80"
+                          style={{ backgroundColor: "var(--primary-color)" }}
                         >
                           <Eye size={15} />
                         </button>
@@ -500,8 +762,13 @@ export default function AllClasses() {
                         <button
                           type="button"
                           onClick={() => handleEditClick(classe)}
-                          title="Edit"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white"
+                          title={t.edit}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80"
+                          style={{
+                            backgroundColor: "var(--section-bg)",
+                            borderColor: "var(--border-color)",
+                            color: "var(--text-color)",
+                          }}
                         >
                           <Pencil size={15} />
                         </button>
@@ -510,8 +777,8 @@ export default function AllClasses() {
                           type="button"
                           onClick={() => setClasseToDelete(classe)}
                           disabled={!classe.id}
-                          title="Delete"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                          title={t.delete}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -525,11 +792,19 @@ export default function AllClasses() {
         </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-xs font-semibold text-slate-500">
-            Page{" "}
-            <span className="font-black text-slate-800">{currentPage}</span>{" "}
-            of <span className="font-black text-slate-800">{totalPages}</span>
+        <div
+          className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.page}{" "}
+            <span className="font-black" style={textStyle}>
+              {currentPage}
+            </span>{" "}
+            {t.of}{" "}
+            <span className="font-black" style={textStyle}>
+              {totalPages}
+            </span>
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -537,10 +812,11 @@ export default function AllClasses() {
               type="button"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
               <ChevronLeft size={16} />
-              Previous
+              {t.previous}
             </button>
 
             {visiblePages.map((page) => (
@@ -548,11 +824,16 @@ export default function AllClasses() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                style={{
+                  backgroundColor:
+                    currentPage === page
+                      ? "var(--secondary-color)"
+                      : "var(--input-bg)",
+                  borderColor: "var(--border-color)",
+                  color:
+                    currentPage === page ? "#ffffff" : "var(--text-color)",
+                }}
               >
                 {page}
               </button>
@@ -562,9 +843,10 @@ export default function AllClasses() {
               type="button"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
-              Next
+              {t.next}
               <ChevronRight size={16} />
             </button>
           </div>

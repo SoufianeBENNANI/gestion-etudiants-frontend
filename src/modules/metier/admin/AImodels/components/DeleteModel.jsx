@@ -1,10 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 import { deleteModel } from "../service/serviceModels";
 
+const translations = {
+  EN: {
+    title: "Delete Model",
+    subtitle: "Confirm model deletion.",
+
+    confirmQuestion: "Are you sure you want to delete this model?",
+    removedText: "will be removed from the list.",
+    version: "Version:",
+
+    deleting: "Deleting...",
+    deleteModel: "Delete Model",
+
+    selectedModel: "Selected model",
+    archiveError: "Error while archiving the model",
+  },
+
+  FR: {
+    title: "Supprimer le modèle",
+    subtitle: "Confirmer la suppression du modèle.",
+
+    confirmQuestion: "Êtes-vous sûr de vouloir supprimer ce modèle ?",
+    removedText: "sera supprimé de la liste.",
+    version: "Version :",
+
+    deleting: "Suppression...",
+    deleteModel: "Supprimer le modèle",
+
+    selectedModel: "Modèle sélectionné",
+    archiveError: "Erreur lors de l’archivage du modèle",
+  },
+
+  AR: {
+    title: "حذف النموذج",
+    subtitle: "تأكيد حذف النموذج.",
+
+    confirmQuestion: "هل أنت متأكد أنك تريد حذف هذا النموذج؟",
+    removedText: "سيتم حذفه من القائمة.",
+    version: "الإصدار:",
+
+    deleting: "جاري الحذف...",
+    deleteModel: "حذف النموذج",
+
+    selectedModel: "النموذج المحدد",
+    archiveError: "حدث خطأ أثناء أرشفة النموذج",
+  },
+};
+
 export default function DeleteModel({ open, model, onClose, onDeleted }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!model?.id || deleting) return;
@@ -19,7 +87,7 @@ export default function DeleteModel({ open, model, onClose, onDeleted }) {
       }
     } catch (error) {
       console.error("Delete model error:", error);
-      alert("Error while archiving the model");
+      alert(t.archiveError);
     } finally {
       setDeleting(false);
     }
@@ -27,10 +95,13 @@ export default function DeleteModel({ open, model, onClose, onDeleted }) {
 
   if (!open || !model) return null;
 
-  const modelName = model.name || model.modelName || "Selected model";
+  const modelName = model.name || model.modelName || t.selectedModel;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       <div className="w-full max-w-md overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-2xl">
         <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-6 py-5 text-white">
           <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
@@ -42,9 +113,9 @@ export default function DeleteModel({ open, model, onClose, onDeleted }) {
               </div>
 
               <div>
-                <h2 className="text-lg font-black">Delete Model</h2>
+                <h2 className="text-lg font-black">{t.title}</h2>
                 <p className="mt-1 text-xs font-semibold text-red-100">
-                  Confirm model deletion.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -69,16 +140,16 @@ export default function DeleteModel({ open, model, onClose, onDeleted }) {
 
               <div>
                 <p className="text-sm font-black text-slate-900">
-                  Are you sure you want to delete this model?
+                  {t.confirmQuestion}
                 </p>
 
                 <p className="mt-2 text-sm font-semibold text-slate-600">
-                  {modelName} will be removed from the list.
+                  {modelName} {t.removedText}
                 </p>
 
                 {model.version && (
                   <p className="mt-2 line-clamp-2 text-xs font-semibold text-slate-500">
-                    Version: {model.version}
+                    {t.version} {model.version}
                   </p>
                 )}
               </div>
@@ -94,12 +165,12 @@ export default function DeleteModel({ open, model, onClose, onDeleted }) {
             {deleting ? (
               <>
                 <Loader2 size={17} className="animate-spin" />
-                Deleting...
+                {t.deleting}
               </>
             ) : (
               <>
                 <Trash2 size={17} />
-                Delete Model
+                {t.deleteModel}
               </>
             )}
           </button>

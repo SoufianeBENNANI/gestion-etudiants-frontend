@@ -1,12 +1,90 @@
 import { useEffect, useState } from "react";
 import { Loader2, Pencil, Save, X } from "lucide-react";
 
-export default function EditStudent({
-  student,
-  saving,
-  onClose,
-  onSubmit,
-}) {
+const translations = {
+  EN: {
+    management: "Students Management",
+    title: "Edit Student",
+    subtitle: "Update selected student information.",
+
+    lastName: "Last Name",
+    firstName: "First Name",
+    email: "Email",
+    gender: "Gender",
+    phone: "Phone",
+    address: "Address",
+
+    lastNamePlaceholder: "Ex: BENNANI",
+    firstNamePlaceholder: "Ex: Soufiane",
+    emailPlaceholder: "Ex: soufiane@gmail.com",
+    phonePlaceholder: "Ex: 0674870006",
+    addressPlaceholder: "Ex: Meknes",
+
+    selectGender: "Select gender",
+    male: "Homme",
+    female: "Femme",
+
+    save: "Save",
+  },
+
+  FR: {
+    management: "Gestion des étudiants",
+    title: "Modifier l’étudiant",
+    subtitle: "Mettre à jour les informations de l’étudiant sélectionné.",
+
+    lastName: "Nom",
+    firstName: "Prénom",
+    email: "Email",
+    gender: "Genre",
+    phone: "Téléphone",
+    address: "Adresse",
+
+    lastNamePlaceholder: "Ex: BENNANI",
+    firstNamePlaceholder: "Ex: Soufiane",
+    emailPlaceholder: "Ex: soufiane@gmail.com",
+    phonePlaceholder: "Ex: 0674870006",
+    addressPlaceholder: "Ex: Meknes",
+
+    selectGender: "Sélectionner le genre",
+    male: "Homme",
+    female: "Femme",
+
+    save: "Enregistrer",
+  },
+
+  AR: {
+    management: "إدارة الطلاب",
+    title: "تعديل الطالب",
+    subtitle: "تحديث معلومات الطالب المحدد.",
+
+    lastName: "الاسم العائلي",
+    firstName: "الاسم الشخصي",
+    email: "البريد الإلكتروني",
+    gender: "الجنس",
+    phone: "الهاتف",
+    address: "العنوان",
+
+    lastNamePlaceholder: "مثال: BENNANI",
+    firstNamePlaceholder: "مثال: Soufiane",
+    emailPlaceholder: "مثال: soufiane@gmail.com",
+    phonePlaceholder: "مثال: 0674870006",
+    addressPlaceholder: "مثال: Meknes",
+
+    selectGender: "اختر الجنس",
+    male: "ذكر",
+    female: "أنثى",
+
+    save: "حفظ",
+  },
+};
+
+export default function EditStudent({ student, saving, onClose, onSubmit }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -15,6 +93,21 @@ export default function EditStudent({
     telephone: "",
     adresse: "",
   });
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (student) {
@@ -49,6 +142,7 @@ export default function EditStudent({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-5xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -67,15 +161,15 @@ export default function EditStudent({
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Students Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Edit Student
+                  {t.title}
                 </h2>
 
                 <p className="mt-2 text-xs text-slate-300">
-                  Update selected student information.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -94,33 +188,33 @@ export default function EditStudent({
         <form onSubmit={handleSubmit} className="grid gap-5 p-6">
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             <InputField
-              label="Last Name"
+              label={t.lastName}
               name="nom"
               value={formData.nom}
               onChange={handleChange}
-              placeholder="Ex: BENNANI"
+              placeholder={t.lastNamePlaceholder}
             />
 
             <InputField
-              label="First Name"
+              label={t.firstName}
               name="prenom"
               value={formData.prenom}
               onChange={handleChange}
-              placeholder="Ex: Soufiane"
+              placeholder={t.firstNamePlaceholder}
             />
 
             <InputField
-              label="Email"
+              label={t.email}
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Ex: soufiane@gmail.com"
+              placeholder={t.emailPlaceholder}
             />
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Gender
+                {t.gender}
               </label>
 
               <select
@@ -130,26 +224,26 @@ export default function EditStudent({
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
                 required
               >
-                <option value="">Select gender</option>
-                <option value="Homme">Homme</option>
-                <option value="Femme">Femme</option>
+                <option value="">{t.selectGender}</option>
+                <option value="Homme">{t.male}</option>
+                <option value="Femme">{t.female}</option>
               </select>
             </div>
 
             <InputField
-              label="Phone"
+              label={t.phone}
               name="telephone"
               value={formData.telephone}
               onChange={handleChange}
-              placeholder="Ex: 0674870006"
+              placeholder={t.phonePlaceholder}
             />
 
             <InputField
-              label="Address"
+              label={t.address}
               name="adresse"
               value={formData.adresse}
               onChange={handleChange}
-              placeholder="Ex: Meknes"
+              placeholder={t.addressPlaceholder}
             />
           </div>
 
@@ -164,7 +258,8 @@ export default function EditStudent({
               ) : (
                 <Save size={17} />
               )}
-              Save
+
+              {t.save}
             </button>
           </div>
         </form>

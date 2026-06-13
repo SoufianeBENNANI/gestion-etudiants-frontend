@@ -1,16 +1,83 @@
+import { useEffect, useState } from "react";
 import { X, BookOpen } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Academics Management",
+    title: "Course Details",
+    subtitle: "View course information.",
+
+    courseName: "Course Name",
+    description: "Description",
+    credits: "Credits",
+
+    noName: "No name",
+    noDescription: "No description",
+    notDefined: "Not defined",
+  },
+
+  FR: {
+    management: "Gestion académique",
+    title: "Détails du cours",
+    subtitle: "Voir les informations du cours.",
+
+    courseName: "Nom du cours",
+    description: "Description",
+    credits: "Crédits",
+
+    noName: "Sans nom",
+    noDescription: "Sans description",
+    notDefined: "Non défini",
+  },
+
+  AR: {
+    management: "الإدارة الأكاديمية",
+    title: "تفاصيل الدورة",
+    subtitle: "عرض معلومات الدورة.",
+
+    courseName: "اسم الدورة",
+    description: "الوصف",
+    credits: "الأرصدة",
+
+    noName: "بدون اسم",
+    noDescription: "بدون وصف",
+    notDefined: "غير محدد",
+  },
+};
+
 export default function CourseDetails({ course, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!course) return null;
 
-  const courseName = course.nom || course.name || "No name";
-  const description = course.description || "No description";
-  const credits = course.credits ?? "Not defined";
+  const courseName = course.nom || course.name || t.noName;
+  const description = course.description || t.noDescription;
+  const credits = course.credits ?? t.notDefined;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -29,16 +96,14 @@ export default function CourseDetails({ course, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Academics Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Course Details
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View course information.
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -55,7 +120,7 @@ export default function CourseDetails({ course, onClose }) {
         <div className="grid gap-5 p-6">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase text-slate-500">
-              Course Name
+              {t.courseName}
             </p>
 
             <h3 className="mt-2 text-lg font-black text-slate-900">
@@ -65,7 +130,7 @@ export default function CourseDetails({ course, onClose }) {
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase text-slate-500">
-              Description
+              {t.description}
             </p>
 
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
@@ -75,14 +140,13 @@ export default function CourseDetails({ course, onClose }) {
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase text-slate-500">
-              Credits
+              {t.credits}
             </p>
 
             <span className="mt-3 inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-black text-blue-600">
               {credits}
             </span>
           </div>
-
         </div>
       </div>
     </div>

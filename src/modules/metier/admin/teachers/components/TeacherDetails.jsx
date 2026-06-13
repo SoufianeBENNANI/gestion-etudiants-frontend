@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   X,
   GraduationCap,
@@ -7,7 +8,63 @@ import {
   User,
 } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Teachers Management",
+    title: "Teacher Details",
+    subtitle: "View teacher information",
+
+    fullName: "Full Name",
+    email: "Email",
+    speciality: "Speciality",
+    department: "Department",
+  },
+
+  FR: {
+    management: "Gestion des enseignants",
+    title: "Détails de l’enseignant",
+    subtitle: "Voir les informations de l’enseignant",
+
+    fullName: "Nom complet",
+    email: "Email",
+    speciality: "Spécialité",
+    department: "Département",
+  },
+
+  AR: {
+    management: "إدارة الأساتذة",
+    title: "تفاصيل الأستاذ",
+    subtitle: "عرض معلومات الأستاذ",
+
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+    speciality: "التخصص",
+    department: "القسم",
+  },
+};
+
 export default function TeacherDetails({ teacher, onClose }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
   if (!teacher) return null;
 
   const fullName = `${teacher.nom || "-"} ${teacher.prenom || "-"}`;
@@ -24,6 +81,7 @@ export default function TeacherDetails({ teacher, onClose }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -42,16 +100,14 @@ export default function TeacherDetails({ teacher, onClose }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Teachers Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Teacher Details
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  View teacher information
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -68,7 +124,7 @@ export default function TeacherDetails({ teacher, onClose }) {
         <div className="grid gap-5 p-6">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Full Name
+              {t.fullName}
             </p>
 
             <div className="mt-2 flex items-center gap-3">
@@ -80,7 +136,7 @@ export default function TeacherDetails({ teacher, onClose }) {
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Email
+              {t.email}
             </p>
 
             <div className="mt-2 flex items-center gap-3">
@@ -94,7 +150,7 @@ export default function TeacherDetails({ teacher, onClose }) {
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Speciality
+              {t.speciality}
             </p>
 
             <div className="mt-2 flex items-center gap-3">
@@ -108,7 +164,7 @@ export default function TeacherDetails({ teacher, onClose }) {
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <p className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Department
+              {t.department}
             </p>
 
             <div className="mt-2 flex items-center gap-3">

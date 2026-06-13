@@ -1,14 +1,64 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { X, Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 import { deleteStudent } from "../services/studentService";
+
+const translations = {
+  EN: {
+    title: "Delete Student",
+    subtitle: "Confirm student deletion.",
+    question: "Are you sure you want to delete this student?",
+    description: "This student will be removed from the list.",
+    delete: "Delete Student",
+    deleting: "Deleting...",
+    close: "Close",
+  },
+
+  FR: {
+    title: "Supprimer l’étudiant",
+    subtitle: "Confirmer la suppression de l’étudiant.",
+    question: "Êtes-vous sûr de vouloir supprimer cet étudiant ?",
+    description: "Cet étudiant sera retiré de la liste.",
+    delete: "Supprimer l’étudiant",
+    deleting: "Suppression...",
+    close: "Fermer",
+  },
+
+  AR: {
+    title: "حذف الطالب",
+    subtitle: "تأكيد حذف الطالب.",
+    question: "هل أنت متأكد أنك تريد حذف هذا الطالب؟",
+    description: "سيتم إزالة هذا الطالب من القائمة.",
+    delete: "حذف الطالب",
+    deleting: "جاري الحذف...",
+    close: "إغلاق",
+  },
+};
 
 export default function DeleteStudent() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [deleting, setDeleting] = useState(false);
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+  const isArabic = language === "AR";
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      setLanguage(event.detail || localStorage.getItem("app-language") || "EN");
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const handleClose = () => {
     navigate("/admin/students/all");
@@ -30,21 +80,40 @@ export default function DeleteStudent() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md overflow-hidden rounded-[1.7rem] border border-slate-200 bg-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
+      dir={isArabic ? "rtl" : "ltr"}
+    >
+      <div
+        className="w-full max-w-md overflow-hidden rounded-[1.7rem] border shadow-2xl transition-colors duration-300"
+        style={{
+          backgroundColor: "var(--card-bg)",
+          borderColor: "var(--border-color)",
+          color: "var(--text-color)",
+        }}
+      >
         <div className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-6 py-5 text-white">
           <div className="absolute right-0 top-0 h-24 w-24 rounded-full bg-white/20 blur-2xl" />
 
-          <div className="relative flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div
+            className={`relative flex items-center justify-between gap-4 ${
+              isArabic ? "flex-row-reverse" : ""
+            }`}
+          >
+            <div
+              className={`flex items-center gap-3 ${
+                isArabic ? "flex-row-reverse text-right" : "text-left"
+              }`}
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
                 <AlertTriangle size={25} />
               </div>
 
               <div>
-                <h2 className="text-lg font-black">Delete Student</h2>
+                <h2 className="text-lg font-black">{t.title}</h2>
+
                 <p className="mt-1 text-xs font-semibold text-red-100">
-                  Confirm student deletion.
+                  {t.subtitle}
                 </p>
               </div>
             </div>
@@ -53,6 +122,7 @@ export default function DeleteStudent() {
               type="button"
               onClick={handleClose}
               disabled={deleting}
+              title={t.close}
               className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <X size={18} />
@@ -62,18 +132,22 @@ export default function DeleteStudent() {
 
         <div className="px-6 py-6">
           <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
-            <div className="flex items-start gap-3">
+            <div
+              className={`flex items-start gap-3 ${
+                isArabic ? "flex-row-reverse text-right" : "text-left"
+              }`}
+            >
               <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-100 text-red-600">
                 <Trash2 size={20} />
               </div>
 
               <div>
                 <p className="text-sm font-black text-slate-900">
-                  Are you sure you want to delete this student?
+                  {t.question}
                 </p>
 
                 <p className="mt-2 text-sm font-semibold text-slate-600">
-                  This student will be removed from the list.
+                  {t.description}
                 </p>
               </div>
             </div>
@@ -88,12 +162,12 @@ export default function DeleteStudent() {
             {deleting ? (
               <>
                 <Loader2 size={17} className="animate-spin" />
-                Deleting...
+                {t.deleting}
               </>
             ) : (
               <>
                 <Trash2 size={17} />
-                Delete Student
+                {t.delete}
               </>
             )}
           </button>

@@ -1,37 +1,79 @@
 import { ShieldAlert } from "lucide-react";
 
+const translations = {
+  EN: {
+    title: "Maintenance Settings",
+    description: "Control maintenance mode.",
+    maintenanceMode: "Maintenance Mode",
+    maintenanceDesc: "Disable user access temporarily.",
+  },
+  FR: {
+    title: "Paramètres de maintenance",
+    description: "Contrôler le mode maintenance.",
+    maintenanceMode: "Mode maintenance",
+    maintenanceDesc: "Désactiver temporairement l’accès des utilisateurs.",
+  },
+  AR: {
+    title: "إعدادات الصيانة",
+    description: "التحكم في وضع الصيانة.",
+    maintenanceMode: "وضع الصيانة",
+    maintenanceDesc: "تعطيل وصول المستخدمين مؤقتًا.",
+  },
+};
+
 export default function MaintenanceSettings({ settings, onChange }) {
+  const currentLanguage = settings?.language || "EN";
+  const t = translations[currentLanguage] || translations.EN;
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
   return (
-    <div>
+    <div dir={currentLanguage === "AR" ? "rtl" : "ltr"}>
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-600 text-white shadow-sm">
           <ShieldAlert size={20} />
         </div>
 
         <div>
-          <h2 className="text-lg font-black text-slate-900">
-            Maintenance Settings
+          <h2 className="text-lg font-black" style={textStyle}>
+            {t.title}
           </h2>
-          <p className="text-xs font-semibold text-slate-500">
-            Control maintenance mode.
+
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.description}
           </p>
         </div>
       </div>
 
-      <label className="flex cursor-pointer items-center justify-between rounded-2xl border border-red-100 bg-red-50 p-4">
+      <label
+        className="flex cursor-pointer items-center justify-between rounded-2xl border p-4 transition"
+        style={sectionStyle}
+      >
         <div>
-          <p className="text-sm font-black text-slate-900">
-            Maintenance Mode
+          <p className="text-sm font-black" style={textStyle}>
+            {t.maintenanceMode}
           </p>
-          <p className="mt-1 text-xs font-semibold text-slate-500">
-            Disable user access temporarily.
+
+          <p className="mt-1 text-xs font-semibold" style={mutedTextStyle}>
+            {t.maintenanceDesc}
           </p>
         </div>
 
         <input
           type="checkbox"
           name="maintenanceMode"
-          checked={Boolean(settings.maintenanceMode)}
+          checked={Boolean(settings?.maintenanceMode)}
           onChange={onChange}
           className="h-5 w-5 accent-red-600"
         />

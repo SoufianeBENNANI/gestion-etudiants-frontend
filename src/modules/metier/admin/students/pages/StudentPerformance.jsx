@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   BarChart3,
   Brain,
-  CalendarDays,
   GraduationCap,
   Mail,
   RefreshCcw,
@@ -23,7 +22,234 @@ import {
   generateStudentPrediction,
 } from "../services/studentService";
 
+const translations = {
+  EN: {
+    management: "Students Management",
+    title: "Performance Students",
+    subtitle: "Analyse AI des moyennes, absences, risques et recommandations.",
+
+    searchPlaceholder: "Search student...",
+    refresh: "Refresh",
+
+    totalStudents: "Total Students",
+    averageGrade: "Average Grade",
+    bestStudent: "Best Student",
+    atRiskStudents: "At Risk Students",
+
+    records: "Records",
+    average: "Average",
+    top: "Top",
+    risk: "Risk",
+
+    riskScoreOverview: "Risk Score Overview",
+    riskScoreDescription: "Vue globale du risque IA pour tous les étudiants.",
+    predicted: "predicted",
+    students: "students",
+
+    lowRisk: "Low Risk",
+    moderate: "Moderate",
+    highRisk: "High Risk",
+
+    loadingGraph: "Loading graph...",
+    noPerformanceData: "No performance data found.",
+
+    noPrediction: "No prediction",
+    riskText: "Risk",
+
+    aiSummary: "AI Summary",
+    aiSummaryDescription: "Résumé automatique des performances.",
+    totalStudentsSummary: "Nombre total d’étudiants",
+    predictedStudents: "Étudiants avec prédiction",
+    generalAverage: "Moyenne générale",
+    riskStudents: "Étudiants à risque",
+
+    tableTitle: "Students Performance Table",
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    results: "results",
+    rows: "Rows:",
+
+    student: "Student",
+    email: "Email",
+    avg: "Avg",
+    abs: "Abs.",
+    prediction: "Prediction",
+    status: "Status",
+    action: "Action",
+
+    loadingPerformance: "Loading performance...",
+    loadError: "Error while loading student performance",
+    generateError: "Error while generating prediction",
+
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
+
+    statusNoPrediction: "No Prediction",
+    statusAtRisk: "At Risk",
+    statusModerate: "Moderate",
+    statusGood: "Good",
+
+    generatePrediction: "Generate Prediction",
+    generated: "Generated",
+    unknownStudent: "Unknown Student",
+  },
+
+  FR: {
+    management: "Gestion des étudiants",
+    title: "Performance des étudiants",
+    subtitle: "Analyse IA des moyennes, absences, risques et recommandations.",
+
+    searchPlaceholder: "Rechercher un étudiant...",
+    refresh: "Actualiser",
+
+    totalStudents: "Total étudiants",
+    averageGrade: "Moyenne générale",
+    bestStudent: "Meilleur étudiant",
+    atRiskStudents: "Étudiants à risque",
+
+    records: "Dossiers",
+    average: "Moyenne",
+    top: "Top",
+    risk: "Risque",
+
+    riskScoreOverview: "Vue d’ensemble du score de risque",
+    riskScoreDescription: "Vue globale du risque IA pour tous les étudiants.",
+    predicted: "prédits",
+    students: "étudiants",
+
+    lowRisk: "Risque faible",
+    moderate: "Modéré",
+    highRisk: "Risque élevé",
+
+    loadingGraph: "Chargement du graphique...",
+    noPerformanceData: "Aucune donnée de performance trouvée.",
+
+    noPrediction: "Aucune prédiction",
+    riskText: "Risque",
+
+    aiSummary: "Résumé IA",
+    aiSummaryDescription: "Résumé automatique des performances.",
+    totalStudentsSummary: "Nombre total d’étudiants",
+    predictedStudents: "Étudiants avec prédiction",
+    generalAverage: "Moyenne générale",
+    riskStudents: "Étudiants à risque",
+
+    tableTitle: "Tableau des performances étudiants",
+    showing: "Affichage",
+    to: "à",
+    of: "sur",
+    results: "résultats",
+    rows: "Lignes :",
+
+    student: "Étudiant",
+    email: "Email",
+    avg: "Moy.",
+    abs: "Abs.",
+    prediction: "Prédiction",
+    status: "Statut",
+    action: "Action",
+
+    loadingPerformance: "Chargement des performances...",
+    loadError: "Erreur lors du chargement des performances",
+    generateError: "Erreur lors de la génération de la prédiction",
+
+    page: "Page",
+    previous: "Précédent",
+    next: "Suivant",
+
+    statusNoPrediction: "Aucune prédiction",
+    statusAtRisk: "À risque",
+    statusModerate: "Modéré",
+    statusGood: "Bon",
+
+    generatePrediction: "Générer la prédiction",
+    generated: "Généré",
+    unknownStudent: "Étudiant inconnu",
+  },
+
+  AR: {
+    management: "إدارة الطلاب",
+    title: "أداء الطلاب",
+    subtitle: "تحليل الذكاء الاصطناعي للمعدلات والغيابات والمخاطر والتوصيات.",
+
+    searchPlaceholder: "البحث عن طالب...",
+    refresh: "تحديث",
+
+    totalStudents: "إجمالي الطلاب",
+    averageGrade: "المعدل العام",
+    bestStudent: "أفضل طالب",
+    atRiskStudents: "الطلاب المعرضون للخطر",
+
+    records: "السجلات",
+    average: "المعدل",
+    top: "الأفضل",
+    risk: "الخطر",
+
+    riskScoreOverview: "نظرة عامة على درجة الخطر",
+    riskScoreDescription: "نظرة عامة على خطر الذكاء الاصطناعي لجميع الطلاب.",
+    predicted: "تم توقعهم",
+    students: "طلاب",
+
+    lowRisk: "خطر منخفض",
+    moderate: "متوسط",
+    highRisk: "خطر مرتفع",
+
+    loadingGraph: "جاري تحميل الرسم البياني...",
+    noPerformanceData: "لا توجد بيانات أداء.",
+
+    noPrediction: "لا توجد توقعات",
+    riskText: "خطر",
+
+    aiSummary: "ملخص الذكاء الاصطناعي",
+    aiSummaryDescription: "ملخص تلقائي للأداء.",
+    totalStudentsSummary: "إجمالي عدد الطلاب",
+    predictedStudents: "طلاب لديهم توقعات",
+    generalAverage: "المعدل العام",
+    riskStudents: "طلاب معرضون للخطر",
+
+    tableTitle: "جدول أداء الطلاب",
+    showing: "عرض",
+    to: "إلى",
+    of: "من",
+    results: "نتائج",
+    rows: "الأسطر:",
+
+    student: "الطالب",
+    email: "البريد الإلكتروني",
+    avg: "المعدل",
+    abs: "الغياب",
+    prediction: "التوقع",
+    status: "الحالة",
+    action: "الإجراء",
+
+    loadingPerformance: "جاري تحميل الأداء...",
+    loadError: "حدث خطأ أثناء تحميل أداء الطلاب",
+    generateError: "حدث خطأ أثناء إنشاء التوقع",
+
+    page: "الصفحة",
+    previous: "السابق",
+    next: "التالي",
+
+    statusNoPrediction: "لا توجد توقعات",
+    statusAtRisk: "معرض للخطر",
+    statusModerate: "متوسط",
+    statusGood: "جيد",
+
+    generatePrediction: "إنشاء التوقع",
+    generated: "تم الإنشاء",
+    unknownStudent: "طالب غير معروف",
+  },
+};
+
 export default function StudentPerformance() {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [performances, setPerformances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,6 +257,46 @@ export default function StudentPerformance() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const cardStyle = {
+    backgroundColor: "var(--card-bg)",
+    borderColor: "var(--border-color)",
+    color: "var(--text-color)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
+  const inputStyle = {
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text-color)",
+    borderColor: "var(--border-color)",
+  };
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadPerformance = async () => {
     try {
@@ -40,7 +306,7 @@ export default function StudentPerformance() {
       setPerformances(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Load student performance error:", error);
-      alert("Error while loading student performance");
+      alert(t.loadError);
     } finally {
       setLoading(false);
     }
@@ -56,10 +322,9 @@ export default function StudentPerformance() {
 
       await generateStudentPrediction(id);
       await loadPerformance();
-
     } catch (error) {
       console.error("Generate prediction error:", error);
-      alert("Error while generating prediction");
+      alert(t.generateError);
     } finally {
       setPredictingId(null);
     }
@@ -72,7 +337,9 @@ export default function StudentPerformance() {
 
     return performances.filter((item) => {
       const fullName = `${item.nom || ""} ${item.prenom || ""}`.toLowerCase();
-      const reverseName = `${item.prenom || ""} ${item.nom || ""}`.toLowerCase();
+      const reverseName = `${item.prenom || ""} ${
+        item.nom || ""
+      }`.toLowerCase();
       const email = String(item.email || "").toLowerCase();
       const prediction = String(item.prediction || "").toLowerCase();
       const status = String(item.status || "").toLowerCase();
@@ -189,7 +456,7 @@ export default function StudentPerformance() {
   const getStatusBadge = (status, scoreRisque, hasPrediction) => {
     if (!hasPrediction) {
       return {
-        text: "No Prediction",
+        text: t.statusNoPrediction,
         className: "bg-slate-100 text-slate-600 ring-slate-200",
       };
     }
@@ -199,31 +466,22 @@ export default function StudentPerformance() {
 
     if (normalizedStatus === "AT_RISK" || score >= 70) {
       return {
-        text: "At Risk",
+        text: t.statusAtRisk,
         className: "bg-rose-50 text-rose-700 ring-rose-200",
       };
     }
 
     if (normalizedStatus === "MODERATE" || score >= 40) {
       return {
-        text: "Moderate",
+        text: t.statusModerate,
         className: "bg-amber-50 text-amber-700 ring-amber-200",
       };
     }
 
     return {
-      text: "Good",
+      text: t.statusGood,
       className: "bg-emerald-50 text-emerald-700 ring-emerald-200",
     };
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
   };
 
   const getRiskBarClass = (risk, hasPrediction) => {
@@ -235,60 +493,77 @@ export default function StudentPerformance() {
 
   const statsCards = [
     {
-      title: "Total Students",
+      title: t.totalStudents,
       value: totalStudents,
       icon: Users,
-      badge: "Records",
+      badge: t.records,
       color: "blue",
     },
     {
-      title: "Average Grade",
+      title: t.averageGrade,
       value: averageGrade,
       icon: GraduationCap,
-      badge: "Average",
+      badge: t.average,
       color: "emerald",
     },
     {
-      title: "Best Student",
+      title: t.bestStudent,
       value: bestStudent,
       icon: Trophy,
-      badge: "Top",
+      badge: t.top,
       color: "amber",
       mediumText: true,
     },
     {
-      title: "At Risk Students",
+      title: t.atRiskStudents,
       value: atRiskStudents,
       icon: AlertTriangle,
-      badge: "Risk",
+      badge: t.risk,
       color: "rose",
     },
   ];
 
   const colorStyles = {
     blue: {
-      icon: "bg-blue-50 text-blue-600",
+      icon: "bg-blue-600 text-white",
       badge: "bg-blue-50 text-blue-600",
     },
     emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
+      icon: "bg-emerald-600 text-white",
       badge: "bg-emerald-50 text-emerald-600",
     },
     amber: {
-      icon: "bg-amber-50 text-amber-600",
+      icon: "bg-amber-500 text-white",
       badge: "bg-amber-50 text-amber-600",
     },
     rose: {
-      icon: "bg-rose-50 text-rose-600",
+      icon: "bg-rose-600 text-white",
       badge: "bg-rose-50 text-rose-600",
     },
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        color: "var(--text-color)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        style={{
+          borderColor: "var(--border-color)",
+          background:
+            "linear-gradient(135deg, var(--secondary-color), #020617)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
+          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
+        />
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -299,16 +574,14 @@ export default function StudentPerformance() {
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Students Management
+                {t.management}
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                Performance Students
+                {t.title}
               </h1>
 
-              <p className="mt-2 text-xs text-slate-300">
-                Analyse AI des moyennes, absences, risques et recommandations.
-              </p>
+              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
             </div>
           </div>
 
@@ -323,7 +596,7 @@ export default function StudentPerformance() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search student..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
@@ -339,7 +612,7 @@ export default function StudentPerformance() {
               ) : (
                 <RefreshCcw size={17} />
               )}
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -354,7 +627,8 @@ export default function StudentPerformance() {
           return (
             <div
               key={index}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              style={cardStyle}
             >
               <div className="mb-5 flex items-center justify-between">
                 <div
@@ -370,14 +644,15 @@ export default function StudentPerformance() {
                 </span>
               </div>
 
-              <p className="text-sm font-black text-slate-950">
+              <p className="text-sm font-black" style={textStyle}>
                 {card.title}
               </p>
 
               <h2
-                className={`mt-3 truncate font-black text-slate-950 ${
+                className={`mt-3 truncate font-black ${
                   card.mediumText ? "text-xl" : "text-2xl"
                 }`}
+                style={textStyle}
                 title={String(card.value)}
               >
                 {loading ? "..." : card.value}
@@ -389,32 +664,44 @@ export default function StudentPerformance() {
 
       {/* GRAPH + SUMMARY */}
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border p-5 shadow-sm" style={cardStyle}>
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <div
+                className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+                style={{ backgroundColor: "var(--primary-color)" }}
+              >
                 <Activity size={22} />
               </div>
 
               <div>
-                <h2 className="text-lg font-black text-slate-900">
-                  Risk Score Overview
+                <h2 className="text-lg font-black" style={textStyle}>
+                  {t.riskScoreOverview}
                 </h2>
-                <p className="text-xs font-semibold text-slate-500">
-                  Vue globale du risque IA pour tous les étudiants.
+
+                <p className="text-xs font-semibold" style={mutedTextStyle}>
+                  {t.riskScoreDescription}
                 </p>
               </div>
             </div>
 
-            <div className="rounded-xl bg-slate-50 px-4 py-2 text-xs font-black text-slate-600 ring-1 ring-slate-200">
-              {predictedStudents.length} predicted / {performances.length} students
+            <div
+              className="rounded-xl px-4 py-2 text-xs font-black ring-1"
+              style={{
+                backgroundColor: "var(--section-bg)",
+                color: "var(--muted-text)",
+                borderColor: "var(--border-color)",
+              }}
+            >
+              {predictedStudents.length} {t.predicted} / {performances.length}{" "}
+              {t.students}
             </div>
           </div>
 
           <div className="mb-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl bg-emerald-50 p-4">
               <p className="text-xs font-black uppercase text-emerald-600">
-                Low Risk
+                {t.lowRisk}
               </p>
               <p className="mt-2 text-2xl font-black text-emerald-700">
                 {riskDistribution.low}
@@ -423,7 +710,7 @@ export default function StudentPerformance() {
 
             <div className="rounded-2xl bg-amber-50 p-4">
               <p className="text-xs font-black uppercase text-amber-600">
-                Moderate
+                {t.moderate}
               </p>
               <p className="mt-2 text-2xl font-black text-amber-700">
                 {riskDistribution.moderate}
@@ -432,7 +719,7 @@ export default function StudentPerformance() {
 
             <div className="rounded-2xl bg-rose-50 p-4">
               <p className="text-xs font-black uppercase text-rose-600">
-                High Risk
+                {t.highRisk}
               </p>
               <p className="mt-2 text-2xl font-black text-rose-700">
                 {riskDistribution.high}
@@ -442,13 +729,19 @@ export default function StudentPerformance() {
 
           <div className="max-h-[360px] space-y-4 overflow-y-auto pr-2">
             {loading ? (
-              <div className="flex h-60 items-center justify-center gap-2 text-sm font-bold text-slate-500">
+              <div
+                className="flex h-60 items-center justify-center gap-2 text-sm font-bold"
+                style={mutedTextStyle}
+              >
                 <Loader2 className="animate-spin" size={18} />
-                Loading graph...
+                {t.loadingGraph}
               </div>
             ) : filteredPerformances.length === 0 ? (
-              <div className="flex h-60 items-center justify-center text-sm font-bold text-slate-500">
-                No performance data found.
+              <div
+                className="flex h-60 items-center justify-center text-sm font-bold"
+                style={mutedTextStyle}
+              >
+                {t.noPerformanceData}
               </div>
             ) : (
               filteredPerformances.map((item) => {
@@ -458,14 +751,19 @@ export default function StudentPerformance() {
                 return (
                   <div
                     key={item.studentId}
-                    className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                    className="rounded-2xl border p-4"
+                    style={sectionStyle}
                   >
                     <div className="mb-3 flex items-center justify-between gap-4">
                       <div className="min-w-0">
-                        <p className="truncate font-black text-slate-900">
+                        <p className="truncate font-black" style={textStyle}>
                           {item.nom} {item.prenom}
                         </p>
-                        <p className="truncate text-xs font-semibold text-slate-500">
+
+                        <p
+                          className="truncate text-xs font-semibold"
+                          style={mutedTextStyle}
+                        >
                           {item.email}
                         </p>
                       </div>
@@ -477,18 +775,28 @@ export default function StudentPerformance() {
                             : "bg-slate-200 text-slate-600"
                         }`}
                       >
-                        {hasPrediction ? `${risk}% Risk` : "No prediction"}
+                        {hasPrediction
+                          ? `${risk}% ${t.riskText}`
+                          : t.noPrediction}
                       </span>
                     </div>
 
-                    <div className="h-3 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+                    <div
+                      className="h-3 overflow-hidden rounded-full ring-1"
+                      style={{
+                        backgroundColor: "var(--input-bg)",
+                        borderColor: "var(--border-color)",
+                      }}
+                    >
                       <div
                         className={`h-full rounded-full ${getRiskBarClass(
                           risk,
                           hasPrediction
                         )}`}
                         style={{
-                          width: `${hasPrediction ? Math.min(100, risk) : 100}%`,
+                          width: `${
+                            hasPrediction ? Math.min(100, risk) : 100
+                          }%`,
                         }}
                       />
                     </div>
@@ -499,52 +807,62 @@ export default function StudentPerformance() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border p-5 shadow-sm" style={cardStyle}>
           <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-white">
               <Sparkles size={22} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">AI Summary</h2>
-              <p className="text-xs font-semibold text-slate-500">
-                Résumé automatique des performances.
+              <h2 className="text-lg font-black" style={textStyle}>
+                {t.aiSummary}
+              </h2>
+
+              <p className="text-xs font-semibold" style={mutedTextStyle}>
+                {t.aiSummaryDescription}
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-bold text-slate-500">
-                Nombre total d’étudiants
+            <div className="rounded-2xl p-4" style={sectionStyle}>
+              <p className="text-xs font-bold" style={mutedTextStyle}>
+                {t.totalStudentsSummary}
               </p>
-              <p className="mt-2 text-2xl font-black text-slate-900">
+
+              <p className="mt-2 text-2xl font-black" style={textStyle}>
                 {totalStudents}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-bold text-slate-500">
-                Étudiants avec prédiction
+            <div className="rounded-2xl p-4" style={sectionStyle}>
+              <p className="text-xs font-bold" style={mutedTextStyle}>
+                {t.predictedStudents}
               </p>
-              <p className="mt-2 text-2xl font-black text-blue-600">
+
+              <p
+                className="mt-2 text-2xl font-black"
+                style={{ color: "var(--primary-color)" }}
+              >
                 {predictedStudents.length}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-bold text-slate-500">
-                Moyenne générale
+            <div className="rounded-2xl p-4" style={sectionStyle}>
+              <p className="text-xs font-bold" style={mutedTextStyle}>
+                {t.generalAverage}
               </p>
-              <p className="mt-2 text-2xl font-black text-slate-900">
+
+              <p className="mt-2 text-2xl font-black" style={textStyle}>
                 {averageGrade}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs font-bold text-slate-500">
-                Étudiants à risque
+            <div className="rounded-2xl p-4" style={sectionStyle}>
+              <p className="text-xs font-bold" style={mutedTextStyle}>
+                {t.riskStudents}
               </p>
+
               <p className="mt-2 text-2xl font-black text-rose-600">
                 {atRiskStudents}
               </p>
@@ -554,26 +872,38 @@ export default function StudentPerformance() {
       </div>
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        style={cardStyle}
+      >
+        <div
+          className="flex flex-col gap-3 border-b px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Brain size={20} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">
-                Students Performance Table
+              <h2 className="text-lg font-black" style={textStyle}>
+                {t.tableTitle}
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                Showing {showingFrom} to {showingTo} of{" "}
-                {filteredPerformances.length} results
+
+              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+                {t.showing} {showingFrom} {t.to} {showingTo} {t.of}{" "}
+                {filteredPerformances.length} {t.results}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-slate-600">Rows:</span>
+            <span className="text-xs font-black" style={mutedTextStyle}>
+              {t.rows}
+            </span>
 
             <select
               value={rowsPerPage}
@@ -581,7 +911,8 @@ export default function StudentPerformance() {
                 setRowsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="rounded-xl border px-3 py-2 text-xs font-bold outline-none transition"
+              style={inputStyle}
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -591,27 +922,43 @@ export default function StudentPerformance() {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 p-10 text-sm font-bold text-slate-600">
+          <div
+            className="flex items-center justify-center gap-2 p-10 text-sm font-bold"
+            style={mutedTextStyle}
+          >
             <Loader2 className="animate-spin" size={18} />
-            Loading performance...
+            {t.loadingPerformance}
           </div>
         ) : filteredPerformances.length === 0 ? (
-          <div className="p-10 text-center text-sm font-bold text-slate-600">
-            No performance data found.
+          <div
+            className="p-10 text-center text-sm font-bold"
+            style={mutedTextStyle}
+          >
+            {t.noPerformanceData}
           </div>
         ) : (
           <>
             <table className="w-full table-fixed border-collapse">
               <thead>
-                <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-                  <th className="w-[19%] px-2 py-3 font-black">Student</th>
-                  <th className="w-[20%] px-2 py-3 font-black">Email</th>
-                  <th className="w-[8%] px-2 py-3 font-black">Avg</th>
-                  <th className="w-[8%] px-2 py-3 font-black">Abs.</th>
-                  <th className="w-[17%] px-2 py-3 font-black">Prediction</th>
-                  <th className="w-[12%] px-2 py-3 font-black">Risk</th>
-                  <th className="w-[8%] px-2 py-3 font-black">Status</th>
-                  <th className="w-[8%] px-2 py-3 font-black">Action</th>
+                <tr
+                  className="text-center text-[11px] uppercase tracking-wide"
+                  style={{
+                    backgroundColor: "var(--card-bg)",
+                    color: "var(--muted-text)",
+                  }}
+                >
+                  <th className="w-[19%] px-2 py-3 font-black">
+                    {t.student}
+                  </th>
+                  <th className="w-[20%] px-2 py-3 font-black">{t.email}</th>
+                  <th className="w-[8%] px-2 py-3 font-black">{t.avg}</th>
+                  <th className="w-[8%] px-2 py-3 font-black">{t.abs}</th>
+                  <th className="w-[17%] px-2 py-3 font-black">
+                    {t.prediction}
+                  </th>
+                  <th className="w-[12%] px-2 py-3 font-black">{t.risk}</th>
+                  <th className="w-[8%] px-2 py-3 font-black">{t.status}</th>
+                  <th className="w-[8%] px-2 py-3 font-black">{t.action}</th>
                 </tr>
               </thead>
 
@@ -619,7 +966,7 @@ export default function StudentPerformance() {
                 {paginatedPerformances.map((item) => {
                   const fullName =
                     `${item.nom || ""} ${item.prenom || ""}`.trim() ||
-                    "Unknown Student";
+                    t.unknownStudent;
 
                   const badge = getStatusBadge(
                     item.status,
@@ -632,15 +979,25 @@ export default function StudentPerformance() {
                   return (
                     <tr
                       key={item.studentId}
-                      className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
+                      className="border-t text-center text-sm transition"
+                      style={{
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-color)",
+                      }}
                     >
                       <td className="px-2 py-3">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                          <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 sm:flex">
+                          <div
+                            className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
+                            style={{ backgroundColor: "var(--primary-color)" }}
+                          >
                             <Users size={17} />
                           </div>
 
-                          <span className="truncate font-black text-slate-900">
+                          <span
+                            className="truncate font-black"
+                            style={textStyle}
+                          >
                             {fullName}
                           </span>
                         </div>
@@ -648,28 +1005,40 @@ export default function StudentPerformance() {
 
                       <td className="px-2 py-3">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-1">
-                          <Mail size={14} className="shrink-0 text-slate-400" />
-                          <span className="truncate">{item.email || "-"}</span>
+                          <Mail
+                            size={14}
+                            className="shrink-0"
+                            style={mutedTextStyle}
+                          />
+                          <span className="truncate" style={mutedTextStyle}>
+                            {item.email || "-"}
+                          </span>
                         </div>
                       </td>
 
-                      <td className="px-2 py-3 font-black text-slate-900">
+                      <td className="px-2 py-3 font-black" style={textStyle}>
                         {item.hasPrediction ? item.moyenne ?? 0 : "-"}
                       </td>
 
-                      <td className="px-2 py-3">
+                      <td className="px-2 py-3" style={mutedTextStyle}>
                         {item.hasPrediction ? item.absences ?? 0 : "-"}
                       </td>
 
                       <td className="px-2 py-3">
-                        <span className="block truncate font-bold text-slate-700">
+                        <span
+                          className="block truncate font-bold"
+                          style={mutedTextStyle}
+                        >
                           {item.prediction || "-"}
                         </span>
                       </td>
 
                       <td className="px-2 py-3">
                         <div className="mx-auto flex max-w-[100px] items-center gap-2">
-                          <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                          <div
+                            className="h-2 flex-1 overflow-hidden rounded-full"
+                            style={{ backgroundColor: "var(--section-bg)" }}
+                          >
                             <div
                               className={`h-full rounded-full ${getRiskBarClass(
                                 risk,
@@ -685,7 +1054,10 @@ export default function StudentPerformance() {
                             />
                           </div>
 
-                          <span className="text-xs font-black text-slate-600">
+                          <span
+                            className="text-xs font-black"
+                            style={mutedTextStyle}
+                          >
                             {item.hasPrediction ? `${risk}%` : "-"}
                           </span>
                         </div>
@@ -707,8 +1079,13 @@ export default function StudentPerformance() {
                               handleGeneratePrediction(item.studentId)
                             }
                             disabled={predictingId === item.studentId}
-                            title="Generate Prediction"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-slate-900 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                            title={t.generatePrediction}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
+                            style={{
+                              backgroundColor: "var(--section-bg)",
+                              borderColor: "var(--border-color)",
+                              color: "var(--text-color)",
+                            }}
                           >
                             {predictingId === item.studentId ? (
                               <Loader2 size={15} className="animate-spin" />
@@ -718,7 +1095,7 @@ export default function StudentPerformance() {
                           </button>
                         ) : (
                           <span
-                            title="Generated"
+                            title={t.generated}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"
                           >
                             <Brain size={15} />
@@ -732,14 +1109,19 @@ export default function StudentPerformance() {
             </table>
 
             {/* PAGINATION */}
-            <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-              <p className="text-xs font-semibold text-slate-500">
-                Page{" "}
-                <span className="font-black text-slate-800">
+            <div
+              className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+              style={sectionStyle}
+            >
+              <p className="text-xs font-semibold" style={mutedTextStyle}>
+                {t.page}{" "}
+                <span className="font-black" style={textStyle}>
                   {safeCurrentPage}
                 </span>{" "}
-                of{" "}
-                <span className="font-black text-slate-800">{totalPages}</span>
+                {t.of}{" "}
+                <span className="font-black" style={textStyle}>
+                  {totalPages}
+                </span>
               </p>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -747,10 +1129,11 @@ export default function StudentPerformance() {
                   type="button"
                   onClick={goToPreviousPage}
                   disabled={safeCurrentPage === 1}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+                  style={inputStyle}
                 >
                   <ChevronLeft size={16} />
-                  Previous
+                  {t.previous}
                 </button>
 
                 {visiblePages.map((page) => (
@@ -758,11 +1141,18 @@ export default function StudentPerformance() {
                     key={page}
                     type="button"
                     onClick={() => setCurrentPage(page)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                      safeCurrentPage === page
-                        ? "bg-slate-900 text-white shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                    style={{
+                      backgroundColor:
+                        safeCurrentPage === page
+                          ? "var(--secondary-color)"
+                          : "var(--input-bg)",
+                      borderColor: "var(--border-color)",
+                      color:
+                        safeCurrentPage === page
+                          ? "#ffffff"
+                          : "var(--text-color)",
+                    }}
                   >
                     {page}
                   </button>
@@ -772,9 +1162,10 @@ export default function StudentPerformance() {
                   type="button"
                   onClick={goToNextPage}
                   disabled={safeCurrentPage === totalPages}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+                  style={inputStyle}
                 >
-                  Next
+                  {t.next}
                   <ChevronRight size={16} />
                 </button>
               </div>

@@ -2,12 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/* THEME VARIABLES DEFAULT */
+:root {
+  --app-bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --section-bg: #ffffff;
+  --text-color: #020617;
+  --muted-text: #64748b;
+  --border-color: #e2e8f0;
+
+  --sidebar-bg: #081028;
+  --sidebar-text: #ffffff;
+
+  --primary-color: #2563eb;
+  --secondary-color: #081028;
+}
+
+/* LIGHT MODE */
+:root[data-theme="light"] {
+  --app-bg: #f1f5f9;
+  --card-bg: #ffffff;
+  --section-bg: #ffffff;
+  --text-color: #020617;
+  --muted-text: #64748b;
+  --border-color: #e2e8f0;
+
+  --sidebar-bg: #081028;
+  --sidebar-text: #ffffff;
+
+  color-scheme: light;
+}
+
+/* DARK MODE */
+:root[data-theme="dark"] {
+  --app-bg: #020617;
+  --card-bg: #0f172a;
+  --section-bg: #0f172a;
+  --text-color: #f8fafc;
+  --muted-text: #94a3b8;
+  --border-color: #1e293b;
+
+  --sidebar-bg: #081028;
+  --sidebar-text: #ffffff;
+
+  color-scheme: dark;
+}
+
 /* RESET FULL PAGE */
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* HTML */
+html {
+  background-color: var(--app-bg);
+  color: var(--text-color);
+}
+
+/* BODY STYLE */
+body {
+  min-height: 100vh;
+  background-color: var(--app-bg);
+  color: var(--text-color);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ROOT APP */
@@ -15,16 +78,33 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: var(--app-bg);
+  color: var(--text-color);
 }
 
-/* BODY STYLE */
-body {
-  background-color: #f1f5f9; /* équivalent bg-gray-100 */
-  font-family: system-ui, -apple-system, sans-serif;
+/* GLOBAL THEME HELPERS */
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+/* INPUTS / SELECTS / TEXTAREA */
+input,
+select,
+textarea {
+  color: var(--text-color);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-text);
 }
 
 /* MODERN SCROLLBAR */
-
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -36,7 +116,7 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #081028;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {

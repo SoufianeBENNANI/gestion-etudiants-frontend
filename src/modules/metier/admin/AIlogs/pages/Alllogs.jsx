@@ -17,7 +17,153 @@ import {
 } from "lucide-react";
 import api from "../../../../../api/axios";
 
+const translations = {
+  EN: {
+    management: "Artificial Intelligence",
+    title: "AI Logs",
+    subtitle: "Monitor, view and track AI prediction history.",
+
+    searchPlaceholder: "Search log...",
+    refresh: "Refresh",
+
+    records: "Records",
+    results: "Results",
+    today: "Today",
+
+    totalLogs: "Total Logs",
+    displayedLogs: "Displayed Logs",
+    todayLogs: "Today Logs",
+
+    logsList: "Logs List",
+    showing: "Showing",
+    to: "to",
+    of: "of",
+    logs: "logs",
+    rows: "Rows:",
+
+    log: "Log",
+    student: "Student",
+    input: "Input",
+    output: "Output",
+    created: "Created",
+
+    saved: "Saved",
+    id: "ID:",
+    noStudent: "No student",
+    noInputData: "No input data",
+    noOutputData: "No output data",
+
+    loadingLogs: "Loading AI logs...",
+    noLogs: "No AI logs found.",
+    loadError: "Failed to load AI logs. Please try again.",
+
+    page: "Page",
+    previous: "Previous",
+    next: "Next",
+
+    notAvailable: "N/A",
+  },
+
+  FR: {
+    management: "Intelligence artificielle",
+    title: "Logs IA",
+    subtitle: "Surveiller, consulter et suivre l’historique des prédictions IA.",
+
+    searchPlaceholder: "Rechercher un log...",
+    refresh: "Actualiser",
+
+    records: "Dossiers",
+    results: "Résultats",
+    today: "Aujourd’hui",
+
+    totalLogs: "Total logs",
+    displayedLogs: "Logs affichés",
+    todayLogs: "Logs du jour",
+
+    logsList: "Liste des logs",
+    showing: "Affichage",
+    to: "à",
+    of: "sur",
+    logs: "logs",
+    rows: "Lignes :",
+
+    log: "Log",
+    student: "Étudiant",
+    input: "Entrée",
+    output: "Sortie",
+    created: "Créé le",
+
+    saved: "Enregistré",
+    id: "ID :",
+    noStudent: "Aucun étudiant",
+    noInputData: "Aucune donnée d’entrée",
+    noOutputData: "Aucune donnée de sortie",
+
+    loadingLogs: "Chargement des logs IA...",
+    noLogs: "Aucun log IA trouvé.",
+    loadError: "Échec du chargement des logs IA. Veuillez réessayer.",
+
+    page: "Page",
+    previous: "Précédent",
+    next: "Suivant",
+
+    notAvailable: "N/A",
+  },
+
+  AR: {
+    management: "الذكاء الاصطناعي",
+    title: "سجلات الذكاء الاصطناعي",
+    subtitle: "مراقبة وعرض وتتبع تاريخ توقعات الذكاء الاصطناعي.",
+
+    searchPlaceholder: "البحث عن سجل...",
+    refresh: "تحديث",
+
+    records: "السجلات",
+    results: "النتائج",
+    today: "اليوم",
+
+    totalLogs: "إجمالي السجلات",
+    displayedLogs: "السجلات المعروضة",
+    todayLogs: "سجلات اليوم",
+
+    logsList: "قائمة السجلات",
+    showing: "عرض",
+    to: "إلى",
+    of: "من",
+    logs: "سجلات",
+    rows: "الأسطر:",
+
+    log: "السجل",
+    student: "الطالب",
+    input: "المدخلات",
+    output: "المخرجات",
+    created: "تاريخ الإنشاء",
+
+    saved: "محفوظ",
+    id: "المعرف:",
+    noStudent: "لا يوجد طالب",
+    noInputData: "لا توجد بيانات إدخال",
+    noOutputData: "لا توجد بيانات إخراج",
+
+    loadingLogs: "جاري تحميل سجلات الذكاء الاصطناعي...",
+    noLogs: "لا توجد سجلات ذكاء اصطناعي.",
+    loadError: "فشل تحميل سجلات الذكاء الاصطناعي. يرجى المحاولة مرة أخرى.",
+
+    page: "الصفحة",
+    previous: "السابق",
+    next: "التالي",
+
+    notAvailable: "N/A",
+  },
+};
+
 export default function Alllogs() {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,6 +172,46 @@ export default function Alllogs() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  const cardStyle = {
+    backgroundColor: "var(--card-bg)",
+    borderColor: "var(--border-color)",
+    color: "var(--text-color)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
+  const inputStyle = {
+    backgroundColor: "var(--input-bg)",
+    color: "var(--text-color)",
+    borderColor: "var(--border-color)",
+  };
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   const loadLogs = async () => {
     try {
@@ -38,7 +224,7 @@ export default function Alllogs() {
     } catch (err) {
       console.error("Error loading AI logs:", err);
       setLogs([]);
-      setError("Failed to load AI logs. Please try again.");
+      setError(t.loadError);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -48,6 +234,12 @@ export default function Alllogs() {
   useEffect(() => {
     loadLogs();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setError(t.loadError);
+    }
+  }, [language]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -99,7 +291,7 @@ export default function Alllogs() {
   }).length;
 
   const formatDate = (date) => {
-    if (!date) return "N/A";
+    if (!date) return t.notAvailable;
 
     return new Date(date).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -109,8 +301,8 @@ export default function Alllogs() {
   };
 
   const getStudentName = (student) => {
-    if (!student) return "No student";
-    return `${student.prenom || ""} ${student.nom || ""}`.trim() || "No student";
+    if (!student) return t.noStudent;
+    return `${student.prenom || ""} ${student.nom || ""}`.trim() || t.noStudent;
   };
 
   const handleSearchChange = (e) => {
@@ -132,30 +324,45 @@ export default function Alllogs() {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        color: "var(--text-color)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-blue-500/10 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        style={{
+          borderColor: "var(--border-color)",
+          background:
+            "linear-gradient(135deg, var(--secondary-color), #020617)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
+          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
+        />
+        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-cyan-300 ring-1 ring-white/15">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
               <Brain size={28} />
             </div>
 
             <div>
-              <p className="text-xs font-bold text-cyan-200">
-                Artificial Intelligence
+              <p className="text-xs font-bold text-blue-200">
+                {t.management}
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                AI Logs
+                {t.title}
               </h1>
 
-              <p className="mt-2 text-xs text-slate-300">
-                Monitor, view and track AI prediction history.
-              </p>
+              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
             </div>
           </div>
 
@@ -170,7 +377,7 @@ export default function Alllogs() {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search log..."
+                placeholder={t.searchPlaceholder}
                 className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
               />
             </div>
@@ -185,7 +392,7 @@ export default function Alllogs() {
                 size={17}
                 className={refreshing ? "animate-spin" : ""}
               />
-              Refresh
+              {t.refresh}
             </button>
           </div>
         </div>
@@ -193,56 +400,80 @@ export default function Alllogs() {
 
       {/* STATS */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600">
+            <div
+              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Database size={22} />
             </div>
 
-            <span className="rounded-full bg-cyan-50 px-3 py-1.5 text-xs font-black text-cyan-600">
-              Records
+            <span
+              className="rounded-full px-3 py-1.5 text-xs font-black"
+              style={{
+                backgroundColor: "var(--section-bg)",
+                color: "var(--primary-color)",
+              }}
+            >
+              {t.records}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Total Logs</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.totalLogs}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {logs.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <Search size={22} />
             </div>
 
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-              Results
+              {t.results}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Displayed Logs</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.displayedLogs}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {filteredLogs.length}
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+        <div
+          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          style={cardStyle}
+        >
           <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-600 text-white">
               <Activity size={22} />
             </div>
 
             <span className="rounded-full bg-orange-50 px-3 py-1.5 text-xs font-black text-orange-500">
-              Today
+              {t.today}
             </span>
           </div>
 
-          <p className="text-sm font-black text-slate-950">Today Logs</p>
+          <p className="text-sm font-black" style={textStyle}>
+            {t.todayLogs}
+          </p>
 
-          <h2 className="mt-3 text-2xl font-black text-slate-950">
+          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
             {todayLogs}
           </h2>
         </div>
@@ -257,31 +488,44 @@ export default function Alllogs() {
       )}
 
       {/* TABLE */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div
+        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        style={cardStyle}
+      >
+        <div
+          className="flex flex-col gap-3 border-b px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
+              style={{ backgroundColor: "var(--primary-color)" }}
+            >
               <Brain size={20} />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-slate-900">
-                Logs List
+              <h2 className="text-lg font-black" style={textStyle}>
+                {t.logsList}
               </h2>
 
-              <p className="mt-0.5 text-xs text-slate-500">
-                Showing {startLog} to {endLog} of {filteredLogs.length} logs
+              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+                {t.showing} {startLog} {t.to} {endLog} {t.of}{" "}
+                {filteredLogs.length} {t.logs}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-black text-slate-600">Rows:</span>
+            <span className="text-xs font-black" style={mutedTextStyle}>
+              {t.rows}
+            </span>
 
             <select
               value={itemsPerPage}
               onChange={handleChangeItemsPerPage}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-100"
+              className="rounded-xl border px-3 py-2 text-xs font-bold outline-none transition"
+              style={inputStyle}
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -293,12 +537,18 @@ export default function Alllogs() {
 
         <table className="w-full table-fixed border-collapse">
           <thead>
-            <tr className="bg-white text-center text-[11px] uppercase tracking-wide text-slate-500">
-              <th className="w-[17%] px-3 py-3 font-black">Log</th>
-              <th className="w-[19%] px-3 py-3 font-black">Student</th>
-              <th className="w-[24%] px-3 py-3 font-black">Input</th>
-              <th className="w-[24%] px-3 py-3 font-black">Output</th>
-              <th className="w-[16%] px-3 py-3 font-black">Created</th>
+            <tr
+              className="text-center text-[11px] uppercase tracking-wide"
+              style={{
+                backgroundColor: "var(--card-bg)",
+                color: "var(--muted-text)",
+              }}
+            >
+              <th className="w-[17%] px-3 py-3 font-black">{t.log}</th>
+              <th className="w-[19%] px-3 py-3 font-black">{t.student}</th>
+              <th className="w-[24%] px-3 py-3 font-black">{t.input}</th>
+              <th className="w-[24%] px-3 py-3 font-black">{t.output}</th>
+              <th className="w-[16%] px-3 py-3 font-black">{t.created}</th>
             </tr>
           </thead>
 
@@ -306,40 +556,49 @@ export default function Alllogs() {
             {loading ? (
               <tr>
                 <td colSpan="5" className="px-5 py-8 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-slate-600">
+                  <div
+                    className="flex items-center justify-center gap-2 text-sm font-bold"
+                    style={mutedTextStyle}
+                  >
                     <Loader2 size={18} className="animate-spin" />
-                    Loading AI logs...
+                    {t.loadingLogs}
                   </div>
                 </td>
               </tr>
             ) : filteredLogs.length === 0 ? (
               <tr>
-                <td
-                  colSpan="5"
-                  className="px-5 py-8 text-center text-sm font-bold text-slate-600"
-                >
-                  No AI logs found.
+                <td colSpan="5" className="px-5 py-8 text-center">
+                  <span className="text-sm font-bold" style={mutedTextStyle}>
+                    {t.noLogs}
+                  </span>
                 </td>
               </tr>
             ) : (
               paginatedLogs.map((log) => (
                 <tr
                   key={log.id}
-                  className="border-t border-slate-100 text-center text-sm text-slate-700 transition hover:bg-slate-50"
+                  className="border-t text-center text-sm transition"
+                  style={{
+                    borderColor: "var(--border-color)",
+                    color: "var(--text-color)",
+                  }}
                 >
                   <td className="px-3 py-3">
                     <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                      <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600 sm:flex">
+                      <div
+                        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
+                        style={{ backgroundColor: "var(--primary-color)" }}
+                      >
                         <Brain size={17} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate font-black text-slate-900">
-                          Log #{log.id}
+                        <p className="truncate font-black" style={textStyle}>
+                          {t.log} #{log.id}
                         </p>
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-600">
                           <ShieldCheck size={11} />
-                          Saved
+                          {t.saved}
                         </span>
                       </div>
                     </div>
@@ -347,16 +606,22 @@ export default function Alllogs() {
 
                   <td className="px-3 py-3">
                     <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                      <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 sm:flex">
+                      <div
+                        className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
+                        style={{ backgroundColor: "var(--primary-color)" }}
+                      >
                         <User size={16} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="truncate font-black text-slate-900">
+                        <p className="truncate font-black" style={textStyle}>
                           {getStudentName(log.student)}
                         </p>
-                        <p className="truncate text-xs font-bold text-slate-400">
-                          ID: {log.student?.id || "N/A"}
+                        <p
+                          className="truncate text-xs font-bold"
+                          style={mutedTextStyle}
+                        >
+                          {t.id} {log.student?.id || t.notAvailable}
                         </p>
                       </div>
                     </div>
@@ -368,8 +633,11 @@ export default function Alllogs() {
                         size={16}
                         className="mt-0.5 shrink-0 text-cyan-600"
                       />
-                      <p className="line-clamp-2 text-left text-xs font-semibold text-slate-600">
-                        {log.inputData || "No input data"}
+                      <p
+                        className="line-clamp-2 text-left text-xs font-semibold"
+                        style={mutedTextStyle}
+                      >
+                        {log.inputData || t.noInputData}
                       </p>
                     </div>
                   </td>
@@ -380,16 +648,22 @@ export default function Alllogs() {
                         size={16}
                         className="mt-0.5 shrink-0 text-emerald-600"
                       />
-                      <p className="line-clamp-2 text-left text-xs font-semibold text-slate-600">
-                        {log.outputData || "No output data"}
+                      <p
+                        className="line-clamp-2 text-left text-xs font-semibold"
+                        style={mutedTextStyle}
+                      >
+                        {log.outputData || t.noOutputData}
                       </p>
                     </div>
                   </td>
 
                   <td className="px-3 py-3">
                     <div className="flex items-center justify-center gap-2">
-                      <CalendarDays size={15} className="text-slate-400" />
-                      <span className="text-xs font-bold text-slate-600">
+                      <CalendarDays size={15} style={mutedTextStyle} />
+                      <span
+                        className="text-xs font-bold"
+                        style={mutedTextStyle}
+                      >
                         {formatDate(log.createdAt)}
                       </span>
                     </div>
@@ -401,11 +675,19 @@ export default function Alllogs() {
         </table>
 
         {/* PAGINATION */}
-        <div className="flex flex-col gap-3 border-t border-slate-100 bg-white px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-xs font-semibold text-slate-500">
-            Page{" "}
-            <span className="font-black text-slate-800">{currentPage}</span>{" "}
-            of <span className="font-black text-slate-800">{totalPages}</span>
+        <div
+          className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.page}{" "}
+            <span className="font-black" style={textStyle}>
+              {currentPage}
+            </span>{" "}
+            {t.of}{" "}
+            <span className="font-black" style={textStyle}>
+              {totalPages}
+            </span>
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -413,10 +695,11 @@ export default function Alllogs() {
               type="button"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
               <ChevronLeft size={16} />
-              Previous
+              {t.previous}
             </button>
 
             {visiblePages.map((page) => (
@@ -424,11 +707,16 @@ export default function Alllogs() {
                 key={page}
                 type="button"
                 onClick={() => setCurrentPage(page)}
-                className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-black transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                style={{
+                  backgroundColor:
+                    currentPage === page
+                      ? "var(--secondary-color)"
+                      : "var(--input-bg)",
+                  borderColor: "var(--border-color)",
+                  color:
+                    currentPage === page ? "#ffffff" : "var(--text-color)",
+                }}
               >
                 {page}
               </button>
@@ -438,9 +726,10 @@ export default function Alllogs() {
               type="button"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
-              Next
+              {t.next}
               <ChevronRight size={16} />
             </button>
           </div>

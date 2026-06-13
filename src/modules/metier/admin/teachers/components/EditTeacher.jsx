@@ -1,7 +1,57 @@
 import { useEffect, useState } from "react";
 import { X, GraduationCap, Loader2, Save } from "lucide-react";
 
+const translations = {
+  EN: {
+    management: "Teachers Management",
+    title: "Edit Teacher",
+    subtitle: "Update teacher information",
+
+    lastName: "Last Name",
+    firstName: "First Name",
+    email: "Email",
+    speciality: "Speciality",
+    departmentId: "Department ID",
+
+    update: "Update",
+  },
+
+  FR: {
+    management: "Gestion des enseignants",
+    title: "Modifier l’enseignant",
+    subtitle: "Modifier les informations de l’enseignant",
+
+    lastName: "Nom",
+    firstName: "Prénom",
+    email: "Email",
+    speciality: "Spécialité",
+    departmentId: "ID du département",
+
+    update: "Modifier",
+  },
+
+  AR: {
+    management: "إدارة الأساتذة",
+    title: "تعديل الأستاذ",
+    subtitle: "تعديل معلومات الأستاذ",
+
+    lastName: "الاسم العائلي",
+    firstName: "الاسم الشخصي",
+    email: "البريد الإلكتروني",
+    speciality: "التخصص",
+    departmentId: "معرف القسم",
+
+    update: "تحديث",
+  },
+};
+
 export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [formData, setFormData] = useState({
     nom: "",
     prenom: "",
@@ -11,14 +61,28 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
   });
 
   useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (teacher) {
       setFormData({
         nom: teacher.nom || "",
         prenom: teacher.prenom || "",
         email: teacher.email || "",
         specialite: teacher.specialite || "",
-        departementId:
-          teacher.departement?.id || teacher.departementId || "",
+        departementId: teacher.departement?.id || teacher.departementId || "",
       });
     }
   }, [teacher]);
@@ -43,6 +107,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
+      dir={language === "AR" ? "rtl" : "ltr"}
     >
       <div
         className="w-full max-w-4xl overflow-hidden rounded-[1.7rem] bg-white shadow-2xl"
@@ -61,16 +126,14 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
 
               <div>
                 <p className="text-xs font-bold text-blue-200">
-                  Teachers Management
+                  {t.management}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-black tracking-tight">
-                  Edit Teacher
+                  {t.title}
                 </h2>
 
-                <p className="mt-2 text-xs text-slate-300">
-                  Update teacher information
-                </p>
+                <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
               </div>
             </div>
 
@@ -88,7 +151,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                Last Name
+                {t.lastName}
               </label>
 
               <input
@@ -103,7 +166,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
 
             <div>
               <label className="mb-2 block text-xs font-black text-slate-700">
-                First Name
+                {t.firstName}
               </label>
 
               <input
@@ -119,7 +182,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Email
+              {t.email}
             </label>
 
             <input
@@ -134,7 +197,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Speciality
+              {t.speciality}
             </label>
 
             <input
@@ -149,7 +212,7 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
 
           <div>
             <label className="mb-2 block text-xs font-black text-slate-700">
-              Department ID
+              {t.departmentId}
             </label>
 
             <input
@@ -172,7 +235,8 @@ export default function EditTeacher({ teacher, saving, onClose, onSubmit }) {
               ) : (
                 <Save size={18} />
               )}
-              Update
+
+              {t.update}
             </button>
           </div>
         </form>

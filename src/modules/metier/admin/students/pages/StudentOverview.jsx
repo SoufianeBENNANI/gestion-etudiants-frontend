@@ -21,7 +21,138 @@ import {
 import AddStudent from "./AddStudent";
 import ArchivedStudents from "./ArchivedStudents";
 
+const translations = {
+  EN: {
+    management: "Students Management",
+    title: "Students Overview",
+    subtitle:
+      "Manage students, attendance, performance and AI predictions from one place.",
+
+    allStudents: "All Students",
+    allStudentsDescription: "View all registered students",
+
+    addStudent: "Add Student",
+    addStudentDescription: "Create a new student profile",
+
+    archivedStudents: "Archived Students",
+    archivedStudentsDescription: "View deleted or archived students",
+
+    performance: "Performance",
+    performanceDescription: "Student academic performance",
+
+    attendance: "Attendance",
+    attendanceDescription: "Total student attendance records",
+
+    aiPredictions: "AI Predictions",
+    aiPredictionsDescription: "Students analyzed by AI",
+
+    records: "Records",
+    new: "New",
+    archive: "Archive",
+    analytics: "Analytics",
+    presence: "Presence",
+    ai: "AI",
+
+    summaryTitle: "Students Summary",
+    summaryDescription: "Quick overview of student records and academic tracking.",
+
+    activeStudents: "Active Students",
+    totalAttendance: "Total Attendance",
+    totalPredictions: "AI Predictions",
+
+    addError: "Error while adding student",
+  },
+
+  FR: {
+    management: "Gestion des étudiants",
+    title: "Vue d’ensemble des étudiants",
+    subtitle:
+      "Gérer les étudiants, les présences, les performances et les prédictions IA depuis un seul endroit.",
+
+    allStudents: "Tous les étudiants",
+    allStudentsDescription: "Voir tous les étudiants enregistrés",
+
+    addStudent: "Ajouter étudiant",
+    addStudentDescription: "Créer un nouveau profil étudiant",
+
+    archivedStudents: "Étudiants archivés",
+    archivedStudentsDescription: "Voir les étudiants supprimés ou archivés",
+
+    performance: "Performance",
+    performanceDescription: "Performance académique des étudiants",
+
+    attendance: "Présence",
+    attendanceDescription: "Total des enregistrements de présence",
+
+    aiPredictions: "Prédictions IA",
+    aiPredictionsDescription: "Étudiants analysés par l’IA",
+
+    records: "Dossiers",
+    new: "Nouveau",
+    archive: "Archive",
+    analytics: "Analytique",
+    presence: "Présence",
+    ai: "IA",
+
+    summaryTitle: "Résumé des étudiants",
+    summaryDescription: "Aperçu rapide des dossiers étudiants et du suivi académique.",
+
+    activeStudents: "Étudiants actifs",
+    totalAttendance: "Total présence",
+    totalPredictions: "Prédictions IA",
+
+    addError: "Erreur lors de l’ajout de l’étudiant",
+  },
+
+  AR: {
+    management: "إدارة الطلاب",
+    title: "نظرة عامة على الطلاب",
+    subtitle:
+      "إدارة الطلاب والحضور والأداء والتوقعات بالذكاء الاصطناعي من مكان واحد.",
+
+    allStudents: "كل الطلاب",
+    allStudentsDescription: "عرض جميع الطلاب المسجلين",
+
+    addStudent: "إضافة طالب",
+    addStudentDescription: "إنشاء ملف طالب جديد",
+
+    archivedStudents: "الطلاب المؤرشفون",
+    archivedStudentsDescription: "عرض الطلاب المحذوفين أو المؤرشفين",
+
+    performance: "الأداء",
+    performanceDescription: "الأداء الأكاديمي للطلاب",
+
+    attendance: "الحضور",
+    attendanceDescription: "إجمالي سجلات حضور الطلاب",
+
+    aiPredictions: "توقعات الذكاء الاصطناعي",
+    aiPredictionsDescription: "الطلاب الذين تم تحليلهم بالذكاء الاصطناعي",
+
+    records: "السجلات",
+    new: "جديد",
+    archive: "الأرشيف",
+    analytics: "تحليلات",
+    presence: "الحضور",
+    ai: "ذكاء اصطناعي",
+
+    summaryTitle: "ملخص الطلاب",
+    summaryDescription: "نظرة سريعة على سجلات الطلاب والمتابعة الأكاديمية.",
+
+    activeStudents: "الطلاب النشطون",
+    totalAttendance: "إجمالي الحضور",
+    totalPredictions: "توقعات الذكاء الاصطناعي",
+
+    addError: "حدث خطأ أثناء إضافة الطالب",
+  },
+};
+
 export default function StudentOverview() {
+  const [language, setLanguage] = useState(
+    localStorage.getItem("app-language") || "EN"
+  );
+
+  const t = translations[language] || translations.EN;
+
   const [stats, setStats] = useState({
     totalStudents: 0,
     totalArchivedStudents: 0,
@@ -45,6 +176,40 @@ export default function StudentOverview() {
     telephone: "",
     adresse: "",
   });
+
+  const cardStyle = {
+    backgroundColor: "var(--card-bg)",
+    borderColor: "var(--border-color)",
+    color: "var(--text-color)",
+  };
+
+  const sectionStyle = {
+    backgroundColor: "var(--section-bg)",
+    borderColor: "var(--border-color)",
+  };
+
+  const textStyle = {
+    color: "var(--text-color)",
+  };
+
+  const mutedTextStyle = {
+    color: "var(--muted-text)",
+  };
+
+  useEffect(() => {
+    const handleLanguageChange = (event) => {
+      const nextLanguage =
+        event.detail || localStorage.getItem("app-language") || "EN";
+
+      setLanguage(nextLanguage);
+    };
+
+    window.addEventListener("app-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("app-language-change", handleLanguageChange);
+    };
+  }, []);
 
   useEffect(() => {
     loadStats();
@@ -115,10 +280,9 @@ export default function StudentOverview() {
 
       handleCloseAddDialog();
       await loadStats();
-
     } catch (error) {
       console.error("Add student error:", error);
-      alert("Error while adding student");
+      alert(t.addError);
     } finally {
       setSavingAdd(false);
     }
@@ -126,60 +290,60 @@ export default function StudentOverview() {
 
   const overviewCards = [
     {
-      title: "All Students",
+      title: t.allStudents,
       value: stats.totalStudents,
-      description: "View all registered students",
+      description: t.allStudentsDescription,
       icon: Users,
       path: "/admin/students/all",
-      badge: "Records",
+      badge: t.records,
       color: "blue",
       type: "link",
     },
     {
-      title: "Add Student",
+      title: t.addStudent,
       value: "+",
-      description: "Create a new student profile",
+      description: t.addStudentDescription,
       icon: UserPlus,
-      badge: "New",
+      badge: t.new,
       color: "emerald",
       type: "addDialog",
     },
     {
-      title: "Archived Students",
+      title: t.archivedStudents,
       value: stats.totalArchivedStudents,
-      description: "View deleted or archived students",
+      description: t.archivedStudentsDescription,
       icon: Archive,
-      badge: "Archive",
+      badge: t.archive,
       color: "amber",
       type: "archiveDialog",
     },
     {
-      title: "Performance",
+      title: t.performance,
       value: `${stats.averagePerformance}%`,
-      description: "Student academic performance",
+      description: t.performanceDescription,
       icon: BarChart3,
       path: "/admin/students/performance",
-      badge: "Analytics",
+      badge: t.analytics,
       color: "violet",
       type: "link",
     },
     {
-      title: "Attendance",
+      title: t.attendance,
       value: stats.totalAttendance,
-      description: "Total student attendance records",
+      description: t.attendanceDescription,
       icon: Bell,
       path: "/admin/students/attendance",
-      badge: "Presence",
+      badge: t.presence,
       color: "cyan",
       type: "link",
     },
     {
-      title: "AI Predictions",
+      title: t.aiPredictions,
       value: stats.totalPredictions,
-      description: "Students analyzed by AI",
+      description: t.aiPredictionsDescription,
       icon: Brain,
       path: "/admin/students/predictions",
-      badge: "AI",
+      badge: t.ai,
       color: "rose",
       type: "link",
     },
@@ -187,33 +351,27 @@ export default function StudentOverview() {
 
   const colorStyles = {
     blue: {
-      icon: "bg-blue-50 text-blue-600",
-      hover: "group-hover:bg-blue-600 group-hover:text-white",
+      icon: "bg-blue-600 text-white",
       badge: "bg-blue-50 text-blue-600",
     },
     emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
-      hover: "group-hover:bg-emerald-600 group-hover:text-white",
+      icon: "bg-emerald-600 text-white",
       badge: "bg-emerald-50 text-emerald-600",
     },
     amber: {
-      icon: "bg-amber-50 text-amber-600",
-      hover: "group-hover:bg-amber-500 group-hover:text-white",
+      icon: "bg-amber-500 text-white",
       badge: "bg-amber-50 text-amber-600",
     },
     violet: {
-      icon: "bg-violet-50 text-violet-600",
-      hover: "group-hover:bg-violet-600 group-hover:text-white",
+      icon: "bg-violet-600 text-white",
       badge: "bg-violet-50 text-violet-600",
     },
     cyan: {
-      icon: "bg-cyan-50 text-cyan-600",
-      hover: "group-hover:bg-cyan-600 group-hover:text-white",
+      icon: "bg-cyan-600 text-white",
       badge: "bg-cyan-50 text-cyan-600",
     },
     rose: {
-      icon: "bg-rose-50 text-rose-600",
-      hover: "group-hover:bg-rose-600 group-hover:text-white",
+      icon: "bg-rose-600 text-white",
       badge: "bg-rose-50 text-rose-600",
     },
   };
@@ -224,11 +382,14 @@ export default function StudentOverview() {
 
     return (
       <>
-        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-slate-100 transition group-hover:scale-125" />
+        <div
+          className="absolute -right-8 -top-8 h-24 w-24 rounded-full transition group-hover:scale-125"
+          style={{ backgroundColor: "var(--section-bg)" }}
+        />
 
         <div className="relative flex items-start justify-between gap-3">
           <div
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl transition ${style.icon} ${style.hover}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl transition ${style.icon}`}
           >
             <Icon size={22} />
           </div>
@@ -240,17 +401,26 @@ export default function StudentOverview() {
               {card.badge}
             </span>
 
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 transition group-hover:bg-slate-900 group-hover:text-white">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-xl transition group-hover:text-white"
+              style={{
+                backgroundColor: "var(--section-bg)",
+                color: "var(--muted-text)",
+              }}
+            >
               <ArrowUpRight size={17} />
             </div>
           </div>
         </div>
 
         <div className="relative mt-6">
-          <h2 className="text-sm font-black text-slate-950">{card.title}</h2>
+          <h2 className="text-sm font-black" style={textStyle}>
+            {card.title}
+          </h2>
 
           <p
-            className="mt-3 truncate text-2xl font-black tracking-tight text-slate-950"
+            className="mt-3 truncate text-2xl font-black tracking-tight"
+            style={textStyle}
             title={String(card.value)}
           >
             {loading ? (
@@ -260,7 +430,10 @@ export default function StudentOverview() {
             )}
           </p>
 
-          <p className="mt-2 text-xs font-semibold leading-5 text-slate-500">
+          <p
+            className="mt-2 text-xs font-semibold leading-5"
+            style={mutedTextStyle}
+          >
             {card.description}
           </p>
         </div>
@@ -270,7 +443,7 @@ export default function StudentOverview() {
 
   const renderCard = (card, index) => {
     const cardClass =
-      "group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md";
+      "group relative overflow-hidden rounded-2xl border p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md";
 
     if (card.type === "addDialog") {
       return (
@@ -279,6 +452,7 @@ export default function StudentOverview() {
           type="button"
           onClick={handleOpenAddDialog}
           className={cardClass}
+          style={cardStyle}
         >
           {renderCardContent(card)}
         </button>
@@ -292,6 +466,7 @@ export default function StudentOverview() {
           type="button"
           onClick={() => setOpenArchiveDialog(true)}
           className={cardClass}
+          style={cardStyle}
         >
           {renderCardContent(card)}
         </button>
@@ -299,17 +474,35 @@ export default function StudentOverview() {
     }
 
     return (
-      <Link key={index} to={card.path} className={cardClass}>
+      <Link key={index} to={card.path} className={cardClass} style={cardStyle}>
         {renderCardContent(card)}
       </Link>
     );
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 transition-colors duration-300"
+      style={{
+        backgroundColor: "var(--app-bg)",
+        color: "var(--text-color)",
+      }}
+      dir={language === "AR" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-[1.7rem] border border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-6 text-white shadow-sm">
-        <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-blue-500/20 blur-3xl" />
+      <div
+        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        style={{
+          borderColor: "var(--border-color)",
+          background:
+            "linear-gradient(135deg, var(--secondary-color), #020617)",
+        }}
+      >
+        <div
+          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
+          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
+        />
+
         <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
@@ -320,16 +513,15 @@ export default function StudentOverview() {
 
             <div>
               <p className="text-xs font-bold text-blue-200">
-                Students Management
+                {t.management}
               </p>
 
               <h1 className="mt-1 text-2xl font-black tracking-tight">
-                Students Overview
+                {t.title}
               </h1>
 
               <p className="mt-2 text-xs text-slate-300">
-                Manage students, attendance, performance and AI predictions from
-                one place.
+                {t.subtitle}
               </p>
             </div>
           </div>
@@ -342,46 +534,58 @@ export default function StudentOverview() {
       </div>
 
       {/* SUMMARY */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div
+        className="rounded-2xl border p-5 shadow-sm transition-colors duration-300"
+        style={cardStyle}
+      >
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+            style={{ backgroundColor: "var(--primary-color)" }}
+          >
             <Activity size={22} />
           </div>
 
           <div>
-            <h2 className="text-lg font-black text-slate-900">
-              Students Summary
+            <h2 className="text-lg font-black" style={textStyle}>
+              {t.summaryTitle}
             </h2>
-            <p className="text-xs font-semibold text-slate-500">
-              Quick overview of student records and academic tracking.
+
+            <p className="text-xs font-semibold" style={mutedTextStyle}>
+              {t.summaryDescription}
             </p>
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs font-bold text-slate-500">
-              Active Students
+          <div className="rounded-2xl p-4" style={sectionStyle}>
+            <p className="text-xs font-bold" style={mutedTextStyle}>
+              {t.activeStudents}
             </p>
-            <p className="mt-2 text-2xl font-black text-slate-900">
+
+            <p className="mt-2 text-2xl font-black" style={textStyle}>
               {loading
                 ? "..."
                 : stats.totalStudents - stats.totalArchivedStudents}
             </p>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs font-bold text-slate-500">
-              Total Attendance
+          <div className="rounded-2xl p-4" style={sectionStyle}>
+            <p className="text-xs font-bold" style={mutedTextStyle}>
+              {t.totalAttendance}
             </p>
-            <p className="mt-2 text-2xl font-black text-slate-900">
+
+            <p className="mt-2 text-2xl font-black" style={textStyle}>
               {loading ? "..." : stats.totalAttendance}
             </p>
           </div>
 
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs font-bold text-slate-500">AI Predictions</p>
-            <p className="mt-2 text-2xl font-black text-slate-900">
+          <div className="rounded-2xl p-4" style={sectionStyle}>
+            <p className="text-xs font-bold" style={mutedTextStyle}>
+              {t.totalPredictions}
+            </p>
+
+            <p className="mt-2 text-2xl font-black" style={textStyle}>
               {loading ? "..." : stats.totalPredictions}
             </p>
           </div>
