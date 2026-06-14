@@ -8,15 +8,37 @@ export function AuthProvider({ children }) {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const saveKeycloakTokens = () => {
+    if (keycloak?.token) {
+      localStorage.setItem("token", keycloak.token);
+      localStorage.setItem("accessToken", keycloak.token);
+    }
+
+    if (keycloak?.idToken) {
+      localStorage.setItem("idToken", keycloak.idToken);
+    }
+
+    if (keycloak?.refreshToken) {
+      localStorage.setItem("refreshToken", keycloak.refreshToken);
+    }
+  };
+
   useEffect(() => {
     const loadAuth = () => {
       try {
         if (!keycloak?.authenticated) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("idToken");
+          localStorage.removeItem("refreshToken");
+
           setUser(null);
           setRoles([]);
           setLoading(false);
           return;
         }
+
+        saveKeycloakTokens();
 
         const parsed = keycloak.tokenParsed;
 
@@ -45,6 +67,12 @@ export function AuthProvider({ children }) {
         setLoading(false);
       } catch (error) {
         console.error("Auth loading error:", error);
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("idToken");
+        localStorage.removeItem("refreshToken");
+
         setUser(null);
         setRoles([]);
         setLoading(false);

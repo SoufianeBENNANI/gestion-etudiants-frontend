@@ -5,7 +5,7 @@ import DashboardRedirect from "./DashboardRedirect";
 import AdminLayout from "../layouts/AdminLayout";
 
 // Dashboards
-import AdminDashboard from "../modules/metier/admin/pages/AdminDashboard";
+import AdminDashboard from "../modules/metier/admin/DashboardAdmin/pages/AdminDashboard";
 import TeacherDashboard from "../modules/metier/teacher/TeacherDashboard";
 import StudentDashboard from "../modules/metier/admin/students/pages/StudentDashboard";
 import ManagerDashboard from "../modules/metier/Manager/ManagerDashboard";

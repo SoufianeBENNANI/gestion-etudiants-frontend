@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/sidebar";
+import Sidebar from "../modules/metier/admin/DashboardAdmin/components/sidebar";
 
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
