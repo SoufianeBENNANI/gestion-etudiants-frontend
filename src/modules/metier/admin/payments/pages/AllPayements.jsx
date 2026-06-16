@@ -11,6 +11,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from "lucide-react";
 
 import {
@@ -374,9 +375,42 @@ export default function AllPayements() {
     }
   };
 
+  const stats = [
+    {
+      title: t.totalPayments,
+      value: payements.length,
+      icon: CreditCard,
+      iconBg: "bg-orange-500",
+      percentBg: "bg-orange-50",
+      percentText: "text-orange-600",
+      percent: "76%",
+      trend: "17%",
+    },
+    {
+      title: t.displayedPayments,
+      value: filteredPayements.length,
+      icon: Users,
+      iconBg: "bg-blue-500",
+      percentBg: "bg-blue-50",
+      percentText: "text-blue-600",
+      percent: "73%",
+      trend: "22%",
+    },
+    {
+      title: t.totalAmount,
+      value: `${totalAmount} DH`,
+      icon: DollarSign,
+      iconBg: "bg-amber-500",
+      percentBg: "bg-amber-50",
+      percentText: "text-amber-600",
+      percent: "100%",
+      trend: "0.9%",
+    },
+  ];
+
   return (
     <div
-      className="min-h-screen space-y-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
@@ -385,173 +419,133 @@ export default function AllPayements() {
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div>
+          <p className="text-xs font-semibold text-blue-200">
+            {t.management}
+          </p>
 
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <CreditCard size={28} />
-            </div>
+          <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
-            <div>
-              <p className="text-xs font-bold text-blue-200">
-                {t.management}
-              </p>
+          <p className="mt-1 text-sm font-semibold text-slate-300">
+            {t.subtitle}
+          </p>
+        </div>
 
-              <h1 className="mt-1 text-2xl font-black tracking-tight">
-                {t.title}
-              </h1>
-
-              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-            <div className="relative">
-              <Search
-                size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-              />
-
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder={t.searchPlaceholder}
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
-              />
-            </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder={t.searchPlaceholder}
+              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-64"
+            />
 
             <button
               type="button"
-              onClick={fetchPayements}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"
             >
-              <RefreshCcw size={17} />
-              {t.refresh}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowArchiveDialog(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
-            >
-              <Archive size={17} />
-              {t.archive}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-red-300/30 transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {downloading ? (
-                <Loader2 size={17} className="animate-spin" />
-              ) : (
-                <FileDown size={17} />
-              )}
-              {t.pdf}
+              <Search className="h-4 w-4" />
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={fetchPayements}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15"
+          >
+            <RefreshCcw size={17} />
+            {t.refresh}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowArchiveDialog(true)}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15"
+          >
+            <Archive size={17} />
+            {t.archive}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {downloading ? (
+              <Loader2 size={17} className="animate-spin" />
+            ) : (
+              <FileDown size={17} />
+            )}
+            {t.pdf}
+          </button>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        {stats.map((item) => {
+          const Icon = item.icon;
+
+          return (
             <div
-              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
+              key={item.title}
+              className="rounded-[1.4rem] border p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              style={cardStyle}
             >
-              <CreditCard size={22} />
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full ${item.iconBg} text-white`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-black" style={textStyle}>
+                      {item.value}
+                    </h3>
+
+                    <p className="text-xs font-semibold" style={mutedTextStyle}>
+                      {item.title}
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-full ${item.percentBg}`}
+                >
+                  <span className={`text-[11px] font-black ${item.percentText}`}>
+                    {item.percent}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center gap-3 text-xs font-semibold">
+                <span style={mutedTextStyle}>Last 30 days</span>
+
+                <span className="font-black text-emerald-500">
+                  {item.trend}
+                </span>
+
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+              </div>
             </div>
-
-            <span
-              className="rounded-full px-3 py-1.5 text-xs font-black"
-              style={{
-                backgroundColor: "var(--section-bg)",
-                color: "var(--primary-color)",
-              }}
-            >
-              {t.records}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.totalPayments}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {payements.length}
-          </h2>
-        </div>
-
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
-              <Users size={22} />
-            </div>
-
-            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-              {t.results}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.displayedPayments}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {filteredPayements.length}
-          </h2>
-        </div>
-
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-600 text-white">
-              <DollarSign size={22} />
-            </div>
-
-            <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-600">
-              {t.amountLabel}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.totalAmount}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {totalAmount} DH
-          </h2>
-        </div>
+          );
+        })}
       </div>
 
       {/* TABLE */}
       <div
-        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        className="overflow-hidden rounded-[1.4rem] border shadow-sm transition-colors duration-300"
         style={cardStyle}
       >
         <div
@@ -559,10 +553,7 @@ export default function AllPayements() {
           style={sectionStyle}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
               <CreditCard size={20} />
             </div>
 
@@ -571,7 +562,7 @@ export default function AllPayements() {
                 {t.paymentsList}
               </h2>
 
-              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                 {t.showing} {startPayement} {t.to} {endPayement} {t.of}{" "}
                 {filteredPayements.length} {t.payments}
               </p>
@@ -597,124 +588,133 @@ export default function AllPayements() {
           </div>
         </div>
 
-        <table className="w-full table-fixed border-collapse">
-          <thead>
-            <tr
-              className="text-center text-[11px] uppercase tracking-wide"
-              style={{
-                backgroundColor: "var(--card-bg)",
-                color: "var(--muted-text)",
-              }}
-            >
-              <th className="w-[25%] px-3 py-3 font-black">{t.student}</th>
-              <th className="w-[15%] px-3 py-3 font-black">{t.amount}</th>
-              <th className="w-[17%] px-3 py-3 font-black">{t.mode}</th>
-              <th className="w-[17%] px-3 py-3 font-black">{t.date}</th>
-              <th className="w-[14%] px-3 py-3 font-black">{t.status}</th>
-              <th className="w-[12%] px-3 py-3 font-black">{t.action}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="6" className="px-5 py-8 text-center">
-                  <div
-                    className="flex items-center justify-center gap-2 text-sm font-bold"
-                    style={mutedTextStyle}
-                  >
-                    <Loader2 size={18} className="animate-spin" />
-                    {t.loadingPayments}
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[980px] table-fixed border-collapse">
+            <thead>
+              <tr
+                className="border-b text-center text-[11px] uppercase tracking-wide"
+                style={{
+                  borderColor: "var(--border-color)",
+                  color: "var(--muted-text)",
+                }}
+              >
+                <th className="w-[25%] px-5 py-4 font-black">{t.student}</th>
+                <th className="w-[15%] px-5 py-4 font-black">{t.amount}</th>
+                <th className="w-[17%] px-5 py-4 font-black">{t.mode}</th>
+                <th className="w-[17%] px-5 py-4 font-black">{t.date}</th>
+                <th className="w-[14%] px-5 py-4 font-black">{t.status}</th>
+                <th className="w-[12%] px-5 py-4 font-black">{t.action}</th>
               </tr>
-            ) : filteredPayements.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="px-5 py-8 text-center">
-                  <span className="text-sm font-bold" style={mutedTextStyle}>
-                    {t.noPayments}
-                  </span>
-                </td>
-              </tr>
-            ) : (
-              paginatedPayements.map((payement) => {
-                const studentName = getStudentName(payement);
-                const amount = getAmount(payement);
-                const mode = getMode(payement);
-                const date = getDate(payement);
-                const status = getStatus(payement);
+            </thead>
 
-                return (
-                  <tr
-                    key={payement.id}
-                    className="border-t text-center text-sm transition"
-                    style={{
-                      borderColor: "var(--border-color)",
-                      color: "var(--text-color)",
-                    }}
-                  >
-                    <td className="px-3 py-3">
-                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                        <div
-                          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
-                          style={{ backgroundColor: "var(--primary-color)" }}
-                        >
-                          <Users size={17} />
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="px-5 py-10 text-center">
+                    <div
+                      className="flex items-center justify-center gap-2 text-sm font-bold"
+                      style={mutedTextStyle}
+                    >
+                      <Loader2 size={18} className="animate-spin" />
+                      {t.loadingPayments}
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredPayements.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-5 py-10 text-center">
+                    <span className="text-sm font-bold" style={mutedTextStyle}>
+                      {t.noPayments}
+                    </span>
+                  </td>
+                </tr>
+              ) : (
+                paginatedPayements.map((payement) => {
+                  const studentName = getStudentName(payement);
+                  const amount = getAmount(payement);
+                  const mode = getMode(payement);
+                  const date = getDate(payement);
+                  const status = getStatus(payement);
+
+                  return (
+                    <tr
+                      key={payement.id}
+                      className="border-b text-center text-sm transition last:border-none hover:bg-slate-50/40"
+                      style={{
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-color)",
+                      }}
+                    >
+                      <td className="px-5 py-4">
+                        <div className="mx-auto flex max-w-full items-center justify-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600">
+                            <Users size={17} />
+                          </div>
+
+                          <div className="min-w-0 text-center">
+                            <p className="truncate font-black" style={textStyle}>
+                              {studentName}
+                            </p>
+
+                            <p
+                              className="mt-0.5 text-xs font-semibold"
+                              style={mutedTextStyle}
+                            >
+                              {t.student}
+                            </p>
+                          </div>
                         </div>
+                      </td>
 
-                        <span className="truncate font-black" style={textStyle}>
-                          {studentName}
+                      <td className="px-5 py-4">
+                        <span
+                          className="inline-flex rounded-full bg-amber-50 px-3 py-1.5 text-xs font-black text-amber-600"
+                        >
+                          {amount ?? "N/A"} DH
                         </span>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-3 py-3">
-                      <span className="font-bold" style={mutedTextStyle}>
-                        {amount ?? "N/A"} DH
-                      </span>
-                    </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className="block truncate text-sm font-semibold"
+                          style={mutedTextStyle}
+                        >
+                          {mode}
+                        </span>
+                      </td>
 
-                    <td className="px-3 py-3">
-                      <span
-                        className="block truncate text-sm font-semibold"
-                        style={mutedTextStyle}
-                      >
-                        {mode}
-                      </span>
-                    </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className="block truncate text-sm font-semibold"
+                          style={mutedTextStyle}
+                        >
+                          {date}
+                        </span>
+                      </td>
 
-                    <td className="px-3 py-3">
-                      <span
-                        className="block truncate text-sm font-semibold"
-                        style={mutedTextStyle}
-                      >
-                        {date}
-                      </span>
-                    </td>
+                      <td className="px-5 py-4">
+                        <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
+                          {status}
+                        </span>
+                      </td>
 
-                    <td className="px-3 py-3">
-                      <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-                        {status}
-                      </span>
-                    </td>
-
-                    <td className="px-3 py-3">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedPayement(payement)}
-                        title={t.view}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-white transition hover:opacity-80"
-                        style={{ backgroundColor: "var(--primary-color)" }}
-                      >
-                        <Eye size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                      <td className="px-5 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPayement(payement)}
+                          title={t.view}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700"
+                        >
+                          <Eye size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* PAGINATION */}
         <div
@@ -722,14 +722,19 @@ export default function AllPayements() {
           style={sectionStyle}
         >
           <p className="text-xs font-semibold" style={mutedTextStyle}>
-            {t.page}{" "}
+            {t.showing}{" "}
             <span className="font-black" style={textStyle}>
-              {currentPage}
+              {startPayement}
+            </span>{" "}
+            {t.to}{" "}
+            <span className="font-black" style={textStyle}>
+              {endPayement}
             </span>{" "}
             {t.of}{" "}
             <span className="font-black" style={textStyle}>
-              {totalPages}
-            </span>
+              {filteredPayements.length}
+            </span>{" "}
+            {t.payments}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -737,11 +742,10 @@ export default function AllPayements() {
               type="button"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
               style={inputStyle}
             >
               <ChevronLeft size={16} />
-              {t.previous}
             </button>
 
             {visiblePages.map((page) => (
@@ -756,8 +760,7 @@ export default function AllPayements() {
                       ? "var(--secondary-color)"
                       : "var(--input-bg)",
                   borderColor: "var(--border-color)",
-                  color:
-                    currentPage === page ? "#ffffff" : "var(--text-color)",
+                  color: currentPage === page ? "#ffffff" : "var(--text-color)",
                 }}
               >
                 {page}
@@ -768,12 +771,18 @@ export default function AllPayements() {
               type="button"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
               style={inputStyle}
             >
-              {t.next}
               <ChevronRight size={16} />
             </button>
+
+            <span
+              className="rounded-xl px-4 py-2 text-xs font-black"
+              style={inputStyle}
+            >
+              {t.page} {currentPage} / {totalPages}
+            </span>
           </div>
         </div>
       </div>

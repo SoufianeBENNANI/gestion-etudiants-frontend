@@ -497,21 +497,24 @@ export default function StudentPerformance() {
       value: totalStudents,
       icon: Users,
       badge: t.records,
-      color: "blue",
+      iconBg: "bg-orange-500",
+      badgeClass: "bg-orange-50 text-orange-600",
     },
     {
       title: t.averageGrade,
       value: averageGrade,
       icon: GraduationCap,
       badge: t.average,
-      color: "emerald",
+      iconBg: "bg-blue-500",
+      badgeClass: "bg-blue-50 text-blue-600",
     },
     {
       title: t.bestStudent,
       value: bestStudent,
       icon: Trophy,
       badge: t.top,
-      color: "amber",
+      iconBg: "bg-amber-500",
+      badgeClass: "bg-amber-50 text-amber-600",
       mediumText: true,
     },
     {
@@ -519,32 +522,14 @@ export default function StudentPerformance() {
       value: atRiskStudents,
       icon: AlertTriangle,
       badge: t.risk,
-      color: "rose",
+      iconBg: "bg-red-500",
+      badgeClass: "bg-red-50 text-red-600",
     },
   ];
 
-  const colorStyles = {
-    blue: {
-      icon: "bg-blue-600 text-white",
-      badge: "bg-blue-50 text-blue-600",
-    },
-    emerald: {
-      icon: "bg-emerald-600 text-white",
-      badge: "bg-emerald-50 text-emerald-600",
-    },
-    amber: {
-      icon: "bg-amber-500 text-white",
-      badge: "bg-amber-50 text-amber-600",
-    },
-    rose: {
-      icon: "bg-rose-600 text-white",
-      badge: "bg-rose-50 text-rose-600",
-    },
-  };
-
   return (
     <div
-      className="min-h-screen space-y-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
@@ -553,125 +538,124 @@ export default function StudentPerformance() {
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div>
+          <p className="text-xs font-semibold text-blue-200">
+            {t.management}
+          </p>
 
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <BarChart3 size={28} />
-            </div>
+          <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
-            <div>
-              <p className="text-xs font-bold text-blue-200">
-                {t.management}
-              </p>
+          <p className="mt-1 text-sm font-semibold text-slate-300">
+            {t.subtitle}
+          </p>
+        </div>
 
-              <h1 className="mt-1 text-2xl font-black tracking-tight">
-                {t.title}
-              </h1>
-
-              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-            <div className="relative">
-              <Search
-                size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-              />
-
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t.searchPlaceholder}
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-4 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
-              />
-            </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={t.searchPlaceholder}
+              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-64"
+            />
 
             <button
               type="button"
-              onClick={loadPerformance}
-              disabled={loading}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"
             >
-              {loading ? (
-                <Loader2 size={17} className="animate-spin" />
-              ) : (
-                <RefreshCcw size={17} />
-              )}
-              {t.refresh}
+              <Search className="h-4 w-4" />
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={loadPerformance}
+            disabled={loading}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? (
+              <Loader2 size={17} className="animate-spin" />
+            ) : (
+              <RefreshCcw size={17} />
+            )}
+            {t.refresh}
+          </button>
         </div>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statsCards.map((card, index) => {
-          const Icon = card.icon;
-          const style = colorStyles[card.color];
+     {/* STATS */}
+<div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+  {statsCards.map((card) => {
+    const Icon = card.icon;
 
-          return (
+    return (
+      <div
+        key={card.title}
+        className="rounded-[1.4rem] border p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+        style={cardStyle}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-4">
             <div
-              key={index}
-              className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              style={cardStyle}
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${card.iconBg} text-white`}
             >
-              <div className="mb-5 flex items-center justify-between">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${style.icon}`}
-                >
-                  <Icon size={22} />
-                </div>
+              <Icon className="h-5 w-5" />
+            </div>
 
-                <span
-                  className={`rounded-full px-3 py-1.5 text-xs font-black ${style.badge}`}
-                >
-                  {card.badge}
-                </span>
-              </div>
-
-              <p className="text-sm font-black" style={textStyle}>
-                {card.title}
-              </p>
-
-              <h2
-                className={`mt-3 truncate font-black ${
-                  card.mediumText ? "text-xl" : "text-2xl"
+            <div className="min-w-0">
+              <h3
+                className={`truncate font-black ${
+                  card.mediumText
+                    ? "max-w-[130px] text-sm sm:max-w-[160px] sm:text-base xl:max-w-[180px] xl:text-lg"
+                    : "text-2xl"
                 }`}
                 style={textStyle}
                 title={String(card.value)}
               >
                 {loading ? "..." : card.value}
-              </h2>
+              </h3>
+
+              <p
+                className="truncate text-xs font-semibold"
+                style={mutedTextStyle}
+              >
+                {card.title}
+              </p>
             </div>
-          );
-        })}
+          </div>
+
+          <span
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black ${card.badgeClass}`}
+          >
+            {card.badge}
+          </span>
+        </div>
       </div>
+    );
+  })}
+</div>
 
       {/* GRAPH + SUMMARY */}
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-2xl border p-5 shadow-sm" style={cardStyle}>
-          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
+        <div
+          className="overflow-hidden rounded-[1.4rem] border shadow-sm"
+          style={cardStyle}
+        >
+          <div
+            className="flex flex-col gap-4 border-b px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+            style={sectionStyle}
+          >
             <div className="flex items-center gap-3">
-              <div
-                className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-                style={{ backgroundColor: "var(--primary-color)" }}
-              >
-                <Activity size={22} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
+                <Activity size={20} />
               </div>
 
               <div>
@@ -679,138 +663,145 @@ export default function StudentPerformance() {
                   {t.riskScoreOverview}
                 </h2>
 
-                <p className="text-xs font-semibold" style={mutedTextStyle}>
+                <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                   {t.riskScoreDescription}
                 </p>
               </div>
             </div>
 
             <div
-              className="rounded-xl px-4 py-2 text-xs font-black ring-1"
-              style={{
-                backgroundColor: "var(--section-bg)",
-                color: "var(--muted-text)",
-                borderColor: "var(--border-color)",
-              }}
+              className="rounded-xl border px-4 py-2 text-xs font-black"
+              style={inputStyle}
             >
               {predictedStudents.length} {t.predicted} / {performances.length}{" "}
               {t.students}
             </div>
           </div>
 
-          <div className="mb-5 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl bg-emerald-50 p-4">
-              <p className="text-xs font-black uppercase text-emerald-600">
-                {t.lowRisk}
-              </p>
-              <p className="mt-2 text-2xl font-black text-emerald-700">
-                {riskDistribution.low}
-              </p>
-            </div>
+          <div className="p-5">
+            <div className="mb-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl bg-emerald-50 p-4">
+                <p className="text-xs font-black uppercase text-emerald-600">
+                  {t.lowRisk}
+                </p>
 
-            <div className="rounded-2xl bg-amber-50 p-4">
-              <p className="text-xs font-black uppercase text-amber-600">
-                {t.moderate}
-              </p>
-              <p className="mt-2 text-2xl font-black text-amber-700">
-                {riskDistribution.moderate}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-rose-50 p-4">
-              <p className="text-xs font-black uppercase text-rose-600">
-                {t.highRisk}
-              </p>
-              <p className="mt-2 text-2xl font-black text-rose-700">
-                {riskDistribution.high}
-              </p>
-            </div>
-          </div>
-
-          <div className="max-h-[360px] space-y-4 overflow-y-auto pr-2">
-            {loading ? (
-              <div
-                className="flex h-60 items-center justify-center gap-2 text-sm font-bold"
-                style={mutedTextStyle}
-              >
-                <Loader2 className="animate-spin" size={18} />
-                {t.loadingGraph}
+                <p className="mt-2 text-2xl font-black text-emerald-700">
+                  {riskDistribution.low}
+                </p>
               </div>
-            ) : filteredPerformances.length === 0 ? (
-              <div
-                className="flex h-60 items-center justify-center text-sm font-bold"
-                style={mutedTextStyle}
-              >
-                {t.noPerformanceData}
+
+              <div className="rounded-2xl bg-amber-50 p-4">
+                <p className="text-xs font-black uppercase text-amber-600">
+                  {t.moderate}
+                </p>
+
+                <p className="mt-2 text-2xl font-black text-amber-700">
+                  {riskDistribution.moderate}
+                </p>
               </div>
-            ) : (
-              filteredPerformances.map((item) => {
-                const risk = Number(item.scoreRisque || 0);
-                const hasPrediction = Boolean(item.hasPrediction);
 
-                return (
-                  <div
-                    key={item.studentId}
-                    className="rounded-2xl border p-4"
-                    style={sectionStyle}
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-4">
-                      <div className="min-w-0">
-                        <p className="truncate font-black" style={textStyle}>
-                          {item.nom} {item.prenom}
-                        </p>
+              <div className="rounded-2xl bg-rose-50 p-4">
+                <p className="text-xs font-black uppercase text-rose-600">
+                  {t.highRisk}
+                </p>
 
-                        <p
-                          className="truncate text-xs font-semibold"
-                          style={mutedTextStyle}
+                <p className="mt-2 text-2xl font-black text-rose-700">
+                  {riskDistribution.high}
+                </p>
+              </div>
+            </div>
+
+            <div className="max-h-[360px] space-y-4 overflow-y-auto pr-2">
+              {loading ? (
+                <div
+                  className="flex h-60 items-center justify-center gap-2 text-sm font-bold"
+                  style={mutedTextStyle}
+                >
+                  <Loader2 className="animate-spin" size={18} />
+                  {t.loadingGraph}
+                </div>
+              ) : filteredPerformances.length === 0 ? (
+                <div
+                  className="flex h-60 items-center justify-center text-sm font-bold"
+                  style={mutedTextStyle}
+                >
+                  {t.noPerformanceData}
+                </div>
+              ) : (
+                filteredPerformances.map((item) => {
+                  const risk = Number(item.scoreRisque || 0);
+                  const hasPrediction = Boolean(item.hasPrediction);
+
+                  return (
+                    <div
+                      key={item.studentId}
+                      className="rounded-2xl border p-4"
+                      style={sectionStyle}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="truncate font-black" style={textStyle}>
+                            {item.nom} {item.prenom}
+                          </p>
+
+                          <p
+                            className="truncate text-xs font-semibold"
+                            style={mutedTextStyle}
+                          >
+                            {item.email}
+                          </p>
+                        </div>
+
+                        <span
+                          className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
+                            hasPrediction
+                              ? "bg-blue-50 text-blue-600"
+                              : "bg-slate-200 text-slate-600"
+                          }`}
                         >
-                          {item.email}
-                        </p>
+                          {hasPrediction
+                            ? `${risk}% ${t.riskText}`
+                            : t.noPrediction}
+                        </span>
                       </div>
 
-                      <span
-                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
-                          hasPrediction
-                            ? "bg-blue-50 text-blue-600"
-                            : "bg-slate-200 text-slate-600"
-                        }`}
-                      >
-                        {hasPrediction
-                          ? `${risk}% ${t.riskText}`
-                          : t.noPrediction}
-                      </span>
-                    </div>
-
-                    <div
-                      className="h-3 overflow-hidden rounded-full ring-1"
-                      style={{
-                        backgroundColor: "var(--input-bg)",
-                        borderColor: "var(--border-color)",
-                      }}
-                    >
                       <div
-                        className={`h-full rounded-full ${getRiskBarClass(
-                          risk,
-                          hasPrediction
-                        )}`}
+                        className="h-3 overflow-hidden rounded-full ring-1"
                         style={{
-                          width: `${
-                            hasPrediction ? Math.min(100, risk) : 100
-                          }%`,
+                          backgroundColor: "var(--input-bg)",
+                          borderColor: "var(--border-color)",
                         }}
-                      />
+                      >
+                        <div
+                          className={`h-full rounded-full ${getRiskBarClass(
+                            risk,
+                            hasPrediction
+                          )}`}
+                          style={{
+                            width: `${
+                              hasPrediction ? Math.min(100, risk) : 100
+                            }%`,
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })
-            )}
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border p-5 shadow-sm" style={cardStyle}>
-          <div className="mb-5 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-white">
-              <Sparkles size={22} />
+        <div
+          className="overflow-hidden rounded-[1.4rem] border shadow-sm"
+          style={cardStyle}
+        >
+          <div
+            className="flex items-center gap-3 border-b px-5 py-4"
+            style={sectionStyle}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-white">
+              <Sparkles size={20} />
             </div>
 
             <div>
@@ -818,14 +809,14 @@ export default function StudentPerformance() {
                 {t.aiSummary}
               </h2>
 
-              <p className="text-xs font-semibold" style={mutedTextStyle}>
+              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                 {t.aiSummaryDescription}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-2xl p-4" style={sectionStyle}>
+          <div className="space-y-4 p-5">
+            <div className="rounded-2xl border p-4" style={sectionStyle}>
               <p className="text-xs font-bold" style={mutedTextStyle}>
                 {t.totalStudentsSummary}
               </p>
@@ -835,7 +826,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl p-4" style={sectionStyle}>
+            <div className="rounded-2xl border p-4" style={sectionStyle}>
               <p className="text-xs font-bold" style={mutedTextStyle}>
                 {t.predictedStudents}
               </p>
@@ -848,7 +839,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl p-4" style={sectionStyle}>
+            <div className="rounded-2xl border p-4" style={sectionStyle}>
               <p className="text-xs font-bold" style={mutedTextStyle}>
                 {t.generalAverage}
               </p>
@@ -858,7 +849,7 @@ export default function StudentPerformance() {
               </p>
             </div>
 
-            <div className="rounded-2xl p-4" style={sectionStyle}>
+            <div className="rounded-2xl border p-4" style={sectionStyle}>
               <p className="text-xs font-bold" style={mutedTextStyle}>
                 {t.riskStudents}
               </p>
@@ -873,7 +864,7 @@ export default function StudentPerformance() {
 
       {/* TABLE */}
       <div
-        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        className="overflow-hidden rounded-[1.4rem] border shadow-sm transition-colors duration-300"
         style={cardStyle}
       >
         <div
@@ -881,10 +872,7 @@ export default function StudentPerformance() {
           style={sectionStyle}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
               <Brain size={20} />
             </div>
 
@@ -893,7 +881,7 @@ export default function StudentPerformance() {
                 {t.tableTitle}
               </h2>
 
-              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                 {t.showing} {showingFrom} {t.to} {showingTo} {t.of}{" "}
                 {filteredPerformances.length} {t.results}
               </p>
@@ -921,49 +909,50 @@ export default function StudentPerformance() {
           </div>
         </div>
 
-        {loading ? (
-          <div
-            className="flex items-center justify-center gap-2 p-10 text-sm font-bold"
-            style={mutedTextStyle}
-          >
-            <Loader2 className="animate-spin" size={18} />
-            {t.loadingPerformance}
-          </div>
-        ) : filteredPerformances.length === 0 ? (
-          <div
-            className="p-10 text-center text-sm font-bold"
-            style={mutedTextStyle}
-          >
-            {t.noPerformanceData}
-          </div>
-        ) : (
-          <>
-            <table className="w-full table-fixed border-collapse">
-              <thead>
-                <tr
-                  className="text-center text-[11px] uppercase tracking-wide"
-                  style={{
-                    backgroundColor: "var(--card-bg)",
-                    color: "var(--muted-text)",
-                  }}
-                >
-                  <th className="w-[19%] px-2 py-3 font-black">
-                    {t.student}
-                  </th>
-                  <th className="w-[20%] px-2 py-3 font-black">{t.email}</th>
-                  <th className="w-[8%] px-2 py-3 font-black">{t.avg}</th>
-                  <th className="w-[8%] px-2 py-3 font-black">{t.abs}</th>
-                  <th className="w-[17%] px-2 py-3 font-black">
-                    {t.prediction}
-                  </th>
-                  <th className="w-[12%] px-2 py-3 font-black">{t.risk}</th>
-                  <th className="w-[8%] px-2 py-3 font-black">{t.status}</th>
-                  <th className="w-[8%] px-2 py-3 font-black">{t.action}</th>
-                </tr>
-              </thead>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1120px] table-fixed border-collapse">
+            <thead>
+              <tr
+                className="border-b text-center text-[11px] uppercase tracking-wide"
+                style={{
+                  borderColor: "var(--border-color)",
+                  color: "var(--muted-text)",
+                }}
+              >
+                <th className="w-[19%] px-5 py-4 font-black">{t.student}</th>
+                <th className="w-[20%] px-5 py-4 font-black">{t.email}</th>
+                <th className="w-[8%] px-5 py-4 font-black">{t.avg}</th>
+                <th className="w-[8%] px-5 py-4 font-black">{t.abs}</th>
+                <th className="w-[17%] px-5 py-4 font-black">{t.prediction}</th>
+                <th className="w-[12%] px-5 py-4 font-black">{t.risk}</th>
+                <th className="w-[8%] px-5 py-4 font-black">{t.status}</th>
+                <th className="w-[8%] px-5 py-4 font-black">{t.action}</th>
+              </tr>
+            </thead>
 
-              <tbody>
-                {paginatedPerformances.map((item) => {
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="px-5 py-10 text-center">
+                    <div
+                      className="flex items-center justify-center gap-2 text-sm font-bold"
+                      style={mutedTextStyle}
+                    >
+                      <Loader2 className="animate-spin" size={18} />
+                      {t.loadingPerformance}
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredPerformances.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="px-5 py-10 text-center">
+                    <span className="text-sm font-bold" style={mutedTextStyle}>
+                      {t.noPerformanceData}
+                    </span>
+                  </td>
+                </tr>
+              ) : (
+                paginatedPerformances.map((item) => {
                   const fullName =
                     `${item.nom || ""} ${item.prenom || ""}`.trim() ||
                     t.unknownStudent;
@@ -979,62 +968,73 @@ export default function StudentPerformance() {
                   return (
                     <tr
                       key={item.studentId}
-                      className="border-t text-center text-sm transition"
+                      className="border-b text-center text-sm transition last:border-none hover:bg-slate-50/40"
                       style={{
                         borderColor: "var(--border-color)",
                         color: "var(--text-color)",
                       }}
                     >
-                      <td className="px-2 py-3">
-                        <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                          <div
-                            className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
-                            style={{ backgroundColor: "var(--primary-color)" }}
-                          >
-                            <Users size={17} />
+                      <td className="px-5 py-4">
+                        <div className="mx-auto flex max-w-full items-center justify-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 font-black text-orange-600">
+                            {String(fullName).charAt(0).toUpperCase()}
                           </div>
 
-                          <span
-                            className="truncate font-black"
-                            style={textStyle}
-                          >
-                            {fullName}
-                          </span>
+                          <div className="min-w-0 text-center">
+                            <p className="truncate font-black" style={textStyle}>
+                              {fullName}
+                            </p>
+
+                            <p
+                              className="mt-0.5 text-xs font-semibold"
+                              style={mutedTextStyle}
+                            >
+                              {t.student}
+                            </p>
+                          </div>
                         </div>
                       </td>
 
-                      <td className="px-2 py-3">
+                      <td className="px-5 py-4">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-1">
                           <Mail
                             size={14}
                             className="shrink-0"
                             style={mutedTextStyle}
                           />
-                          <span className="truncate" style={mutedTextStyle}>
+
+                          <span
+                            className="truncate text-sm font-semibold"
+                            style={mutedTextStyle}
+                          >
                             {item.email || "-"}
                           </span>
                         </div>
                       </td>
 
-                      <td className="px-2 py-3 font-black" style={textStyle}>
-                        {item.hasPrediction ? item.moyenne ?? 0 : "-"}
+                      <td className="px-5 py-4">
+                        <span className="font-black" style={textStyle}>
+                          {item.hasPrediction ? item.moyenne ?? 0 : "-"}
+                        </span>
                       </td>
 
-                      <td className="px-2 py-3" style={mutedTextStyle}>
-                        {item.hasPrediction ? item.absences ?? 0 : "-"}
+                      <td className="px-5 py-4">
+                        <span className="font-semibold" style={mutedTextStyle}>
+                          {item.hasPrediction ? item.absences ?? 0 : "-"}
+                        </span>
                       </td>
 
-                      <td className="px-2 py-3">
+                      <td className="px-5 py-4">
                         <span
-                          className="block truncate font-bold"
+                          className="block truncate text-sm font-bold"
                           style={mutedTextStyle}
                         >
                           {item.prediction || "-"}
                         </span>
                       </td>
 
-                      <td className="px-2 py-3">
-                        <div className="mx-auto flex max-w-[100px] items-center gap-2">
+                      <td className="px-5 py-4">
+                        <div className="mx-auto flex max-w-[120px] items-center gap-2">
                           <div
                             className="h-2 flex-1 overflow-hidden rounded-full"
                             style={{ backgroundColor: "var(--section-bg)" }}
@@ -1063,7 +1063,7 @@ export default function StudentPerformance() {
                         </div>
                       </td>
 
-                      <td className="px-2 py-3">
+                      <td className="px-5 py-4">
                         <span
                           className={`inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${badge.className}`}
                         >
@@ -1071,7 +1071,7 @@ export default function StudentPerformance() {
                         </span>
                       </td>
 
-                      <td className="px-2 py-3">
+                      <td className="px-5 py-4">
                         {!item.hasPrediction ? (
                           <button
                             type="button"
@@ -1081,11 +1081,7 @@ export default function StudentPerformance() {
                             disabled={predictingId === item.studentId}
                             title={t.generatePrediction}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
-                            style={{
-                              backgroundColor: "var(--section-bg)",
-                              borderColor: "var(--border-color)",
-                              color: "var(--text-color)",
-                            }}
+                            style={inputStyle}
                           >
                             {predictingId === item.studentId ? (
                               <Loader2 size={15} className="animate-spin" />
@@ -1104,74 +1100,82 @@ export default function StudentPerformance() {
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
-            {/* PAGINATION */}
-            <div
-              className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
-              style={sectionStyle}
+        {/* PAGINATION */}
+        <div
+          className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.showing}{" "}
+            <span className="font-black" style={textStyle}>
+              {showingFrom}
+            </span>{" "}
+            {t.to}{" "}
+            <span className="font-black" style={textStyle}>
+              {showingTo}
+            </span>{" "}
+            {t.of}{" "}
+            <span className="font-black" style={textStyle}>
+              {filteredPerformances.length}
+            </span>{" "}
+            {t.results}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={goToPreviousPage}
+              disabled={safeCurrentPage === 1}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
-              <p className="text-xs font-semibold" style={mutedTextStyle}>
-                {t.page}{" "}
-                <span className="font-black" style={textStyle}>
-                  {safeCurrentPage}
-                </span>{" "}
-                {t.of}{" "}
-                <span className="font-black" style={textStyle}>
-                  {totalPages}
-                </span>
-              </p>
+              <ChevronLeft size={16} />
+            </button>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goToPreviousPage}
-                  disabled={safeCurrentPage === 1}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  style={inputStyle}
-                >
-                  <ChevronLeft size={16} />
-                  {t.previous}
-                </button>
+            {visiblePages.map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                style={{
+                  backgroundColor:
+                    safeCurrentPage === page
+                      ? "var(--secondary-color)"
+                      : "var(--input-bg)",
+                  borderColor: "var(--border-color)",
+                  color:
+                    safeCurrentPage === page ? "#ffffff" : "var(--text-color)",
+                }}
+              >
+                {page}
+              </button>
+            ))}
 
-                {visiblePages.map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
-                    style={{
-                      backgroundColor:
-                        safeCurrentPage === page
-                          ? "var(--secondary-color)"
-                          : "var(--input-bg)",
-                      borderColor: "var(--border-color)",
-                      color:
-                        safeCurrentPage === page
-                          ? "#ffffff"
-                          : "var(--text-color)",
-                    }}
-                  >
-                    {page}
-                  </button>
-                ))}
+            <button
+              type="button"
+              onClick={goToNextPage}
+              disabled={safeCurrentPage === totalPages}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
+            >
+              <ChevronRight size={16} />
+            </button>
 
-                <button
-                  type="button"
-                  onClick={goToNextPage}
-                  disabled={safeCurrentPage === totalPages}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  style={inputStyle}
-                >
-                  {t.next}
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+            <span
+              className="rounded-xl px-4 py-2 text-xs font-black"
+              style={inputStyle}
+            >
+              {t.page} {safeCurrentPage} / {totalPages}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -145,10 +145,27 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   }, []);
 
   const toggleMenu = (menu) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [menu]: !prev[menu],
-    }));
+    setOpenMenus((prev) => {
+      const isAlreadyOpen = prev[menu];
+
+      if (menu === "students") {
+        return {
+          academics: true,
+          students: !isAlreadyOpen,
+          evaluation: false,
+          finance: false,
+          ai: false,
+        };
+      }
+
+      return {
+        academics: menu === "academics" ? !isAlreadyOpen : false,
+        students: false,
+        evaluation: menu === "evaluation" ? !isAlreadyOpen : false,
+        finance: menu === "finance" ? !isAlreadyOpen : false,
+        ai: menu === "ai" ? !isAlreadyOpen : false,
+      };
+    });
   };
 
   const activeStyle =
@@ -170,8 +187,13 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         : "text-white hover:bg-white/10 hover:text-cyan-300"
     }`;
 
-  const studentsButtonClass =
-    "w-full flex items-center justify-between px-4 py-3 rounded-2xl text-white hover:bg-white/10 hover:text-cyan-300 transition-all duration-300";
+  const studentsButtonClass = (isOpen) =>
+    `w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300
+    ${
+      isOpen
+        ? "bg-white/10 text-white font-semibold"
+        : "text-white hover:bg-white/10 hover:text-cyan-300"
+    }`;
 
   const studentSubItemClass = (path) =>
     `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300
@@ -191,8 +213,9 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <div
-      className={`h-screen transition-all duration-300 flex flex-col
-  ${collapsed ? "w-20" : "w-72"}`}
+      className={`flex h-screen flex-col transition-all duration-300 ${
+        collapsed ? "w-20" : "w-72"
+      }`}
       style={{
         backgroundColor: "var(--sidebar-bg)",
         color: "var(--sidebar-text)",
@@ -206,15 +229,16 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         )}
 
         <button
+          type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-xl hover:bg-white/10 transition"
+          className="rounded-xl p-2 transition hover:bg-white/10"
         >
           <Menu size={22} />
         </button>
       </div>
 
       {/* MENU */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-3">
+      <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-3">
         {/* DASHBOARD */}
         <Link to="/admin" className={itemClass("/admin")}>
           <LayoutDashboard size={20} />
@@ -224,6 +248,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* ACADEMICS */}
         <div>
           <button
+            type="button"
             onClick={() => toggleMenu("academics")}
             className={buttonClass(openMenus.academics)}
           >
@@ -244,8 +269,9 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <div className="ml-6 mt-3 space-y-2 border-l border-white/10 pl-4">
               {/* STUDENTS MENU */}
               <button
+                type="button"
                 onClick={() => toggleMenu("students")}
-                className={studentsButtonClass}
+                className={studentsButtonClass(openMenus.students)}
               >
                 <div className="flex items-center gap-3">
                   <Users size={18} />
@@ -342,6 +368,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* AI */}
         <div>
           <button
+            type="button"
             onClick={() => toggleMenu("ai")}
             className={buttonClass(openMenus.ai)}
           >
@@ -382,6 +409,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* EVALUATION */}
         <div>
           <button
+            type="button"
             onClick={() => toggleMenu("evaluation")}
             className={buttonClass(openMenus.evaluation)}
           >
@@ -411,6 +439,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
         {/* FINANCE */}
         <div>
           <button
+            type="button"
             onClick={() => toggleMenu("finance")}
             className={buttonClass(openMenus.finance)}
           >

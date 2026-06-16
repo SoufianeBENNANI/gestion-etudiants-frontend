@@ -14,6 +14,7 @@ import {
   Archive,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from "lucide-react";
 
 import { getAllStudents } from "../services/studentService";
@@ -414,39 +415,47 @@ export default function StudentAttendance() {
       title: t.totalStudents,
       value: totalStudents,
       icon: Users,
-      iconClass: "bg-blue-600 text-white",
-      badge: t.records,
-      badgeClass: "bg-blue-50 text-blue-600",
+      iconBg: "bg-orange-500",
+      percentBg: "bg-orange-50",
+      percentText: "text-orange-600",
+      percent: "76%",
+      trend: "17%",
     },
     {
       title: t.presentStudents,
       value: presentStudents,
       icon: CheckCircle,
-      iconClass: "bg-emerald-600 text-white",
-      badge: t.present,
-      badgeClass: "bg-emerald-50 text-emerald-700",
+      iconBg: "bg-blue-500",
+      percentBg: "bg-blue-50",
+      percentText: "text-blue-600",
+      percent: "73%",
+      trend: "22%",
     },
     {
       title: t.absentStudents,
       value: absentStudents,
       icon: XCircle,
-      iconClass: "bg-red-600 text-white",
-      badge: t.absent,
-      badgeClass: "bg-red-50 text-red-700",
+      iconBg: "bg-red-500",
+      percentBg: "bg-red-50",
+      percentText: "text-red-600",
+      percent: "12%",
+      trend: "0.9%",
     },
     {
       title: t.lateStudents,
       value: lateStudents,
       icon: Clock,
-      iconClass: "bg-amber-500 text-white",
-      badge: t.late,
-      badgeClass: "bg-amber-50 text-amber-700",
+      iconBg: "bg-amber-500",
+      percentBg: "bg-amber-50",
+      percentText: "text-amber-600",
+      percent: "8%",
+      trend: "1.4%",
     },
   ];
 
   return (
     <div
-      className="min-h-screen space-y-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
@@ -455,122 +464,121 @@ export default function StudentAttendance() {
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div>
+          <p className="text-xs font-semibold text-blue-200">
+            {t.management}
+          </p>
 
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <Bell size={28} />
-            </div>
+          <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
-            <div>
-              <p className="text-xs font-bold text-blue-200">
-                {t.management}
-              </p>
+          <p className="mt-1 text-sm font-semibold text-slate-300">
+            {t.subtitle}
+          </p>
+        </div>
 
-              <h1 className="mt-1 text-2xl font-black tracking-tight">
-                {t.title}
-              </h1>
+        <div className="flex flex-col gap-3 sm:items-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => loadData()}
+              disabled={loading || autoRefreshing}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading || autoRefreshing ? (
+                <Loader2 size={17} className="animate-spin" />
+              ) : (
+                <RefreshCcw size={17} />
+              )}
+              {t.refresh}
+            </button>
 
-              <p className="mt-2 text-xs text-slate-300">{t.subtitle}</p>
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpenArchiveDialog(true)}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15"
+            >
+              <Archive size={17} />
+              {t.archive}
+            </button>
           </div>
 
-          <div className="flex flex-col gap-2.5 sm:items-end">
-            <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-              <button
-                type="button"
-                onClick={() => loadData()}
-                disabled={loading || autoRefreshing}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading || autoRefreshing ? (
-                  <Loader2 size={17} className="animate-spin" />
-                ) : (
-                  <RefreshCcw size={17} />
-                )}
-                {t.refresh}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setOpenArchiveDialog(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
-              >
-                <Archive size={17} />
-                {t.archive}
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-300">
-              {lastUpdated
-                ? `${t.lastUpdated} ${lastUpdated.toLocaleTimeString()}`
-                : t.waitingData}
-            </p>
-          </div>
+          <p className="text-xs font-semibold text-slate-300">
+            {lastUpdated
+              ? `${t.lastUpdated} ${lastUpdated.toLocaleTimeString()}`
+              : t.waitingData}
+          </p>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {statCards.map((card, index) => {
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        {statCards.map((card) => {
           const Icon = card.icon;
 
           return (
             <div
-              key={index}
-              className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              key={card.title}
+              className="rounded-[1.4rem] border p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
               style={cardStyle}
             >
-              <div className="mb-5 flex items-center justify-between">
-                <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${card.iconClass}`}
-                >
-                  <Icon size={22} />
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full ${card.iconBg} text-white`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-black" style={textStyle}>
+                      {loading ? "..." : card.value}
+                    </h3>
+
+                    <p className="text-xs font-semibold" style={mutedTextStyle}>
+                      {card.title}
+                    </p>
+                  </div>
                 </div>
 
-                <span
-                  className={`rounded-full px-3 py-1.5 text-xs font-black ${card.badgeClass}`}
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-full ${card.percentBg}`}
                 >
-                  {card.badge}
-                </span>
+                  <span className={`text-[11px] font-black ${card.percentText}`}>
+                    {card.percent}
+                  </span>
+                </div>
               </div>
 
-              <p className="text-sm font-black" style={textStyle}>
-                {card.title}
-              </p>
+              <div className="mt-5 flex items-center gap-3 text-xs font-semibold">
+                <span style={mutedTextStyle}>Last 30 days</span>
 
-              <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-                {loading ? "..." : card.value}
-              </h2>
+                <span className="font-black text-emerald-500">
+                  {card.trend}
+                </span>
+
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+              </div>
             </div>
           );
         })}
       </div>
 
       {/* SUMMARY */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div
-          className="rounded-2xl border p-5 shadow-sm xl:col-span-2"
+          className="rounded-[1.4rem] border p-5 shadow-sm xl:col-span-2"
           style={cardStyle}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
-            >
-              <Calendar size={22} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
+              <Calendar size={20} />
             </div>
 
             <div>
@@ -618,7 +626,7 @@ export default function StudentAttendance() {
         </div>
 
         <div
-          className="rounded-2xl border p-5 text-white shadow-sm"
+          className="rounded-[1.4rem] border p-5 text-white shadow-sm"
           style={{
             borderColor: "var(--border-color)",
             background:
@@ -631,7 +639,7 @@ export default function StudentAttendance() {
             <h2 className="text-lg font-black">{t.liveSync}</h2>
           </div>
 
-          <p className="mt-3 text-sm leading-6 text-slate-300">
+          <p className="mt-3 text-sm font-semibold leading-6 text-slate-300">
             {t.liveSyncDescription}
           </p>
         </div>
@@ -639,7 +647,7 @@ export default function StudentAttendance() {
 
       {/* TABLE */}
       <div
-        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        className="overflow-hidden rounded-[1.4rem] border shadow-sm transition-colors duration-300"
         style={cardStyle}
       >
         <div
@@ -647,10 +655,7 @@ export default function StudentAttendance() {
           style={sectionStyle}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
               <Calendar size={20} />
             </div>
 
@@ -659,7 +664,7 @@ export default function StudentAttendance() {
                 {t.attendanceRecords}
               </h2>
 
-              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                 {t.showing} {startRecord} {t.to} {endRecord} {t.of}{" "}
                 {filteredAttendances.length}{" "}
                 {filteredAttendances.length > 1
@@ -670,21 +675,19 @@ export default function StudentAttendance() {
           </div>
 
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-            <div className="relative">
-              <Search
-                size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2"
-                style={mutedTextStyle}
-              />
-
+            <div className="flex h-11 items-center gap-2 rounded-full border px-4">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 placeholder={t.searchPlaceholder}
-                className="w-full rounded-2xl border py-2.5 pl-10 pr-4 text-sm font-semibold outline-none transition sm:w-72"
-                style={inputStyle}
+                className="w-full bg-transparent text-sm font-semibold outline-none sm:w-64"
+                style={{
+                  color: "var(--text-color)",
+                }}
               />
+
+              <Search className="h-4 w-4" style={mutedTextStyle} />
             </div>
 
             <div className="flex items-center gap-2">
@@ -707,89 +710,97 @@ export default function StudentAttendance() {
           </div>
         </div>
 
-        {loading ? (
-          <div
-            className="flex items-center justify-center gap-2 p-10 text-sm font-bold"
-            style={mutedTextStyle}
-          >
-            <Loader2 size={18} className="animate-spin" />
-            {t.loadingAttendance}
-          </div>
-        ) : filteredAttendances.length === 0 ? (
-          <div
-            className="p-10 text-center text-sm font-bold"
-            style={mutedTextStyle}
-          >
-            {t.noAttendance}
-          </div>
-        ) : (
-          <>
-            <table className="w-full table-fixed border-collapse">
-              <thead>
-                <tr
-                  className="text-center text-[11px] uppercase tracking-wide"
-                  style={{
-                    backgroundColor: "var(--card-bg)",
-                    color: "var(--muted-text)",
-                  }}
-                >
-                  <th className="w-[28%] px-3 py-3 font-black">
-                    {t.student}
-                  </th>
-                  <th className="w-[30%] px-3 py-3 font-black">
-                    {t.email}
-                  </th>
-                  <th className="w-[16%] px-3 py-3 font-black">{t.date}</th>
-                  <th className="w-[14%] px-3 py-3 font-black">
-                    {t.status}
-                  </th>
-                  <th className="w-[12%] px-3 py-3 font-black">{t.id}</th>
-                </tr>
-              </thead>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[880px] table-fixed border-collapse">
+            <thead>
+              <tr
+                className="border-b text-center text-[11px] uppercase tracking-wide"
+                style={{
+                  borderColor: "var(--border-color)",
+                  color: "var(--muted-text)",
+                }}
+              >
+                <th className="w-[28%] px-5 py-4 font-black">{t.student}</th>
+                <th className="w-[30%] px-5 py-4 font-black">{t.email}</th>
+                <th className="w-[16%] px-5 py-4 font-black">{t.date}</th>
+                <th className="w-[14%] px-5 py-4 font-black">{t.status}</th>
+                <th className="w-[12%] px-5 py-4 font-black">{t.id}</th>
+              </tr>
+            </thead>
 
-              <tbody>
-                {paginatedAttendances.map((item) => (
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-10 text-center">
+                    <div
+                      className="flex items-center justify-center gap-2 text-sm font-bold"
+                      style={mutedTextStyle}
+                    >
+                      <Loader2 size={18} className="animate-spin" />
+                      {t.loadingAttendance}
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredAttendances.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-10 text-center">
+                    <span className="text-sm font-bold" style={mutedTextStyle}>
+                      {t.noAttendance}
+                    </span>
+                  </td>
+                </tr>
+              ) : (
+                paginatedAttendances.map((item) => (
                   <tr
                     key={item.id}
-                    className="border-t text-center text-sm transition"
+                    className="border-b text-center text-sm transition last:border-none hover:bg-slate-50/40"
                     style={{
                       borderColor: "var(--border-color)",
                       color: "var(--text-color)",
                     }}
                   >
-                    <td className="px-3 py-3">
-                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                        <div
-                          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
-                          style={{ backgroundColor: "var(--primary-color)" }}
-                        >
-                          <Users size={17} />
+                    <td className="px-5 py-4">
+                      <div className="mx-auto flex max-w-full items-center justify-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 font-black text-orange-600">
+                          {String(getStudentName(item)).charAt(0).toUpperCase()}
                         </div>
 
-                        <span className="truncate font-black" style={textStyle}>
-                          {getStudentName(item)}
-                        </span>
+                        <div className="min-w-0 text-center">
+                          <p className="truncate font-black" style={textStyle}>
+                            {getStudentName(item)}
+                          </p>
+
+                          <p
+                            className="mt-0.5 text-xs font-semibold"
+                            style={mutedTextStyle}
+                          >
+                            {t.student}
+                          </p>
+                        </div>
                       </div>
                     </td>
 
-                    <td className="px-3 py-3">
-                      <span className="block truncate" style={mutedTextStyle}>
+                    <td className="px-5 py-4">
+                      <span
+                        className="block truncate text-sm font-semibold"
+                        style={mutedTextStyle}
+                      >
                         {getStudentEmail(item)}
                       </span>
                     </td>
 
-                    <td className="px-3 py-3">
+                    <td className="px-5 py-4">
                       <span
-                        className="block truncate font-semibold"
+                        className="block truncate text-sm font-semibold"
                         style={mutedTextStyle}
                       >
                         {formatDateOnly(item.date)}
                       </span>
                     </td>
 
-                    <td className="px-3 py-3">
+                    <td className="px-5 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-black ring-1 ${getStatusBadge(
+                        className={`inline-flex rounded-full px-3 py-1.5 text-xs font-black ring-1 ${getStatusBadge(
                           item.status
                         )}`}
                       >
@@ -797,80 +808,89 @@ export default function StudentAttendance() {
                       </span>
                     </td>
 
-                    <td className="px-3 py-3">
+                    <td className="px-5 py-4">
                       <span className="font-black" style={textStyle}>
                         {getStudentId(item) || "-"}
                       </span>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-            {/* PAGINATION */}
-            <div
-              className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
-              style={sectionStyle}
+        {/* PAGINATION */}
+        <div
+          className="flex flex-col gap-3 border-t px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+          style={sectionStyle}
+        >
+          <p className="text-xs font-semibold" style={mutedTextStyle}>
+            {t.showing}{" "}
+            <span className="font-black" style={textStyle}>
+              {startRecord}
+            </span>{" "}
+            {t.to}{" "}
+            <span className="font-black" style={textStyle}>
+              {endRecord}
+            </span>{" "}
+            {t.of}{" "}
+            <span className="font-black" style={textStyle}>
+              {filteredAttendances.length}
+            </span>{" "}
+            {filteredAttendances.length > 1
+              ? t.attendanceRecordsPlural
+              : t.attendanceRecord}
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
             >
-              <p className="text-xs font-semibold" style={mutedTextStyle}>
-                {t.page}{" "}
-                <span className="font-black" style={textStyle}>
-                  {currentPage}
-                </span>{" "}
-                {t.of}{" "}
-                <span className="font-black" style={textStyle}>
-                  {totalPages}
-                </span>
-              </p>
+              <ChevronLeft size={16} />
+            </button>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={goToPreviousPage}
-                  disabled={currentPage === 1}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  style={inputStyle}
-                >
-                  <ChevronLeft size={16} />
-                  {t.previous}
-                </button>
+            {visiblePages.map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
+                style={{
+                  backgroundColor:
+                    currentPage === page
+                      ? "var(--secondary-color)"
+                      : "var(--input-bg)",
+                  borderColor: "var(--border-color)",
+                  color: currentPage === page ? "#ffffff" : "var(--text-color)",
+                }}
+              >
+                {page}
+              </button>
+            ))}
 
-                {visiblePages.map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-black transition"
-                    style={{
-                      backgroundColor:
-                        currentPage === page
-                          ? "var(--secondary-color)"
-                          : "var(--input-bg)",
-                      borderColor: "var(--border-color)",
-                      color:
-                        currentPage === page
-                          ? "#ffffff"
-                          : "var(--text-color)",
-                    }}
-                  >
-                    {page}
-                  </button>
-                ))}
+            <button
+              type="button"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              style={inputStyle}
+            >
+              <ChevronRight size={16} />
+            </button>
 
-                <button
-                  type="button"
-                  onClick={goToNextPage}
-                  disabled={currentPage === totalPages}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  style={inputStyle}
-                >
-                  {t.next}
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+            <span
+              className="rounded-xl px-4 py-2 text-xs font-black"
+              style={inputStyle}
+            >
+              {t.page} {currentPage} / {totalPages}
+            </span>
+          </div>
+        </div>
       </div>
 
       <ArchivedAttendance

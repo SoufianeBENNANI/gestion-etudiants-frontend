@@ -30,7 +30,6 @@ const translations = {
     loading: "Loading settings...",
     noSettings: "No settings found",
     backendMessage: "Please check your backend settings endpoint.",
-    back: "Back",
     settingsMenu: "Settings Menu",
     preferences: "Preferences",
     active: "Active",
@@ -98,10 +97,7 @@ const translations = {
 export default function Settings() {
   const navigate = useNavigate();
 
-  // Form values
   const [settings, setSettings] = useState(null);
-
-  // Applied values: UI does not change before Save
   const [appliedSettings, setAppliedSettings] = useState(null);
 
   const [activeTab, setActiveTab] = useState("general");
@@ -150,7 +146,6 @@ export default function Settings() {
       setSettings(data);
       setAppliedSettings(data);
 
-      // Apply only saved settings from backend
       applySettingsTheme(data);
       applyLanguage(data?.language);
 
@@ -170,9 +165,6 @@ export default function Settings() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Important:
-    // Do not apply theme, language, localStorage or events here.
-    // Only update form values.
     setSettings((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -193,7 +185,6 @@ export default function Settings() {
       setSettings(updatedSettings);
       setAppliedSettings(updatedSettings);
 
-      // Apply changes only after Save
       applySettingsTheme(updatedSettings);
       applyLanguage(updatedSettings?.language);
 
@@ -204,8 +195,6 @@ export default function Settings() {
           detail: updatedSettings?.language || "EN",
         })
       );
-
-      
     } catch (error) {
       console.error("Error updating settings:", error);
       alert("Error while updating settings");
@@ -250,7 +239,10 @@ export default function Settings() {
         className="flex min-h-[70vh] items-center justify-center transition-colors duration-300"
         style={{ backgroundColor: "var(--app-bg)" }}
       >
-        <div className="rounded-3xl border px-6 py-5 shadow-sm" style={cardStyle}>
+        <div
+          className="rounded-3xl border px-6 py-5 shadow-sm"
+          style={cardStyle}
+        >
           <div
             className="flex items-center gap-3 text-sm font-black"
             style={textStyle}
@@ -287,15 +279,7 @@ export default function Settings() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-2.5 text-sm font-bold shadow-sm transition"
-            style={inputStyle}
-          >
-            <ArrowLeft size={17} />
-            {t.back}
-          </button>
+
         </div>
       </div>
     );
@@ -303,72 +287,64 @@ export default function Settings() {
 
   return (
     <div
-      className="min-h-screen space-y-6 p-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
       }}
+      dir={currentLanguage === "AR" ? "rtl" : "ltr"}
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[2rem] border px-6 py-6 text-white shadow-sm"
+        className="rounded-[1.7rem] border px-6 py-5 text-white shadow-sm"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-40 w-40 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
-
-        <div className="absolute bottom-0 right-40 h-32 w-32 rounded-full bg-cyan-500/10 blur-3xl" />
-
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <SettingsIcon size={28} />
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white ring-1 ring-white/15">
+              <SettingsIcon size={24} />
             </div>
 
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-black text-blue-100 ring-1 ring-white/10">
+            <div className="min-w-0">
+              <p className="inline-flex items-center gap-2 text-xs font-semibold text-blue-200">
                 <CheckCircle2 size={14} />
                 {t.systemConfiguration}
-              </div>
+              </p>
 
-              <h1 className="mt-2 text-2xl font-black tracking-tight">
+              <h1 className="mt-1 truncate text-2xl font-black text-white">
                 {t.settings}
               </h1>
 
-              <p className="mt-2 text-xs font-semibold text-slate-300">
+              <p className="mt-1 text-sm font-semibold text-slate-300">
                 {t.subtitle}
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
-            style={{
-              backgroundColor: "var(--primary-color)",
-              boxShadow: "0 18px 35px rgba(37, 99, 235, 0.25)",
-            }}
-          >
-            {saving ? (
-              <>
-                <Loader2 size={17} className="animate-spin" />
-                {t.saving}
-              </>
-            ) : (
-              <>
-                <Save size={17} />
-                {t.save}
-              </>
-            )}
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {saving ? (
+                <>
+                  <Loader2 size={17} className="animate-spin" />
+                  {t.saving}
+                </>
+              ) : (
+                <>
+                  <Save size={17} />
+                  {t.save}
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -473,7 +449,10 @@ export default function Settings() {
                   {activeTabData?.label}
                 </h2>
 
-                <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
+                <p
+                  className="mt-0.5 text-xs font-semibold"
+                  style={mutedTextStyle}
+                >
                   {activeTabData?.description}
                 </p>
               </div>

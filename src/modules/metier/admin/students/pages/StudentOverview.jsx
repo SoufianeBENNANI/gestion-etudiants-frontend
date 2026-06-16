@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
   Activity,
   Loader2,
+  TrendingUp,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -288,6 +289,8 @@ export default function StudentOverview() {
     }
   };
 
+  const activeStudents = stats.totalStudents - stats.totalArchivedStudents;
+
   const overviewCards = [
     {
       title: t.allStudents,
@@ -296,7 +299,11 @@ export default function StudentOverview() {
       icon: Users,
       path: "/admin/students/all",
       badge: t.records,
-      color: "blue",
+      iconBg: "bg-orange-500",
+      percentBg: "bg-orange-50",
+      percentText: "text-orange-600",
+      percent: "76%",
+      trend: "17%",
       type: "link",
     },
     {
@@ -305,7 +312,11 @@ export default function StudentOverview() {
       description: t.addStudentDescription,
       icon: UserPlus,
       badge: t.new,
-      color: "emerald",
+      iconBg: "bg-emerald-500",
+      percentBg: "bg-emerald-50",
+      percentText: "text-emerald-600",
+      percent: "New",
+      trend: "0.9%",
       type: "addDialog",
     },
     {
@@ -314,7 +325,11 @@ export default function StudentOverview() {
       description: t.archivedStudentsDescription,
       icon: Archive,
       badge: t.archive,
-      color: "amber",
+      iconBg: "bg-red-500",
+      percentBg: "bg-red-50",
+      percentText: "text-red-600",
+      percent: "12%",
+      trend: "0.9%",
       type: "archiveDialog",
     },
     {
@@ -324,7 +339,11 @@ export default function StudentOverview() {
       icon: BarChart3,
       path: "/admin/students/performance",
       badge: t.analytics,
-      color: "violet",
+      iconBg: "bg-violet-500",
+      percentBg: "bg-violet-50",
+      percentText: "text-violet-600",
+      percent: "73%",
+      trend: "22%",
       type: "link",
     },
     {
@@ -334,7 +353,11 @@ export default function StudentOverview() {
       icon: Bell,
       path: "/admin/students/attendance",
       badge: t.presence,
-      color: "cyan",
+      iconBg: "bg-blue-500",
+      percentBg: "bg-blue-50",
+      percentText: "text-blue-600",
+      percent: "100%",
+      trend: "1.4%",
       type: "link",
     },
     {
@@ -344,98 +367,72 @@ export default function StudentOverview() {
       icon: Brain,
       path: "/admin/students/predictions",
       badge: t.ai,
-      color: "rose",
+      iconBg: "bg-rose-500",
+      percentBg: "bg-rose-50",
+      percentText: "text-rose-600",
+      percent: "AI",
+      trend: "3.1%",
       type: "link",
     },
   ];
 
-  const colorStyles = {
-    blue: {
-      icon: "bg-blue-600 text-white",
-      badge: "bg-blue-50 text-blue-600",
-    },
-    emerald: {
-      icon: "bg-emerald-600 text-white",
-      badge: "bg-emerald-50 text-emerald-600",
-    },
-    amber: {
-      icon: "bg-amber-500 text-white",
-      badge: "bg-amber-50 text-amber-600",
-    },
-    violet: {
-      icon: "bg-violet-600 text-white",
-      badge: "bg-violet-50 text-violet-600",
-    },
-    cyan: {
-      icon: "bg-cyan-600 text-white",
-      badge: "bg-cyan-50 text-cyan-600",
-    },
-    rose: {
-      icon: "bg-rose-600 text-white",
-      badge: "bg-rose-50 text-rose-600",
-    },
-  };
-
   const renderCardContent = (card) => {
     const Icon = card.icon;
-    const style = colorStyles[card.color];
 
     return (
       <>
-        <div
-          className="absolute -right-8 -top-8 h-24 w-24 rounded-full transition group-hover:scale-125"
-          style={{ backgroundColor: "var(--section-bg)" }}
-        />
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-full ${card.iconBg} text-white`}
+            >
+              <Icon className="h-5 w-5" />
+            </div>
 
-        <div className="relative flex items-start justify-between gap-3">
-          <div
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl transition ${style.icon}`}
-          >
-            <Icon size={22} />
+            <div className="min-w-0">
+              <h3 className="text-2xl font-black" style={textStyle}>
+                {loading ? (
+                  <Loader2 className="animate-spin" size={24} />
+                ) : (
+                  card.value
+                )}
+              </h3>
+
+              <p className="truncate text-xs font-semibold" style={mutedTextStyle}>
+                {card.title}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span
-              className={`rounded-full px-3 py-1.5 text-xs font-black ${style.badge}`}
-            >
-              {card.badge}
+          <div
+            className={`flex h-11 w-11 items-center justify-center rounded-full ${card.percentBg}`}
+          >
+            <span className={`text-[11px] font-black ${card.percentText}`}>
+              {card.percent}
             </span>
-
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-xl transition group-hover:text-white"
-              style={{
-                backgroundColor: "var(--section-bg)",
-                color: "var(--muted-text)",
-              }}
-            >
-              <ArrowUpRight size={17} />
-            </div>
           </div>
         </div>
 
-        <div className="relative mt-6">
-          <h2 className="text-sm font-black" style={textStyle}>
-            {card.title}
-          </h2>
+        <p className="mt-4 line-clamp-2 text-xs font-semibold leading-5" style={mutedTextStyle}>
+          {card.description}
+        </p>
 
-          <p
-            className="mt-3 truncate text-2xl font-black tracking-tight"
-            style={textStyle}
-            title={String(card.value)}
-          >
-            {loading ? (
-              <Loader2 className="animate-spin" size={24} />
-            ) : (
-              card.value
-            )}
-          </p>
+        <div className="mt-5 flex items-center justify-between gap-3 text-xs font-semibold">
+          <div className="flex items-center gap-3">
+            <span style={mutedTextStyle}>{card.badge}</span>
+            <span className="font-black text-emerald-500">{card.trend}</span>
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+          </div>
 
-          <p
-            className="mt-2 text-xs font-semibold leading-5"
-            style={mutedTextStyle}
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-xl transition group-hover:bg-blue-600 group-hover:text-white"
+            style={{
+              backgroundColor: "var(--section-bg)",
+              color: "var(--muted-text)",
+            }}
           >
-            {card.description}
-          </p>
+            <ArrowUpRight size={17} />
+          </div>
         </div>
       </>
     );
@@ -443,7 +440,7 @@ export default function StudentOverview() {
 
   const renderCard = (card, index) => {
     const cardClass =
-      "group relative overflow-hidden rounded-2xl border p-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md";
+      "group rounded-[1.4rem] border p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md";
 
     if (card.type === "addDialog") {
       return (
@@ -482,7 +479,7 @@ export default function StudentOverview() {
 
   return (
     <div
-      className="min-h-screen space-y-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
@@ -491,59 +488,46 @@ export default function StudentOverview() {
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
+        <div>
+          <p className="text-xs font-semibold text-blue-200">
+            {t.management}
+          </p>
 
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
+          <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <GraduationCap size={28} />
-            </div>
+          <p className="mt-1 text-sm font-semibold text-slate-300">
+            {t.subtitle}
+          </p>
+        </div>
 
-            <div>
-              <p className="text-xs font-bold text-blue-200">
-                {t.management}
-              </p>
-
-              <h1 className="mt-1 text-2xl font-black tracking-tight">
-                {t.title}
-              </h1>
-
-              <p className="mt-2 text-xs text-slate-300">
-                {t.subtitle}
-              </p>
-            </div>
-          </div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-blue-200 ring-1 ring-white/15">
+          <GraduationCap size={24} />
         </div>
       </div>
 
       {/* CARDS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {overviewCards.map((card, index) => renderCard(card, index))}
       </div>
 
       {/* SUMMARY */}
       <div
-        className="rounded-2xl border p-5 shadow-sm transition-colors duration-300"
+        className="overflow-hidden rounded-[1.4rem] border shadow-sm transition-colors duration-300"
         style={cardStyle}
       >
-        <div className="flex items-center gap-3">
-          <div
-            className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-            style={{ backgroundColor: "var(--primary-color)" }}
-          >
-            <Activity size={22} />
+        <div
+          className="flex items-center gap-3 border-b px-5 py-4"
+          style={sectionStyle}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
+            <Activity size={20} />
           </div>
 
           <div>
@@ -551,26 +535,24 @@ export default function StudentOverview() {
               {t.summaryTitle}
             </h2>
 
-            <p className="text-xs font-semibold" style={mutedTextStyle}>
+            <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
               {t.summaryDescription}
             </p>
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-2xl p-4" style={sectionStyle}>
+        <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-3">
+          <div className="rounded-[1.2rem] border p-4" style={sectionStyle}>
             <p className="text-xs font-bold" style={mutedTextStyle}>
               {t.activeStudents}
             </p>
 
             <p className="mt-2 text-2xl font-black" style={textStyle}>
-              {loading
-                ? "..."
-                : stats.totalStudents - stats.totalArchivedStudents}
+              {loading ? "..." : activeStudents}
             </p>
           </div>
 
-          <div className="rounded-2xl p-4" style={sectionStyle}>
+          <div className="rounded-[1.2rem] border p-4" style={sectionStyle}>
             <p className="text-xs font-bold" style={mutedTextStyle}>
               {t.totalAttendance}
             </p>
@@ -580,7 +562,7 @@ export default function StudentOverview() {
             </p>
           </div>
 
-          <div className="rounded-2xl p-4" style={sectionStyle}>
+          <div className="rounded-[1.2rem] border p-4" style={sectionStyle}>
             <p className="text-xs font-bold" style={mutedTextStyle}>
               {t.totalPredictions}
             </p>

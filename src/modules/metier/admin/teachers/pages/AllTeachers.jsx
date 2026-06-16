@@ -420,9 +420,41 @@ export default function AllTeachers() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handleChangeItemsPerPage = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
+  const stats = [
+    {
+      title: t.totalTeachers,
+      value: totalTeachers,
+      label: t.records,
+      icon: GraduationCap,
+      iconBg: "bg-orange-500",
+      labelClass: "bg-orange-50 text-orange-600",
+    },
+    {
+      title: t.displayedTeachers,
+      value: teachers.length,
+      label: t.results,
+      icon: Search,
+      iconBg: "bg-blue-500",
+      labelClass: "bg-blue-50 text-blue-600",
+    },
+    {
+      title: t.archived,
+      value: archivedCount,
+      label: t.status,
+      icon: AlertTriangle,
+      iconBg: "bg-red-500",
+      labelClass: "bg-red-50 text-red-600",
+    },
+  ];
+
   return (
     <div
-      className="min-h-screen space-y-6 transition-colors duration-300"
+      className="min-h-screen space-y-5 px-2 py-1 transition-colors duration-300"
       style={{
         backgroundColor: "var(--app-bg)",
         color: "var(--text-color)",
@@ -431,177 +463,120 @@ export default function AllTeachers() {
     >
       {/* HEADER */}
       <div
-        className="relative overflow-hidden rounded-[1.7rem] border px-6 py-6 text-white shadow-sm"
+        className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
         style={{
           borderColor: "var(--border-color)",
           background:
             "linear-gradient(135deg, var(--secondary-color), #020617)",
         }}
       >
-        <div
-          className="absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl"
-          style={{ backgroundColor: "var(--primary-color)", opacity: 0.2 }}
-        />
-        <div className="absolute bottom-0 right-28 h-28 w-28 rounded-full bg-cyan-500/10 blur-3xl" />
+        <div>
+          <p className="text-xs font-semibold text-blue-200">
+            {t.management}
+          </p>
 
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-blue-300 ring-1 ring-white/15">
-              <GraduationCap size={28} />
-            </div>
+          <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
-            <div>
-              <p className="text-xs font-bold text-blue-200">
-                {t.management}
-              </p>
+          <p className="mt-1 text-sm font-semibold text-slate-300">
+            {t.subtitle}
+          </p>
+        </div>
 
-              <h1 className="mt-1 text-2xl font-black tracking-tight">
-                {t.title}
-              </h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder={t.searchPlaceholder}
+              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-64"
+            />
 
-              <p className="mt-2 text-xs text-slate-300">
-                {t.subtitle}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center">
-            <div className="relative">
-              <Search
-                size={17}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-              />
-
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder={t.searchPlaceholder}
-                className="w-full rounded-2xl border border-white/15 bg-white/10 py-2.5 pl-10 pr-10 text-sm font-semibold text-white outline-none backdrop-blur-xl transition placeholder:text-slate-300 focus:border-white/30 focus:bg-white/15 sm:w-72"
-              />
-
-              {searching && (
-                <Loader2
-                  size={17}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-slate-300"
-                />
+            <button
+              type="button"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white"
+            >
+              {searching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
               )}
-            </div>
-
-            <button
-              type="button"
-              onClick={handleOpenAddDialog}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
-            >
-              <Plus size={17} />
-              {t.add}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setOpenArchiveDialog(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-2.5 text-sm font-bold text-white ring-1 ring-white/15 transition hover:bg-white/15"
-            >
-              <Archive size={17} />
-              {t.archive}
-            </button>
-
-            <button
-              type="button"
-              onClick={downloadTeachersPdf}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 ring-1 ring-red-300/30 transition hover:-translate-y-0.5 hover:opacity-80"
-            >
-              <FileDown size={17} />
-              {t.pdf}
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={handleOpenAddDialog}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15"
+          >
+            <Plus size={17} />
+            {t.add}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setOpenArchiveDialog(true)}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 shadow-sm transition hover:bg-white/15"
+          >
+            <Archive size={17} />
+            {t.archive}
+          </button>
+
+          <button
+            type="button"
+            onClick={downloadTeachersPdf}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-red-700"
+          >
+            <FileDown size={17} />
+            {t.pdf}
+          </button>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        {stats.map((item) => {
+          const Icon = item.icon;
+
+          return (
             <div
-              className="flex h-11 w-11 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
+              key={item.title}
+              className="rounded-[1.4rem] border p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+              style={cardStyle}
             >
-              <GraduationCap size={22} />
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full ${item.iconBg} text-white`}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-black" style={textStyle}>
+                      {item.value}
+                    </h3>
+
+                    <p className="text-xs font-semibold" style={mutedTextStyle}>
+                      {item.title}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className={`rounded-full px-3 py-1.5 text-xs font-black ${item.labelClass}`}
+                >
+                  {item.label}
+                </span>
+              </div>
             </div>
-
-            <span
-              className="rounded-full px-3 py-1.5 text-xs font-black"
-              style={{
-                backgroundColor: "var(--section-bg)",
-                color: "var(--primary-color)",
-              }}
-            >
-              {t.records}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.totalTeachers}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {totalTeachers}
-          </h2>
-        </div>
-
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-600 text-white">
-              <Search size={22} />
-            </div>
-
-            <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-600">
-              {t.results}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.displayedTeachers}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {teachers.length}
-          </h2>
-        </div>
-
-        <div
-          className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          style={cardStyle}
-        >
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-600 text-white">
-              <AlertTriangle size={22} />
-            </div>
-
-            <span className="rounded-full bg-red-50 px-3 py-1.5 text-xs font-black text-red-500">
-              {t.status}
-            </span>
-          </div>
-
-          <p className="text-sm font-black" style={textStyle}>
-            {t.archived}
-          </p>
-
-          <h2 className="mt-3 text-2xl font-black" style={textStyle}>
-            {archivedCount}
-          </h2>
-        </div>
+          );
+        })}
       </div>
 
       {/* TABLE */}
       <div
-        className="overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300"
+        className="overflow-hidden rounded-[1.4rem] border shadow-sm transition-colors duration-300"
         style={cardStyle}
       >
         <div
@@ -609,10 +584,7 @@ export default function AllTeachers() {
           style={sectionStyle}
         >
           <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center rounded-2xl text-white"
-              style={{ backgroundColor: "var(--primary-color)" }}
-            >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">
               <Users size={20} />
             </div>
 
@@ -621,7 +593,7 @@ export default function AllTeachers() {
                 {t.teachersList}
               </h2>
 
-              <p className="mt-0.5 text-xs" style={mutedTextStyle}>
+              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
                 {t.showing} {startTeacher} {t.to} {endTeacher} {t.of}{" "}
                 {teachers.length} {t.teachers}
               </p>
@@ -635,10 +607,7 @@ export default function AllTeachers() {
 
             <select
               value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
+              onChange={handleChangeItemsPerPage}
               className="rounded-xl border px-3 py-2 text-xs font-bold outline-none transition"
               style={inputStyle}
             >
@@ -650,155 +619,161 @@ export default function AllTeachers() {
           </div>
         </div>
 
-        <table className="w-full table-fixed border-collapse">
-          <thead>
-            <tr
-              className="text-center text-[11px] uppercase tracking-wide"
-              style={{
-                backgroundColor: "var(--card-bg)",
-                color: "var(--muted-text)",
-              }}
-            >
-              <th className="w-[22%] px-3 py-3 font-black">{t.teacher}</th>
-              <th className="w-[25%] px-3 py-3 font-black">{t.email}</th>
-              <th className="w-[19%] px-3 py-3 font-black">
-                {t.speciality}
-              </th>
-              <th className="w-[20%] px-3 py-3 font-black">
-                {t.department}
-              </th>
-              <th className="w-[14%] px-3 py-3 font-black">{t.actions}</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="5" className="px-5 py-8 text-center">
-                  <div
-                    className="flex items-center justify-center gap-2 text-sm font-bold"
-                    style={mutedTextStyle}
-                  >
-                    <Loader2 size={18} className="animate-spin" />
-                    {t.loadingTeachers}
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[980px] table-fixed border-collapse">
+            <thead>
+              <tr
+                className="border-b text-center text-[11px] uppercase tracking-wide"
+                style={{
+                  borderColor: "var(--border-color)",
+                  color: "var(--muted-text)",
+                }}
+              >
+                <th className="w-[24%] px-5 py-4 font-black">{t.teacher}</th>
+                <th className="w-[26%] px-5 py-4 font-black">{t.email}</th>
+                <th className="w-[18%] px-5 py-4 font-black">
+                  {t.speciality}
+                </th>
+                <th className="w-[17%] px-5 py-4 font-black">
+                  {t.department}
+                </th>
+                <th className="w-[15%] px-5 py-4 font-black">{t.actions}</th>
               </tr>
-            ) : teachers.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="px-5 py-8 text-center">
-                  <span className="text-sm font-bold" style={mutedTextStyle}>
-                    {t.noTeachers}
-                  </span>
-                </td>
-              </tr>
-            ) : (
-              paginatedTeachers.map((teacher) => {
-                const fullName = `${teacher.nom || ""} ${
-                  teacher.prenom || ""
-                }`.trim();
+            </thead>
 
-                const department =
-                  teacher.departement?.nom ||
-                  teacher.departementNom ||
-                  teacher.nomDepartement ||
-                  "-";
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-10 text-center">
+                    <div
+                      className="flex items-center justify-center gap-2 text-sm font-bold"
+                      style={mutedTextStyle}
+                    >
+                      <Loader2 size={18} className="animate-spin" />
+                      {t.loadingTeachers}
+                    </div>
+                  </td>
+                </tr>
+              ) : teachers.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-5 py-10 text-center">
+                    <span className="text-sm font-bold" style={mutedTextStyle}>
+                      {t.noTeachers}
+                    </span>
+                  </td>
+                </tr>
+              ) : (
+                paginatedTeachers.map((teacher) => {
+                  const fullName = `${teacher.nom || ""} ${
+                    teacher.prenom || ""
+                  }`.trim();
 
-                return (
-                  <tr
-                    key={teacher.id}
-                    className="border-t text-center text-sm transition"
-                    style={{
-                      borderColor: "var(--border-color)",
-                      color: "var(--text-color)",
-                    }}
-                  >
-                    <td className="px-3 py-3">
-                      <div className="mx-auto flex max-w-full items-center justify-center gap-2">
-                        <div
-                          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-white sm:flex"
-                          style={{ backgroundColor: "var(--primary-color)" }}
-                        >
-                          <GraduationCap size={17} />
+                  const department =
+                    teacher.departement?.nom ||
+                    teacher.departementNom ||
+                    teacher.nomDepartement ||
+                    "-";
+
+                  return (
+                    <tr
+                      key={teacher.id}
+                      className="border-b text-center text-sm transition last:border-none hover:bg-slate-50/40"
+                      style={{
+                        borderColor: "var(--border-color)",
+                        color: "var(--text-color)",
+                      }}
+                    >
+                      <td className="px-5 py-4">
+                        <div className="mx-auto flex max-w-full items-center justify-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 font-black text-orange-600">
+                            {String(fullName || "-").charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="min-w-0 text-center">
+                            <p className="truncate font-black" style={textStyle}>
+                              {fullName || "-"}
+                            </p>
+
+                            <p
+                              className="mt-0.5 text-xs font-semibold"
+                              style={mutedTextStyle}
+                            >
+                              {t.teacher}
+                            </p>
+                          </div>
                         </div>
+                      </td>
 
-                        <span className="truncate font-black" style={textStyle}>
-                          {fullName || "-"}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="px-3 py-3">
-                      <span className="block truncate" style={mutedTextStyle}>
-                        {teacher.email || "-"}
-                      </span>
-                    </td>
-
-                    <td className="px-3 py-3">
-                      <span
-                        className="block truncate font-semibold"
-                        style={mutedTextStyle}
-                      >
-                        {teacher.specialite || "-"}
-                      </span>
-                    </td>
-
-                    <td className="px-3 py-3">
-                      <span
-                        className="inline-flex max-w-full rounded-full px-3 py-1.5 text-xs font-black"
-                        style={{
-                          backgroundColor: "var(--section-bg)",
-                          color: "var(--primary-color)",
-                        }}
-                      >
-                        <span className="truncate">{department}</span>
-                      </span>
-                    </td>
-
-                    <td className="px-3 py-3">
-                      <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setViewTeacher(teacher)}
-                          title={t.view}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-white transition hover:opacity-80"
-                          style={{ backgroundColor: "var(--primary-color)" }}
+                      <td className="px-5 py-4">
+                        <span
+                          className="block truncate text-sm font-semibold"
+                          style={mutedTextStyle}
                         >
-                          <Eye size={15} />
-                        </button>
+                          {teacher.email || "-"}
+                        </span>
+                      </td>
 
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTeacher(teacher)}
-                          disabled={!teacher.id}
-                          title={t.edit}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
+                      <td className="px-5 py-4">
+                        <span
+                          className="inline-flex rounded-full px-3 py-1.5 text-xs font-black"
                           style={{
                             backgroundColor: "var(--section-bg)",
-                            borderColor: "var(--border-color)",
-                            color: "var(--text-color)",
+                            color: "var(--primary-color)",
                           }}
                         >
-                          <Pencil size={15} />
-                        </button>
+                          {teacher.specialite || "-"}
+                        </span>
+                      </td>
 
-                        <button
-                          type="button"
-                          onClick={() => setTeacherToDelete(teacher)}
-                          disabled={!teacher.id}
-                          title={t.delete}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
+                      <td className="px-5 py-4">
+                        <span
+                          className="block truncate text-sm font-semibold"
+                          style={mutedTextStyle}
                         >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                          {department}
+                        </span>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setViewTeacher(teacher)}
+                            title={t.view}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700"
+                          >
+                            <Eye size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedTeacher(teacher)}
+                            disabled={!teacher.id}
+                            title={t.edit}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
+                            style={inputStyle}
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setTeacherToDelete(teacher)}
+                            disabled={!teacher.id}
+                            title={t.delete}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-600 text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* PAGINATION */}
         <div
@@ -806,14 +781,19 @@ export default function AllTeachers() {
           style={sectionStyle}
         >
           <p className="text-xs font-semibold" style={mutedTextStyle}>
-            {t.page}{" "}
+            {t.showing}{" "}
             <span className="font-black" style={textStyle}>
-              {currentPage}
+              {startTeacher}
+            </span>{" "}
+            {t.to}{" "}
+            <span className="font-black" style={textStyle}>
+              {endTeacher}
             </span>{" "}
             {t.of}{" "}
             <span className="font-black" style={textStyle}>
-              {totalPages}
-            </span>
+              {teachers.length}
+            </span>{" "}
+            {t.teachers}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -821,11 +801,10 @@ export default function AllTeachers() {
               type="button"
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
               style={inputStyle}
             >
               <ChevronLeft size={16} />
-              {t.previous}
             </button>
 
             {visiblePages.map((page) => (
@@ -840,8 +819,7 @@ export default function AllTeachers() {
                       ? "var(--secondary-color)"
                       : "var(--input-bg)",
                   borderColor: "var(--border-color)",
-                  color:
-                    currentPage === page ? "#ffffff" : "var(--text-color)",
+                  color: currentPage === page ? "#ffffff" : "var(--text-color)",
                 }}
               >
                 {page}
@@ -852,12 +830,18 @@ export default function AllTeachers() {
               type="button"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
               style={inputStyle}
             >
-              {t.next}
               <ChevronRight size={16} />
             </button>
+
+            <span
+              className="rounded-xl px-4 py-2 text-xs font-black"
+              style={inputStyle}
+            >
+              {t.page} {currentPage} / {totalPages}
+            </span>
           </div>
         </div>
       </div>
