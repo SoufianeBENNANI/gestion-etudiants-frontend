@@ -31,6 +31,7 @@ import {
 } from "recharts";
 
 import { getDashboardData } from "../services/dashboardService";
+import { connectKafkaNotifications } from "../services/notificationService";
 
 const translations = {
   EN: {
@@ -316,6 +317,11 @@ export default function AdminDashboard() {
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+
+  const [selectedNotification, setSelectedNotification] = useState(null);
+
   const [dashboardData, setDashboardData] = useState({
     students: [],
     archivedStudents: [],
@@ -359,18 +365,39 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    const handleLanguageChange = (event) => {
-      const nextLanguage =
-        event.detail || localStorage.getItem("app-language") || "EN";
+    const isAllowedNotification = (notification) => {
+      const entity = String(notification?.entity || "").toUpperCase();
+      const action = String(notification?.action || "").toUpperCase();
 
-      setLanguage(nextLanguage);
+      const rules = {
+        PAYEMENT: ["CREATED", "UPDATED", "DELETED", "RESTORED", "GENERATED"],
+        PAYMENT: ["CREATED", "UPDATED", "DELETED", "RESTORED", "GENERATED"],
+        ATTENDANCE: ["CREATED", "UPDATED"],
+        GRADE: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
+        GMAIL: ["SENT"],
+      };
+
+      return rules[entity]?.includes(action);
     };
 
-    window.addEventListener("app-language-change", handleLanguageChange);
+    const disconnect = connectKafkaNotifications((notification) => {
+      console.log("Notification dashboard:", notification);
 
-    return () => {
-      window.removeEventListener("app-language-change", handleLanguageChange);
-    };
+      if (!isAllowedNotification(notification)) {
+        console.log("Notification ignorée:", notification);
+        return;
+      }
+
+      setNotifications((prev) => [
+        {
+          ...notification,
+          receivedAt: notification?.createdAt || new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+    });
+
+    return () => disconnect();
   }, []);
 
   const loadDashboard = async () => {
@@ -546,10 +573,10 @@ export default function AdminDashboard() {
 
     const classe = String(
       student.classe?.nom ||
-        student.classeName ||
-        student.className ||
-        student.niveau ||
-        ""
+      student.classeName ||
+      student.className ||
+      student.niveau ||
+      ""
     ).toLowerCase();
 
     return (
@@ -576,17 +603,6 @@ export default function AdminDashboard() {
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
-
-  const notifications = [
-    {
-      title: t.gmailNotificationService,
-      message: t.gmailNotificationMessage,
-    },
-    {
-      title: t.studentsLoaded,
-      message: `${students.length} ${t.studentsLoadedMessage}`,
-    },
-  ];
 
   const pieColors = [
     "#38bdf8",
@@ -671,13 +687,124 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
-              >
-                <Bell className="h-5 w-5" />
-                <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-[#020617]" />
-              </button>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setNotificationOpen((prev) => !prev)}
+                  className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/15 transition hover:bg-white/15"
+                >
+                  <Bell className="h-5 w-5" />
+
+                  {notifications.length > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white ring-2 ring-[#020617]">
+                      {notifications.length > 99 ? "99+" : notifications.length}
+                    </span>
+                  )}
+                </button>
+
+                {notificationOpen && (
+                  <div
+                    className={`absolute top-[calc(100%+0.75rem)] z-[999] w-96 overflow-hidden rounded-[1.4rem] border shadow-2xl ${language === "AR" ? "left-0" : "right-0"
+                      }`}
+                    style={cardStyle}
+                  >
+                    <div
+                      className="flex items-center justify-between border-b px-5 py-4"
+                      style={{ borderColor: "var(--border-color)" }}
+                    >
+                      <div>
+                        <h3 className="text-sm font-black" style={textStyle}>
+                          Notifications
+                        </h3>
+                        <p className="text-xs font-semibold" style={mutedTextStyle}>
+                          {notifications.length} message(s)
+                        </p>
+                      </div>
+
+                      {notifications.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNotifications([]);
+                            setSelectedNotification(null);
+                          }}
+                          className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-600 hover:bg-red-100"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-80 overflow-y-auto p-3">
+                      {notifications.length > 0 ? (
+                        notifications.map((notification, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => setSelectedNotification(notification)}
+                            className="mb-3 flex w-full gap-3 rounded-2xl border p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md"
+                            style={sectionStyle}
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+                              <Bell className="h-4 w-4" />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-black" style={textStyle}>
+                                {notification.entity || "KAFKA"} - {notification.action || "EVENT"}
+                              </p>
+
+                              <p className="mt-1 truncate text-xs font-semibold" style={mutedTextStyle}>
+                                {notification.message || "New notification received"}
+                              </p>
+
+                              {notification.createdAt && (
+                                <p className="mt-1 text-[10px] font-bold" style={mutedTextStyle}>
+                                  {new Date(notification.createdAt).toLocaleString()}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl border p-4 text-center" style={sectionStyle}>
+                          <p className="text-sm font-black" style={textStyle}>
+                            Aucune notification
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedNotification && (
+                      <div
+                        className="border-t p-4"
+                        style={{ borderColor: "var(--border-color)" }}
+                      >
+                        <p className="text-xs font-black uppercase" style={mutedTextStyle}>
+                          Contenu du message
+                        </p>
+
+                        <div className="mt-3 rounded-2xl border p-4" style={sectionStyle}>
+                          <p className="text-sm font-black" style={textStyle}>
+                            {selectedNotification.entity || "KAFKA"} -{" "}
+                            {selectedNotification.action || "EVENT"}
+                          </p>
+
+                          <p className="mt-2 text-sm font-semibold leading-6" style={mutedTextStyle}>
+                            {selectedNotification.message || "New notification received"}
+                          </p>
+
+                          {selectedNotification.entityId && (
+                            <p className="mt-2 text-xs font-bold" style={mutedTextStyle}>
+                              ID: {selectedNotification.entityId}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="relative">
                 <button
@@ -702,17 +829,15 @@ export default function AdminDashboard() {
                   </div>
 
                   <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-300 transition ${
-                      adminMenuOpen ? "rotate-180" : ""
-                    }`}
+                    className={`h-4 w-4 shrink-0 text-slate-300 transition ${adminMenuOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
                 {adminMenuOpen && (
                   <div
-                    className={`absolute top-[calc(100%+0.75rem)] z-[999] w-64 overflow-hidden rounded-[1.2rem] border shadow-2xl ${
-                      language === "AR" ? "left-0" : "right-0"
-                    }`}
+                    className={`absolute top-[calc(100%+0.75rem)] z-[999] w-64 overflow-hidden rounded-[1.2rem] border shadow-2xl ${language === "AR" ? "left-0" : "right-0"
+                      }`}
                     style={cardStyle}
                   >
                     <div
@@ -1119,43 +1244,60 @@ export default function AdminDashboard() {
               </p>
             </div>
 
-            <div className="rounded-full bg-red-50 p-3">
+            <div className="relative rounded-full bg-red-50 p-3">
               <Mail className="h-5 w-5 text-red-600" />
+
+              {notifications.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white">
+                  {notifications.length}
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="space-y-3">
-            {notifications.map((notification, index) => (
-              <div
-                key={index}
-                className="rounded-2xl border p-4"
-                style={sectionStyle}
-              >
+          <div className="max-h-80 space-y-3 overflow-y-auto">
+            {notifications.length > 0 ? (
+              notifications.map((notification, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border p-4"
+                  style={sectionStyle}
+                >
+                  <p className="text-sm font-black" style={textStyle}>
+                    {notification.entity || "KAFKA"} - {notification.action || "EVENT"}
+                  </p>
+
+                  <p
+                    className="mt-1 text-xs font-semibold leading-5"
+                    style={mutedTextStyle}
+                  >
+                    {notification.message || "New notification received"}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border p-4" style={sectionStyle}>
                 <p className="text-sm font-black" style={textStyle}>
-                  {notification.title}
+                  Aucune notification
                 </p>
 
-                <p
-                  className="mt-1 text-xs font-semibold leading-5"
-                  style={mutedTextStyle}
-                >
-                  {notification.message}
+                <p className="mt-1 text-xs font-semibold" style={mutedTextStyle}>
+                  Les événements Kafka seront affichés ici.
                 </p>
               </div>
-            ))}
+            )}
           </div>
 
           <div
             className="mt-5 rounded-2xl p-4 text-white"
             style={{
-              background:
-                "linear-gradient(135deg, var(--secondary-color), #020617)",
+              background: "linear-gradient(135deg, var(--secondary-color), #020617)",
             }}
           >
             <p className="text-sm font-black">{t.kafkaStatus}</p>
 
             <p className="mt-1 text-xs font-semibold text-slate-300">
-              {t.kafkaMessage}
+              SSE connecté avec Kafka via backend.
             </p>
           </div>
         </div>

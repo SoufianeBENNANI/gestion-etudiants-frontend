@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 export default function Navbar() {
   return (
@@ -6,8 +7,7 @@ export default function Navbar() {
       className="flex flex-col gap-4 rounded-[1.7rem] border px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between"
       style={{
         borderColor: "var(--border-color)",
-        background:
-          "linear-gradient(135deg, var(--secondary-color), #020617)",
+        background: "linear-gradient(135deg, var(--secondary-color), #020617)",
       }}
     >
       <div>
@@ -32,6 +32,8 @@ export default function Navbar() {
             <Search className="h-4 w-4" />
           </button>
         </div>
+
+        <NotificationBell />
 
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-black text-white ring-1 ring-white/15">
           A
