@@ -3,40 +3,44 @@ export function connectKafkaNotifications(onNotification) {
     "http://localhost:8080/api/notifications/stream"
   );
 
-  eventSource.onopen = () => {
-    console.log("SSE connecté avec succès");
-  };
+  const handleNotification = (event) => {
+    console.log("SSE EVENT:", event);
+    console.log("SSE DATA:", event.data);
 
-  eventSource.onmessage = (event) => {
-    console.log("Notification reçue :", event.data);
+    if (!event.data || event.data === "CONNECTED" || event.data === "SSE connected") {
+      return;
+    }
 
     try {
       const notification = JSON.parse(event.data);
 
       onNotification({
-        entity: notification.entity || "KAFKA",
-        action: notification.action || "EVENT",
-        entityId: notification.entityId || null,
+        entity: String(notification.entity || "KAFKA").toUpperCase(),
+        action: String(notification.action || "EVENT").toUpperCase(),
+        entityId: notification.entityId ?? null,
         message: notification.message || "Nouvelle notification reçue",
+        createdAt: notification.createdAt || new Date().toISOString(),
       });
     } catch (error) {
-      console.error("Erreur parsing notification :", error);
-
-      onNotification({
-        entity: "KAFKA",
-        action: "EVENT",
-        entityId: null,
-        message: event.data || "Nouvelle notification reçue",
-      });
+      console.error("Erreur SSE JSON:", error);
     }
   };
 
+  eventSource.onopen = () => {
+    console.log("SSE frontend connecté");
+  };
+
+  eventSource.addEventListener("notification", handleNotification);
+
+  eventSource.addEventListener("connected", (event) => {
+    console.log("SSE connected:", event.data);
+  });
+
   eventSource.onerror = (error) => {
-    console.error("Erreur connexion SSE :", error);
+    console.error("Erreur SSE frontend:", error);
   };
 
   return () => {
-    console.log("SSE fermé");
     eventSource.close();
   };
 }
