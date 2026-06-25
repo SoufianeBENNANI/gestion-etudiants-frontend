@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getAllAttendances } from "../services/attendanceService";
 
 import {
   getStudentOverviewStats,
@@ -160,6 +161,7 @@ export default function StudentOverview() {
     totalPredictions: 0,
     averagePerformance: 0,
     totalAttendance: 0,
+    absentStudents: 0,
   });
 
   const [loading, setLoading] = useState(true);
@@ -220,14 +222,50 @@ export default function StudentOverview() {
     try {
       setLoading(true);
 
-      const data = await getStudentOverviewStats();
+      const [overviewData, attendancesData] = await Promise.all([
+        getStudentOverviewStats(),
+        getAllAttendances(),
+      ]);
+
+      const activeAttendances = Array.isArray(attendancesData)
+        ? attendancesData.filter((item) => {
+          const archived =
+            item?.archived === true ||
+            String(item?.archived || "").toLowerCase() === "true";
+
+          return !archived;
+        })
+        : [];
+
+      const absentStudentIds = new Set();
+
+      activeAttendances.forEach((item) => {
+        const status = String(item?.status || "").trim().toUpperCase();
+
+        if (status === "ABSENT") {
+          const studentId =
+            item?.studentId ||
+            item?.student?.id ||
+            item?.idStudent ||
+            null;
+
+          if (studentId !== null && studentId !== undefined) {
+            absentStudentIds.add(studentId);
+          }
+        }
+      });
 
       setStats({
-        totalStudents: Number(data.totalStudents) || 0,
-        totalArchivedStudents: Number(data.totalArchivedStudents) || 0,
-        totalPredictions: Number(data.totalPredictions) || 0,
-        averagePerformance: Number(data.averagePerformance) || 0,
-        totalAttendance: Number(data.totalAttendance) || 0,
+        totalStudents: Number(overviewData.totalStudents) || 0,
+        totalArchivedStudents: Number(overviewData.totalArchivedStudents) || 0,
+        totalPredictions: Number(overviewData.totalPredictions) || 0,
+        averagePerformance: Number(overviewData.averagePerformance) || 0,
+
+        // total records attendance
+        totalAttendance: activeAttendances.length,
+
+        // students absents uniques
+        absentStudents: absentStudentIds.size,
       });
     } catch (error) {
       console.error("Error loading overview stats:", error);
@@ -348,8 +386,8 @@ export default function StudentOverview() {
     },
     {
       title: t.attendance,
-      value: stats.totalAttendance,
-      description: t.attendanceDescription,
+      value: stats.absentStudents,
+      description: "Total unique absent students",
       icon: Bell,
       path: "/admin/students/attendance",
       badge: t.presence,
@@ -558,7 +596,7 @@ export default function StudentOverview() {
             </p>
 
             <p className="mt-2 text-2xl font-black" style={textStyle}>
-              {loading ? "..." : stats.totalAttendance}
+              {loading ? "..." : stats.absentStudents}
             </p>
           </div>
 

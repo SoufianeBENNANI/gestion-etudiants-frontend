@@ -172,50 +172,44 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30";
 
   const itemClass = (path) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer
-    ${
+    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer ${
       pathname === path
-        ? activeStyle
-        : "text-white hover:bg-white/10 hover:text-cyan-300"
+      ? activeStyle
+      : "text-white hover:bg-white/10 hover:text-cyan-300"
     }`;
 
   const buttonClass = (isOpen) =>
     `w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300
-    ${
-      isOpen
-        ? activeStyle
-        : "text-white hover:bg-white/10 hover:text-cyan-300"
+    ${isOpen
+      ? activeStyle
+      : "text-white hover:bg-white/10 hover:text-cyan-300"
     }`;
 
   const studentsButtonClass = (isOpen) =>
     `w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300
-    ${
-      isOpen
-        ? "bg-white/10 text-white font-semibold"
-        : "text-white hover:bg-white/10 hover:text-cyan-300"
+    ${isOpen
+      ? "bg-white/10 text-white font-semibold"
+      : "text-white hover:bg-white/10 hover:text-cyan-300"
     }`;
 
   const studentSubItemClass = (path) =>
     `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300
-    ${
-      pathname === path
-        ? "bg-white/10 text-white font-semibold"
-        : "text-slate-300 hover:bg-white/10 hover:text-white"
+    ${pathname === path
+      ? "bg-white/10 text-white font-semibold"
+      : "text-slate-300 hover:bg-white/10 hover:text-white"
     }`;
 
   const aiSubItemClass = (path) =>
     `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300
-    ${
-      pathname === path
-        ? "bg-white/10 text-white font-semibold"
-        : "text-slate-300 hover:bg-white/10 hover:text-white"
+    ${pathname === path
+      ? "bg-white/10 text-white font-semibold"
+      : "text-slate-300 hover:bg-white/10 hover:text-white"
     }`;
 
   return (
     <div
-      className={`flex h-screen flex-col transition-all duration-300 ${
-        collapsed ? "w-20" : "w-72"
-      }`}
+      className={`flex h-screen flex-col transition-all duration-300 ${collapsed ? "w-20" : "w-72"
+        }`}
       style={{
         backgroundColor: "var(--sidebar-bg)",
         color: "var(--sidebar-text)",

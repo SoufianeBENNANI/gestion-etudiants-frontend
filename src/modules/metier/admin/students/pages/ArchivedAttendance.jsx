@@ -38,7 +38,6 @@ const translations = {
     loading: "Loading archived attendance...",
     empty: "No archived attendance found.",
 
-    confirmRestore: "Restore this attendance record?",
     restoreError: "Error while restoring attendance",
   },
 

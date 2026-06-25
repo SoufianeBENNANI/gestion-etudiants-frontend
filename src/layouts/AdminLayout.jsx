@@ -44,17 +44,22 @@ export default function AdminLayout() {
           collapsed ? "w-20" : "w-72"
         }`}
       >
-        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Sidebar
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
       </aside>
 
       {/* CONTENT */}
       <main
+        onDoubleClick={() => setCollapsed((prev) => !prev)}
         className={`min-h-screen px-8 py-6 transition-all duration-300 ${
           collapsed ? "ml-20" : "ml-72"
         }`}
         style={{
           backgroundColor: "var(--app-bg)",
           color: "var(--text-color)",
+          cursor: "default",
         }}
       >
         <Outlet />

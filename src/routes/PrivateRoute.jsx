@@ -2,21 +2,16 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../modules/auth/hooks/useAuth";
 
 function PrivateRoute({ children, role }) {
-  const { hasRole, roles, loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated, hasRole, roles } = useAuth();
 
-  console.log("CHECK ROLE:", role, roles);
+  console.log("ROLE DEMANDÉ:", role);
+  console.log("ROLES USER:", roles);
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return <h2>Chargement...</h2>;
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/" replace />;
 
-  if (!hasRole(role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
+  if (!hasRole(role)) return <Navigate to="/" replace />;
 
   return children;
 }

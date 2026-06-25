@@ -307,10 +307,20 @@ export default function StudentAttendance() {
     return item.studentId || item.student?.id || item.idStudent || null;
   };
 
-  const countAttendanceRecordsByStatus = (status) => {
-    return attendances.filter(
-      (item) => normalizeStatus(item.status) === status
-    ).length;
+  const getUniqueStudentIdsByStatus = (status) => {
+    const ids = new Set();
+
+    attendances.forEach((item) => {
+      if (normalizeStatus(item.status) === status) {
+        const studentId = getStudentId(item);
+
+        if (studentId !== null && studentId !== undefined) {
+          ids.add(studentId);
+        }
+      }
+    });
+
+    return ids;
   };
 
   const filteredAttendances = useMemo(() => {
@@ -379,11 +389,19 @@ export default function StudentAttendance() {
   const totalStudents = students.length;
   const totalRecords = attendances.length;
 
-  const absentStudents = countAttendanceRecordsByStatus("ABSENT");
-  const lateStudents = countAttendanceRecordsByStatus("LATE");
+  const absentStudentIds = getUniqueStudentIdsByStatus("ABSENT");
+  const lateStudentIds = getUniqueStudentIdsByStatus("LATE");
+
+  const absentStudents = absentStudentIds.size;
+  const lateStudents = lateStudentIds.size;
+
+  const absentOrLateStudentIds = new Set([
+    ...absentStudentIds,
+    ...lateStudentIds,
+  ]);
 
   const presentStudents = Math.max(
-    totalStudents - absentStudents - lateStudents,
+    totalStudents - absentOrLateStudentIds.size,
     0
   );
 
