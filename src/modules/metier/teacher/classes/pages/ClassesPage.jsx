@@ -1,127 +1,117 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   RefreshCw,
-  Search,
-  Users,
+  GraduationCap,
   Loader2,
-  FileDown,
   ChevronLeft,
   ChevronRight,
   Eye,
+  Search,
 } from "lucide-react";
 
-import {
-  getAllStudents,
-  searchStudentsByNom,
-  downloadStudentsPdf,
-} from "../services/studentService";
-
-import StudentDetails from "../components/StudentDetails";
+import { getAllClasses, getClassById } from "../services/classService";
+import ClassDetails from "../components/ClassDetails";
 
 const translations = {
   EN: {
-    badge: "Teacher / Students",
-    title: "Students List",
-    subtitle: "View and search students.",
-    search: "Search by last name...",
+    badge: "Teacher / Classes",
+    title: "Classes List",
+    subtitle: "View and search classes.",
+    search: "Search class...",
     refresh: "Refresh",
-    pdf: "PDF",
-    totalStudents: "Total Students",
-    studentsList: "Students List",
+    totalClasses: "Total Classes",
+    classesList: "Classes List",
     showing: "Showing",
     to: "to",
     of: "of",
-    students: "students",
+    classes: "classes",
     rows: "Rows:",
-    student: "Student",
-    email: "Email",
-    gender: "Gender",
-    phone: "Phone",
-    address: "Address",
+    className: "Class",
+    level: "Level",
+    academicYear: "Academic Year",
     actions: "Actions",
     view: "View",
     page: "Page",
-    loadingStudents: "Loading students...",
-    noStudents: "No students found.",
-    loadError: "Unable to load students.",
-    pdfError: "Unable to download PDF.",
+    loading: "Loading classes...",
+    empty: "No classes found.",
+    loadError: "Unable to load classes.",
+    detailsError: "Unable to load class details.",
+    noName: "No name",
+    notDefined: "Not defined",
   },
 
   FR: {
-    badge: "Professeur / Étudiants",
-    title: "Liste des étudiants",
-    subtitle: "Consultation et recherche des étudiants.",
-    search: "Rechercher par nom...",
+    badge: "Professeur / Classes",
+    title: "Liste des classes",
+    subtitle: "Voir et rechercher les classes.",
+    search: "Rechercher une classe...",
     refresh: "Actualiser",
-    pdf: "PDF",
-    totalStudents: "Total étudiants",
-    studentsList: "Liste des étudiants",
+    totalClasses: "Total classes",
+    classesList: "Liste des classes",
     showing: "Affichage",
     to: "à",
     of: "sur",
-    students: "étudiants",
+    classes: "classes",
     rows: "Lignes :",
-    student: "Étudiant",
-    email: "Email",
-    gender: "Genre",
-    phone: "Téléphone",
-    address: "Adresse",
+    className: "Classe",
+    level: "Niveau",
+    academicYear: "Année scolaire",
     actions: "Actions",
     view: "Voir",
     page: "Page",
-    loadingStudents: "Chargement des étudiants...",
-    noStudents: "Aucun étudiant trouvé.",
-    loadError: "Impossible de charger les étudiants.",
-    searchError: "Aucun étudiant trouvé ou erreur pendant la recherche.",
-    pdfError: "Impossible de télécharger le PDF.",
+    loading: "Chargement des classes...",
+    empty: "Aucune classe trouvée.",
+    loadError: "Impossible de charger les classes.",
+    detailsError: "Impossible de charger les détails de la classe.",
+    noName: "Sans nom",
+    notDefined: "Non défini",
   },
 
   AR: {
-    badge: "الأستاذ / الطلاب",
-    title: "قائمة الطلاب",
-    subtitle: "عرض والبحث عن الطلاب.",
-    search: "البحث بالاسم...",
+    badge: "الأستاذ / الأقسام",
+    title: "قائمة الأقسام",
+    subtitle: "عرض والبحث عن الأقسام.",
+    search: "البحث عن قسم...",
     refresh: "تحديث",
-    pdf: "PDF",
-    totalStudents: "إجمالي الطلاب",
-    studentsList: "قائمة الطلاب",
+    totalClasses: "إجمالي الأقسام",
+    classesList: "قائمة الأقسام",
     showing: "عرض",
     to: "إلى",
     of: "من",
-    students: "طلاب",
+    classes: "أقسام",
     rows: "الأسطر:",
-    student: "الطالب",
-    email: "البريد الإلكتروني",
-    gender: "الجنس",
-    phone: "الهاتف",
-    address: "العنوان",
+    className: "القسم",
+    level: "المستوى",
+    academicYear: "السنة الدراسية",
     actions: "الإجراءات",
     view: "عرض",
     page: "الصفحة",
-    loadingStudents: "جاري تحميل الطلاب...",
-    noStudents: "لا يوجد طلاب.",
-    loadError: "تعذر تحميل الطلاب.",
-    searchError: "لم يتم العثور على طالب أو حدث خطأ في البحث.",
-    pdfError: "تعذر تحميل ملف PDF.",
+    loading: "جاري تحميل الأقسام...",
+    empty: "لا توجد أقسام.",
+    loadError: "تعذر تحميل الأقسام.",
+    detailsError: "تعذر تحميل تفاصيل القسم.",
+    noName: "بدون اسم",
+    notDefined: "غير محدد",
   },
 };
 
-export default function StudentsList() {
-  const [students, setStudents] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [searchNom, setSearchNom] = useState("");
+export default function ClassesPage() {
+  const [classes, setClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [language, setLanguage] = useState(
     localStorage.getItem("app-language") || "EN"
   );
 
+  const t = translations[language] || translations.EN;
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
-  const t = translations[language] || translations.EN;
 
   const cardStyle = {
     backgroundColor: "var(--card-bg)",
@@ -144,14 +134,12 @@ export default function StudentsList() {
   const mutedTextStyle = { color: "var(--muted-text)" };
 
   useEffect(() => {
-    loadStudents();
+    loadClasses();
   }, []);
 
   useEffect(() => {
     const handleLanguageChange = (event) => {
-      const nextLanguage =
-        event.detail || localStorage.getItem("app-language") || "EN";
-      setLanguage(nextLanguage);
+      setLanguage(event.detail || localStorage.getItem("app-language") || "EN");
     };
 
     window.addEventListener("app-language-change", handleLanguageChange);
@@ -163,99 +151,87 @@ export default function StudentsList() {
     };
   }, []);
 
-  const normalizeStudents = (data) => {
+  const normalizeClasses = (data) => {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.content)) return data.content;
     return [];
   };
 
-  const loadStudents = async () => {
+  const getClassName = (classe) =>
+    classe.nom ||
+    classe.name ||
+    classe.nomClasse ||
+    classe.className ||
+    t.noName;
+
+  const getLevel = (classe) =>
+    classe.niveau || classe.level || classe.filiere || t.notDefined;
+
+  const getAcademicYear = (classe) =>
+    classe.annee ||
+    classe.academicYear ||
+    classe.year ||
+    classe.anneeScolaire ||
+    t.notDefined;
+
+  const loadClasses = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const data = await getAllStudents();
-      setStudents(normalizeStudents(data));
+      const data = await getAllClasses();
+      setClasses(normalizeClasses(data));
       setCurrentPage(1);
     } catch (error) {
-      console.error("Erreur chargement students:", error);
-      setStudents([]);
+      console.error("Erreur chargement classes:", error);
+      setClasses([]);
       setError(t.loadError);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    const nom = searchNom.trim();
-
-    if (!nom) {
-      await loadStudents();
-      return;
-    }
+  const handleViewClass = async (classe) => {
+    if (!classe?.id) return;
 
     try {
-      setLoading(true);
-      setError("");
-
-      const data = await searchStudentsByNom(nom);
-      setStudents(normalizeStudents(data));
-      setCurrentPage(1);
+      setDetailsLoading(true);
+      const data = await getClassById(classe.id);
+      setSelectedClass(data);
     } catch (error) {
-      console.error("Erreur recherche students:", error);
-      setStudents([]);
-      setError(t.searchError);
+      console.error("Erreur détails classe:", error);
+      alert(t.detailsError);
     } finally {
-      setLoading(false);
+      setDetailsLoading(false);
     }
   };
 
-  const handleChangeSearch = async (e) => {
-    const value = e.target.value;
-    setSearchNom(value);
-    setCurrentPage(1);
+  const filteredClasses = useMemo(() => {
+    return classes.filter((classe) => {
+      const name = String(getClassName(classe));
+      const level = String(getLevel(classe));
+      const academicYear = String(getAcademicYear(classe));
 
-    if (!value.trim()) {
-      await loadStudents();
-    }
-  };
+      return `${name} ${level} ${academicYear}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    });
+  }, [classes, searchTerm, language]);
 
-  const handleDownloadPdf = async () => {
-    try {
-      setPdfLoading(true);
-      setError("");
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredClasses.length / itemsPerPage)
+  );
 
-      const pdfData = await downloadStudentsPdf();
-      const blob = new Blob([pdfData], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "liste_etudiants.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Erreur téléchargement PDF:", error);
-      setError(t.pdfError);
-    } finally {
-      setPdfLoading(false);
-    }
-  };
-
-  const totalPages = Math.max(1, Math.ceil(students.length / itemsPerPage));
-
-  const paginatedStudents = useMemo(() => {
+  const paginatedClasses = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return students.slice(startIndex, startIndex + itemsPerPage);
-  }, [students, currentPage, itemsPerPage]);
+    return filteredClasses.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredClasses, currentPage, itemsPerPage]);
 
-  const startStudent =
-    students.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const startClass =
+    filteredClasses.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
 
-  const endStudent = Math.min(currentPage * itemsPerPage, students.length);
+  const endClass = Math.min(currentPage * itemsPerPage, filteredClasses.length);
 
   const visiblePages = Array.from(
     { length: totalPages },
@@ -274,9 +250,7 @@ export default function StudentsList() {
       <div className="flex flex-col gap-4 rounded-[1.7rem] border border-white/15 bg-gradient-to-br from-[#6d28d9] to-[#020617] px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold text-violet-200">{t.badge}</p>
-
           <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
-
           <p className="mt-1 text-sm font-semibold text-slate-300">
             {t.subtitle}
           </p>
@@ -286,47 +260,31 @@ export default function StudentsList() {
           <div className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl">
             <input
               type="text"
-              value={searchNom}
-              onChange={handleChangeSearch}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
               }}
               placeholder={t.search}
-              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-64"
+              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-72"
             />
 
             <button
               type="button"
-              onClick={handleSearch}
-              disabled={loading}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white transition hover:bg-violet-700 disabled:opacity-60"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
+              <Search className="h-4 w-4" />
             </button>
           </div>
 
           <button
             type="button"
-            onClick={loadStudents}
+            onClick={loadClasses}
             disabled={loading}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:opacity-60"
           >
             <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
             {t.refresh}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-60"
-          >
-            <FileDown size={17} />
-            {pdfLoading ? t.loadingStudents : t.pdf}
           </button>
         </div>
       </div>
@@ -334,16 +292,16 @@ export default function StudentsList() {
       <div className="rounded-[1.4rem] border p-5 shadow-sm" style={cardStyle}>
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-white">
-            <Users className="h-5 w-5" />
+            <GraduationCap className="h-5 w-5" />
           </div>
 
           <div>
             <h3 className="text-2xl font-black" style={textStyle}>
-              {students.length}
+              {filteredClasses.length}
             </h3>
 
             <p className="text-xs font-semibold" style={mutedTextStyle}>
-              {t.totalStudents}
+              {t.totalClasses}
             </p>
           </div>
         </div>
@@ -365,17 +323,17 @@ export default function StudentsList() {
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-white">
-              <Users size={20} />
+              <GraduationCap size={20} />
             </div>
 
             <div>
               <h2 className="text-lg font-black" style={textStyle}>
-                {t.studentsList}
+                {t.classesList}
               </h2>
 
               <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
-                {t.showing} {startStudent} {t.to} {endStudent} {t.of}{" "}
-                {students.length} {t.students}
+                {t.showing} {startClass} {t.to} {endClass} {t.of}{" "}
+                {filteredClasses.length} {t.classes}
               </p>
             </div>
           </div>
@@ -403,7 +361,7 @@ export default function StudentsList() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1050px] table-fixed border-collapse">
+          <table className="w-full min-w-[950px] table-fixed border-collapse">
             <thead>
               <tr
                 className="border-b text-center text-[11px] uppercase tracking-wide"
@@ -412,40 +370,42 @@ export default function StudentsList() {
                   color: "var(--muted-text)",
                 }}
               >
-                <th className="w-[22%] px-5 py-4 font-black">{t.student}</th>
-                <th className="w-[23%] px-5 py-4 font-black">{t.email}</th>
-                <th className="w-[13%] px-5 py-4 font-black">{t.gender}</th>
-                <th className="w-[15%] px-5 py-4 font-black">{t.phone}</th>
-                <th className="w-[17%] px-5 py-4 font-black">{t.address}</th>
-                <th className="w-[10%] px-5 py-4 font-black">{t.actions}</th>
+                <th className="w-[34%] px-5 py-4 font-black">
+                  {t.className}
+                </th>
+                <th className="w-[23%] px-5 py-4 font-black">{t.level}</th>
+                <th className="w-[23%] px-5 py-4 font-black">
+                  {t.academicYear}
+                </th>
+                <th className="w-[20%] px-5 py-4 font-black">{t.actions}</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-10 text-center">
+                  <td colSpan="4" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 font-bold">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      {t.loadingStudents}
+                      {t.loading}
                     </div>
                   </td>
                 </tr>
-              ) : paginatedStudents.length === 0 ? (
+              ) : paginatedClasses.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-10 text-center font-bold">
-                    {t.noStudents}
+                  <td colSpan="4" className="px-5 py-10 text-center font-bold">
+                    {t.empty}
                   </td>
                 </tr>
               ) : (
-                paginatedStudents.map((student) => {
-                  const fullName = `${student.nom || ""} ${
-                    student.prenom || ""
-                  }`.trim();
+                paginatedClasses.map((classe) => {
+                  const className = getClassName(classe);
+                  const level = getLevel(classe);
+                  const academicYear = getAcademicYear(classe);
 
                   return (
                     <tr
-                      key={student.id}
+                      key={classe.id}
                       className="border-b text-center text-sm transition last:border-none hover:bg-violet-500/5"
                       style={{
                         borderColor: "var(--border-color)",
@@ -455,19 +415,19 @@ export default function StudentsList() {
                       <td className="px-5 py-4">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-100 font-black text-violet-700">
-                            {String(fullName || "-").charAt(0).toUpperCase()}
+                            {String(className).charAt(0).toUpperCase()}
                           </div>
 
                           <div className="min-w-0 text-center">
                             <p className="truncate font-black" style={textStyle}>
-                              {fullName || "-"}
+                              {className}
                             </p>
 
                             <p
                               className="mt-0.5 text-xs font-semibold"
                               style={mutedTextStyle}
                             >
-                              {t.student}
+                              {t.className}
                             </p>
                           </div>
                         </div>
@@ -475,10 +435,13 @@ export default function StudentsList() {
 
                       <td className="px-5 py-4">
                         <span
-                          className="block truncate text-sm font-semibold"
-                          style={mutedTextStyle}
+                          className="inline-flex rounded-full px-3 py-1.5 text-xs font-black"
+                          style={{
+                            backgroundColor: "var(--section-bg)",
+                            color: "var(--primary-color)",
+                          }}
                         >
-                          {student.email || "-"}
+                          {level}
                         </span>
                       </td>
 
@@ -490,34 +453,17 @@ export default function StudentsList() {
                             color: "var(--primary-color)",
                           }}
                         >
-                          {student.genre || "-"}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <span
-                          className="block truncate text-sm font-semibold"
-                          style={mutedTextStyle}
-                        >
-                          {student.telephone || "-"}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <span
-                          className="block truncate text-sm font-semibold"
-                          style={mutedTextStyle}
-                        >
-                          {student.adresse || "-"}
+                          {academicYear}
                         </span>
                       </td>
 
                       <td className="px-5 py-4">
                         <button
                           type="button"
-                          onClick={() => setSelectedStudent(student)}
+                          onClick={() => handleViewClass(classe)}
+                          disabled={detailsLoading}
                           title={t.view}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-60"
                         >
                           <Eye size={15} />
                         </button>
@@ -535,8 +481,8 @@ export default function StudentsList() {
           style={sectionStyle}
         >
           <p className="text-xs font-semibold" style={mutedTextStyle}>
-            {t.showing} {startStudent} {t.to} {endStudent} {t.of}{" "}
-            {students.length} {t.students}
+            {t.showing} {startClass} {t.to} {endClass} {t.of}{" "}
+            {filteredClasses.length} {t.classes}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -592,9 +538,9 @@ export default function StudentsList() {
         </div>
       </div>
 
-      <StudentDetails
-        student={selectedStudent}
-        onClose={() => setSelectedStudent(null)}
+      <ClassDetails
+        classe={selectedClass}
+        onClose={() => setSelectedClass(null)}
       />
     </div>
   );

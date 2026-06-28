@@ -1,127 +1,120 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   RefreshCw,
-  Search,
-  Users,
+  BookOpen,
   Loader2,
-  FileDown,
   ChevronLeft,
   ChevronRight,
   Eye,
+  Search,
 } from "lucide-react";
 
-import {
-  getAllStudents,
-  searchStudentsByNom,
-  downloadStudentsPdf,
-} from "../services/studentService";
-
-import StudentDetails from "../components/StudentDetails";
+import { getAllCourses, getCourseById } from "../services/courseService";
+import CourseDetails from "../components/CourseDetails";
 
 const translations = {
   EN: {
-    badge: "Teacher / Students",
-    title: "Students List",
-    subtitle: "View and search students.",
-    search: "Search by last name...",
+    breadcrumb: "Teacher / Courses",
+    title: "Courses List",
+    subtitle: "View and search courses.",
+    searchPlaceholder: "Search course...",
     refresh: "Refresh",
-    pdf: "PDF",
-    totalStudents: "Total Students",
-    studentsList: "Students List",
+    totalCourses: "Total Courses",
+    coursesList: "Courses List",
     showing: "Showing",
     to: "to",
     of: "of",
-    students: "students",
+    courses: "courses",
     rows: "Rows:",
-    student: "Student",
-    email: "Email",
-    gender: "Gender",
-    phone: "Phone",
-    address: "Address",
+    course: "Course",
+    description: "Description",
+    credits: "Credits",
     actions: "Actions",
-    view: "View",
+    loading: "Loading courses...",
+    empty: "No courses found.",
     page: "Page",
-    loadingStudents: "Loading students...",
-    noStudents: "No students found.",
-    loadError: "Unable to load students.",
-    pdfError: "Unable to download PDF.",
+    detailsError: "Unable to load course details.",
+    loadError: "Unable to load courses.",
+    noName: "No name",
+    noDescription: "No description",
+    notDefined: "Not defined",
+    view: "View",
   },
 
   FR: {
-    badge: "Professeur / Étudiants",
-    title: "Liste des étudiants",
-    subtitle: "Consultation et recherche des étudiants.",
-    search: "Rechercher par nom...",
+    breadcrumb: "Teacher / Cours",
+    title: "Liste des cours",
+    subtitle: "Voir et rechercher les cours.",
+    searchPlaceholder: "Rechercher un cours...",
     refresh: "Actualiser",
-    pdf: "PDF",
-    totalStudents: "Total étudiants",
-    studentsList: "Liste des étudiants",
+    totalCourses: "Total cours",
+    coursesList: "Liste des cours",
     showing: "Affichage",
     to: "à",
     of: "sur",
-    students: "étudiants",
+    courses: "cours",
     rows: "Lignes :",
-    student: "Étudiant",
-    email: "Email",
-    gender: "Genre",
-    phone: "Téléphone",
-    address: "Adresse",
+    course: "Cours",
+    description: "Description",
+    credits: "Crédits",
     actions: "Actions",
-    view: "Voir",
+    loading: "Chargement des cours...",
+    empty: "Aucun cours trouvé.",
     page: "Page",
-    loadingStudents: "Chargement des étudiants...",
-    noStudents: "Aucun étudiant trouvé.",
-    loadError: "Impossible de charger les étudiants.",
-    searchError: "Aucun étudiant trouvé ou erreur pendant la recherche.",
-    pdfError: "Impossible de télécharger le PDF.",
+    detailsError: "Impossible de charger les détails du cours.",
+    loadError: "Impossible de charger les cours.",
+    noName: "Sans nom",
+    noDescription: "Sans description",
+    notDefined: "Non défini",
+    view: "Voir",
   },
 
   AR: {
-    badge: "الأستاذ / الطلاب",
-    title: "قائمة الطلاب",
-    subtitle: "عرض والبحث عن الطلاب.",
-    search: "البحث بالاسم...",
+    breadcrumb: "المعلم / الدورات",
+    title: "قائمة الدورات",
+    subtitle: "عرض والبحث عن الدورات.",
+    searchPlaceholder: "البحث عن دورة...",
     refresh: "تحديث",
-    pdf: "PDF",
-    totalStudents: "إجمالي الطلاب",
-    studentsList: "قائمة الطلاب",
+    totalCourses: "إجمالي الدورات",
+    coursesList: "قائمة الدورات",
     showing: "عرض",
     to: "إلى",
     of: "من",
-    students: "طلاب",
+    courses: "دورات",
     rows: "الأسطر:",
-    student: "الطالب",
-    email: "البريد الإلكتروني",
-    gender: "الجنس",
-    phone: "الهاتف",
-    address: "العنوان",
+    course: "الدورة",
+    description: "الوصف",
+    credits: "الأرصدة",
     actions: "الإجراءات",
-    view: "عرض",
+    loading: "جاري تحميل الدورات...",
+    empty: "لا توجد دورات.",
     page: "الصفحة",
-    loadingStudents: "جاري تحميل الطلاب...",
-    noStudents: "لا يوجد طلاب.",
-    loadError: "تعذر تحميل الطلاب.",
-    searchError: "لم يتم العثور على طالب أو حدث خطأ في البحث.",
-    pdfError: "تعذر تحميل ملف PDF.",
+    detailsError: "تعذر تحميل تفاصيل الدورة.",
+    loadError: "تعذر تحميل الدورات.",
+    noName: "بدون اسم",
+    noDescription: "بدون وصف",
+    notDefined: "غير محدد",
+    view: "عرض",
   },
 };
 
-export default function StudentsList() {
-  const [students, setStudents] = useState([]);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [searchNom, setSearchNom] = useState("");
+export default function CoursesPage() {
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [language, setLanguage] = useState(
     localStorage.getItem("app-language") || "EN"
   );
 
+  const t = translations[language] || translations.EN;
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
-  const t = translations[language] || translations.EN;
 
   const cardStyle = {
     backgroundColor: "var(--card-bg)",
@@ -144,13 +137,14 @@ export default function StudentsList() {
   const mutedTextStyle = { color: "var(--muted-text)" };
 
   useEffect(() => {
-    loadStudents();
+    loadCourses();
   }, []);
 
   useEffect(() => {
     const handleLanguageChange = (event) => {
       const nextLanguage =
         event.detail || localStorage.getItem("app-language") || "EN";
+
       setLanguage(nextLanguage);
     };
 
@@ -163,104 +157,94 @@ export default function StudentsList() {
     };
   }, []);
 
-  const normalizeStudents = (data) => {
+  const normalizeCourses = (data) => {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.content)) return data.content;
     return [];
   };
 
-  const loadStudents = async () => {
+  const getCredits = (course) => {
+    return (
+      course.credits ??
+      course.credit ??
+      course.courseCredits ??
+      course.creditNumber ??
+      t.notDefined
+    );
+  };
+
+  const loadCourses = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const data = await getAllStudents();
-      setStudents(normalizeStudents(data));
+      const data = await getAllCourses();
+      setCourses(normalizeCourses(data));
       setCurrentPage(1);
     } catch (error) {
-      console.error("Erreur chargement students:", error);
-      setStudents([]);
+      console.error("Erreur chargement cours:", error);
+      setCourses([]);
       setError(t.loadError);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    const nom = searchNom.trim();
-
-    if (!nom) {
-      await loadStudents();
-      return;
-    }
+  const handleViewCourse = async (course) => {
+    if (!course?.id) return;
 
     try {
-      setLoading(true);
-      setError("");
+      setDetailsLoading(true);
 
-      const data = await searchStudentsByNom(nom);
-      setStudents(normalizeStudents(data));
-      setCurrentPage(1);
+      const data = await getCourseById(course.id);
+      setSelectedCourse(data);
     } catch (error) {
-      console.error("Erreur recherche students:", error);
-      setStudents([]);
-      setError(t.searchError);
+      console.error("Erreur détails cours:", error);
+      alert(t.detailsError);
     } finally {
-      setLoading(false);
+      setDetailsLoading(false);
     }
   };
 
-  const handleChangeSearch = async (e) => {
-    const value = e.target.value;
-    setSearchNom(value);
-    setCurrentPage(1);
+  const filteredCourses = useMemo(() => {
+    return courses.filter((course) => {
+      const name = String(course.nom || course.name || "");
+      const description = String(course.description || "");
+      const credits = String(getCredits(course));
 
-    if (!value.trim()) {
-      await loadStudents();
-    }
-  };
+      return `${name} ${description} ${credits}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    });
+  }, [courses, searchTerm]);
 
-  const handleDownloadPdf = async () => {
-    try {
-      setPdfLoading(true);
-      setError("");
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredCourses.length / itemsPerPage)
+  );
 
-      const pdfData = await downloadStudentsPdf();
-      const blob = new Blob([pdfData], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      link.href = url;
-      link.download = "liste_etudiants.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Erreur téléchargement PDF:", error);
-      setError(t.pdfError);
-    } finally {
-      setPdfLoading(false);
-    }
-  };
-
-  const totalPages = Math.max(1, Math.ceil(students.length / itemsPerPage));
-
-  const paginatedStudents = useMemo(() => {
+  const paginatedCourses = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return students.slice(startIndex, startIndex + itemsPerPage);
-  }, [students, currentPage, itemsPerPage]);
+    return filteredCourses.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredCourses, currentPage, itemsPerPage]);
 
-  const startStudent =
-    students.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const startCourse =
+    filteredCourses.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
 
-  const endStudent = Math.min(currentPage * itemsPerPage, students.length);
+  const endCourse = Math.min(
+    currentPage * itemsPerPage,
+    filteredCourses.length
+  );
 
   const visiblePages = Array.from(
     { length: totalPages },
     (_, index) => index + 1
   ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div
@@ -273,7 +257,9 @@ export default function StudentsList() {
     >
       <div className="flex flex-col gap-4 rounded-[1.7rem] border border-white/15 bg-gradient-to-br from-[#6d28d9] to-[#020617] px-6 py-5 text-white shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-semibold text-violet-200">{t.badge}</p>
+          <p className="text-xs font-semibold text-violet-200">
+            {t.breadcrumb}
+          </p>
 
           <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
@@ -286,47 +272,28 @@ export default function StudentsList() {
           <div className="flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl">
             <input
               type="text"
-              value={searchNom}
-              onChange={handleChangeSearch}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-              placeholder={t.search}
-              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-64"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              placeholder={t.searchPlaceholder}
+              className="w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-slate-300 sm:w-72"
             />
 
             <button
               type="button"
-              onClick={handleSearch}
-              disabled={loading}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white transition hover:bg-violet-700 disabled:opacity-60"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white"
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
+              <Search className="h-4 w-4" />
             </button>
           </div>
 
           <button
             type="button"
-            onClick={loadStudents}
+            onClick={loadCourses}
             disabled={loading}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-white/10 px-5 text-sm font-black text-white ring-1 ring-white/15 transition hover:bg-white/15 disabled:opacity-60"
           >
             <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
             {t.refresh}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            disabled={pdfLoading}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-60"
-          >
-            <FileDown size={17} />
-            {pdfLoading ? t.loadingStudents : t.pdf}
           </button>
         </div>
       </div>
@@ -334,16 +301,16 @@ export default function StudentsList() {
       <div className="rounded-[1.4rem] border p-5 shadow-sm" style={cardStyle}>
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-600 text-white">
-            <Users className="h-5 w-5" />
+            <BookOpen className="h-5 w-5" />
           </div>
 
           <div>
             <h3 className="text-2xl font-black" style={textStyle}>
-              {students.length}
+              {filteredCourses.length}
             </h3>
 
             <p className="text-xs font-semibold" style={mutedTextStyle}>
-              {t.totalStudents}
+              {t.totalCourses}
             </p>
           </div>
         </div>
@@ -365,17 +332,17 @@ export default function StudentsList() {
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-600 text-white">
-              <Users size={20} />
+              <BookOpen size={20} />
             </div>
 
             <div>
               <h2 className="text-lg font-black" style={textStyle}>
-                {t.studentsList}
+                {t.coursesList}
               </h2>
 
               <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
-                {t.showing} {startStudent} {t.to} {endStudent} {t.of}{" "}
-                {students.length} {t.students}
+                {t.showing} {startCourse} {t.to} {endCourse} {t.of}{" "}
+                {filteredCourses.length} {t.courses}
               </p>
             </div>
           </div>
@@ -403,7 +370,7 @@ export default function StudentsList() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1050px] table-fixed border-collapse">
+          <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
               <tr
                 className="border-b text-center text-[11px] uppercase tracking-wide"
@@ -412,40 +379,39 @@ export default function StudentsList() {
                   color: "var(--muted-text)",
                 }}
               >
-                <th className="w-[22%] px-5 py-4 font-black">{t.student}</th>
-                <th className="w-[23%] px-5 py-4 font-black">{t.email}</th>
-                <th className="w-[13%] px-5 py-4 font-black">{t.gender}</th>
-                <th className="w-[15%] px-5 py-4 font-black">{t.phone}</th>
-                <th className="w-[17%] px-5 py-4 font-black">{t.address}</th>
-                <th className="w-[10%] px-5 py-4 font-black">{t.actions}</th>
+                <th className="w-[34%] px-5 py-4 font-black">{t.course}</th>
+                <th className="w-[38%] px-5 py-4 font-black">
+                  {t.description}
+                </th>
+                <th className="w-[13%] px-5 py-4 font-black">{t.credits}</th>
+                <th className="w-[15%] px-5 py-4 font-black">{t.actions}</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-10 text-center">
+                  <td colSpan="4" className="px-5 py-10 text-center">
                     <div className="flex items-center justify-center gap-2 font-bold">
                       <Loader2 className="h-5 w-5 animate-spin" />
-                      {t.loadingStudents}
+                      {t.loading}
                     </div>
                   </td>
                 </tr>
-              ) : paginatedStudents.length === 0 ? (
+              ) : paginatedCourses.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-10 text-center font-bold">
-                    {t.noStudents}
+                  <td colSpan="4" className="px-5 py-10 text-center font-bold">
+                    {t.empty}
                   </td>
                 </tr>
               ) : (
-                paginatedStudents.map((student) => {
-                  const fullName = `${student.nom || ""} ${
-                    student.prenom || ""
-                  }`.trim();
+                paginatedCourses.map((course) => {
+                  const courseName = course.name || course.nom || t.noName;
+                  const credits = getCredits(course);
 
                   return (
                     <tr
-                      key={student.id}
+                      key={course.id}
                       className="border-b text-center text-sm transition last:border-none hover:bg-violet-500/5"
                       style={{
                         borderColor: "var(--border-color)",
@@ -455,19 +421,19 @@ export default function StudentsList() {
                       <td className="px-5 py-4">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-100 font-black text-violet-700">
-                            {String(fullName || "-").charAt(0).toUpperCase()}
+                            {String(courseName).charAt(0).toUpperCase()}
                           </div>
 
                           <div className="min-w-0 text-center">
                             <p className="truncate font-black" style={textStyle}>
-                              {fullName || "-"}
+                              {courseName}
                             </p>
 
                             <p
                               className="mt-0.5 text-xs font-semibold"
                               style={mutedTextStyle}
                             >
-                              {t.student}
+                              {t.course}
                             </p>
                           </div>
                         </div>
@@ -478,7 +444,7 @@ export default function StudentsList() {
                           className="block truncate text-sm font-semibold"
                           style={mutedTextStyle}
                         >
-                          {student.email || "-"}
+                          {course.description || t.noDescription}
                         </span>
                       </td>
 
@@ -490,34 +456,17 @@ export default function StudentsList() {
                             color: "var(--primary-color)",
                           }}
                         >
-                          {student.genre || "-"}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <span
-                          className="block truncate text-sm font-semibold"
-                          style={mutedTextStyle}
-                        >
-                          {student.telephone || "-"}
-                        </span>
-                      </td>
-
-                      <td className="px-5 py-4">
-                        <span
-                          className="block truncate text-sm font-semibold"
-                          style={mutedTextStyle}
-                        >
-                          {student.adresse || "-"}
+                          {credits}
                         </span>
                       </td>
 
                       <td className="px-5 py-4">
                         <button
                           type="button"
-                          onClick={() => setSelectedStudent(student)}
+                          onClick={() => handleViewCourse(course)}
+                          disabled={detailsLoading}
                           title={t.view}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 disabled:opacity-60"
                         >
                           <Eye size={15} />
                         </button>
@@ -535,8 +484,8 @@ export default function StudentsList() {
           style={sectionStyle}
         >
           <p className="text-xs font-semibold" style={mutedTextStyle}>
-            {t.showing} {startStudent} {t.to} {endStudent} {t.of}{" "}
-            {students.length} {t.students}
+            {t.showing} {startCourse} {t.to} {endCourse} {t.of}{" "}
+            {filteredCourses.length} {t.courses}
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -592,9 +541,9 @@ export default function StudentsList() {
         </div>
       </div>
 
-      <StudentDetails
-        student={selectedStudent}
-        onClose={() => setSelectedStudent(null)}
+      <CourseDetails
+        course={selectedCourse}
+        onClose={() => setSelectedCourse(null)}
       />
     </div>
   );
