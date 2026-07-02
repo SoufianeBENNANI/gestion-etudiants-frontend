@@ -43,7 +43,6 @@ const translations = {
     page: "Page",
     loadingStudents: "Loading students...",
     noStudents: "No students found.",
-    loadError: "Unable to load students.",
     pdfError: "Unable to download PDF.",
   },
 

@@ -34,7 +34,6 @@ const translations = {
     page: "Page",
     loading: "Loading classes...",
     empty: "No classes found.",
-    loadError: "Unable to load classes.",
     detailsError: "Unable to load class details.",
     noName: "No name",
     notDefined: "Not defined",

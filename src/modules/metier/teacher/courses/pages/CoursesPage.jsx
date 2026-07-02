@@ -34,7 +34,6 @@ const translations = {
     empty: "No courses found.",
     page: "Page",
     detailsError: "Unable to load course details.",
-    loadError: "Unable to load courses.",
     noName: "No name",
     noDescription: "No description",
     notDefined: "Not defined",
