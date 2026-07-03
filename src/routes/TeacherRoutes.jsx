@@ -9,7 +9,10 @@ import ClassesPage from "../modules/metier/teacher/classes/pages/ClassesPage";
 import TeacherAttendancePage from "../modules/metier/teacher/attendance/pages/TeacherAttendancePage";
 import TeacherDepartmentsPage from "../modules/metier/teacher/departments/pages/TeacherDepartmentsPage";
 import TeacherTeachersPage from "../modules/metier/teacher/teachers/pages/TeacherTeachersPage";
+import PredictionsPage from "../modules/metier/teacher/predictions/pages/PredictionsPage";
 import TeacherSettings from "../modules/metier/teacher/settings/pages/TeacherSettings";
+
+import GradesPage from "../modules/metier/teacher/grades/pages/GradesPage";
 
 export default function TeacherRoutes() {
   return (
@@ -28,6 +31,8 @@ export default function TeacherRoutes() {
       <Route path="attendance" element={<TeacherAttendancePage />} />
       <Route path="departments" element={<TeacherDepartmentsPage />} />
       <Route path="teachers" element={<TeacherTeachersPage />} />
+      <Route path="grades" element={<GradesPage />} />
+      <Route path="predictions" element={<PredictionsPage />} />
       <Route path="settings" element={<TeacherSettings />} />
     </Route>
   );
