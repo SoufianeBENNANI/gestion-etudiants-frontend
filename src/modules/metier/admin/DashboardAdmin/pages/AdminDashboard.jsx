@@ -425,63 +425,51 @@ export default function AdminDashboard() {
     color: "var(--muted-text)",
   };
 
-  useEffect(() => {
-    const isAllowedNotification = (notification) => {
-      const entity = String(notification?.entity || "").toUpperCase();
-      const action = String(notification?.action || "").toUpperCase();
+ useEffect(() => {
+  const disconnect =
+    connectKafkaNotifications({
+      recipientRole: "ADMIN",
 
-      if (isOldGmailSuccessMessage(notification)) {
-        return false;
-      }
+      onConnected: () => {
+        console.log(
+          "Dashboard Admin connecté aux notifications"
+        );
+      },
 
-      if (entity === "GMAIL" && !gmailConnected && action !== "SENT") {
-        return false;
-      }
+      onNotification: (notification) => {
+        setNotifications(
+          (previousNotifications) => {
+            const alreadyExists =
+              previousNotifications.some(
+                (item) =>
+                  item.notificationId ===
+                  notification.notificationId
+              );
 
-      const rules = {
-        STUDENT: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
-        TEACHER: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
-        CLASSES: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
-        COURSES: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
+            if (alreadyExists) {
+              return previousNotifications;
+            }
 
-        PAYEMENT: ["CREATED", "UPDATED", "DELETED", "RESTORED", "GENERATED"],
-        PAYMENT: ["CREATED", "UPDATED", "DELETED", "RESTORED", "GENERATED"],
-        ATTENDANCE: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
-        GRADE: ["CREATED", "UPDATED", "DELETED", "RESTORED"],
+            return [
+              notification,
+              ...previousNotifications,
+            ];
+          }
+        );
+      },
 
-        GMAIL: ["SENT", "READ", "RECEIVED"],
-      };
-
-      return rules[entity]?.includes(action);
-    };
-
-    const disconnect = connectKafkaNotifications((notification) => {
-      console.log("Notification dashboard:", notification);
-
-      if (!isAllowedNotification(notification)) {
-        console.log("Notification ignorée:", notification);
-        return;
-      }
-
-      setNotifications((prev) => {
-        const newNotification = {
-          ...notification,
-          notificationId: getNotificationId(notification, Date.now()),
-          receivedAt: notification?.createdAt || new Date().toISOString(),
-          read: false,
-        };
-
-        return [
-          newNotification,
-          ...prev.filter((item) => !isOldGmailSuccessMessage(item)),
-        ];
-      });
-
-      loadDashboard();
+      onError: (error) => {
+        console.error(
+          "Erreur notification Admin :",
+          error
+        );
+      },
     });
 
-    return () => disconnect();
-  }, [gmailConnected]);
+  return () => {
+    disconnect();
+  };
+}, []);
 
   const loadDashboard = async () => {
     try {
