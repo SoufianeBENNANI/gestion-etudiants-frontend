@@ -31,6 +31,7 @@ import {
 
 import { getDashboardData } from "../services/teacherDashboardService";
 import { connectKafkaNotifications } from "../../../admin/DashboardAdmin/services/notificationService";
+
 import TeacherNavbar from "../components/TeacherNavbar";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
@@ -211,6 +212,90 @@ const buildMonthlyData = ({ students = [], teachers = [], courses = [], payement
   return result;
 };
 
+const TEACHER_NOTIFICATIONS_STORAGE_KEY =
+  "teacher-notifications";
+
+const MAX_STORED_NOTIFICATIONS = 50;
+
+const loadTeacherNotifications = () => {
+  try {
+    const storedNotifications =
+      localStorage.getItem(
+        TEACHER_NOTIFICATIONS_STORAGE_KEY
+      );
+
+    if (!storedNotifications) {
+      return [];
+    }
+
+    const parsedNotifications =
+      JSON.parse(storedNotifications);
+
+    return Array.isArray(parsedNotifications)
+      ? parsedNotifications
+      : [];
+  } catch (error) {
+    console.error(
+      "Erreur lecture notifications Teacher :",
+      error
+    );
+
+    return [];
+  }
+};
+
+const saveTeacherNotifications = (
+  notifications
+) => {
+  try {
+    localStorage.setItem(
+      TEACHER_NOTIFICATIONS_STORAGE_KEY,
+      JSON.stringify(
+        notifications.slice(
+          0,
+          MAX_STORED_NOTIFICATIONS
+        )
+      )
+    );
+  } catch (error) {
+    console.error(
+      "Erreur sauvegarde notifications Teacher :",
+      error
+    );
+  }
+};
+
+const createTeacherNotificationId = (
+  notification
+) => {
+  return String(
+    notification?.notificationId ||
+    notification?.id ||
+    [
+      notification?.entity ||
+      "NOTIFICATION",
+
+      notification?.action ||
+      "RECEIVED",
+
+      notification?.entityId ??
+      "",
+
+      notification?.senderEmail ||
+      "",
+
+      notification?.recipientEmail ||
+      "",
+
+      notification?.message ||
+      "",
+
+      notification?.createdAt ||
+      Date.now(),
+    ].join("-")
+  );
+};
+
 export default function DashboardTeacher() {
   const [language, setLanguage] = useState(localStorage.getItem("app-language") || "EN");
   const t = translations[language] || translations.EN;
@@ -218,8 +303,12 @@ export default function DashboardTeacher() {
   const [loading, setLoading] = useState(true);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [
+    notifications,
+    setNotifications,
+  ] = useState(() =>
+    loadTeacherNotifications()
+  ); const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [showAllNotifications, setShowAllNotifications] = useState(false);
@@ -267,12 +356,68 @@ export default function DashboardTeacher() {
 
   const isGmailNotification = (notification) => String(notification?.entity || "").toUpperCase() === "GMAIL";
 
-  const handleNotificationClick = (notification) => {
-    setNotifications((prev) =>
-      prev.map((item) => item.notificationId === notification.notificationId ? { ...item, read: true } : item)
+  const handleNotificationClick = (
+    notification
+  ) => {
+    const clickedId =
+      createTeacherNotificationId(
+        notification
+      );
+
+    setNotifications(
+      (
+        previousNotifications
+      ) => {
+        const updatedNotifications =
+          previousNotifications.map(
+            (item) => {
+              const itemId =
+                createTeacherNotificationId(
+                  item
+                );
+
+              if (itemId !== clickedId) {
+                return item;
+              }
+
+              return {
+                ...item,
+                read: true,
+              };
+            }
+          );
+
+        saveTeacherNotifications(
+          updatedNotifications
+        );
+
+        return updatedNotifications;
+      }
     );
-    if (isGmailNotification(notification)) window.open(notification.redirectUrl || GMAIL_URL, "_blank", "noopener,noreferrer");
+
+    if (
+      isGmailNotification(
+        notification
+      )
+    ) {
+      window.open(
+        notification.redirectUrl ||
+        GMAIL_URL,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
   };
+
+  const handleClearNotifications =
+    () => {
+      setNotifications([]);
+      setShowAllNotifications(false);
+
+      localStorage.removeItem(
+        TEACHER_NOTIFICATIONS_STORAGE_KEY
+      );
+    };
 
   const loadDashboard = async () => {
     try {
@@ -300,209 +445,322 @@ export default function DashboardTeacher() {
     }
   };
 
+  useEffect(() => {
+    saveTeacherNotifications(
+      notifications
+    );
+  }, [notifications]);
+
   useEffect(() => { loadDashboard(); }, []);
 
   useEffect(() => {
-  const notificationStreamUrl =
-    "http://localhost:8080/api/notifications/stream";
+    const notificationStreamUrl =
+      "http://localhost:8080/api/notifications/stream";
 
-  const controller = new AbortController();
+    const controller =
+      new AbortController();
 
-  const token =
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("token") ||
-    sessionStorage.getItem("accessToken") ||
-    sessionStorage.getItem("access_token") ||
-    sessionStorage.getItem("token");
+    const token =
+      localStorage.getItem(
+        "accessToken"
+      ) ||
+      localStorage.getItem(
+        "access_token"
+      ) ||
+      localStorage.getItem(
+        "token"
+      ) ||
+      sessionStorage.getItem(
+        "accessToken"
+      ) ||
+      sessionStorage.getItem(
+        "access_token"
+      ) ||
+      sessionStorage.getItem(
+        "token"
+      );
 
-  if (!token) {
-    console.error(
-      "Token Keycloak introuvable pour la connexion SSE Teacher."
-    );
+    if (!token) {
+      console.error(
+        "Token Keycloak introuvable pour la connexion SSE Teacher."
+      );
 
-    return () => controller.abort();
-  }
-
-  const addNotification = (data) => {
-    const recipientRole = String(
-      data?.recipientRole || data?.role || ""
-    ).toUpperCase();
-
-    /*
-     * Le Teacher reçoit uniquement
-     * les notifications qui lui sont destinées.
-     */
-    if (
-      recipientRole &&
-      recipientRole !== "TEACHER"
-    ) {
-      return;
+      return () => {
+        controller.abort();
+      };
     }
 
-    const notification = {
-      ...data,
+    const addNotification = (
+      receivedData
+    ) => {
+      const data =
+        receivedData?.data ||
+        receivedData?.payload ||
+        receivedData;
 
-      notificationId:
-        data?.notificationId ||
-        [
-          data?.entity || "NOTIFICATION",
-          data?.action || "RECEIVED",
-          data?.entityId || "null",
-          data?.createdAt || Date.now(),
-        ].join("-"),
-
-      read: false,
-
-      redirectUrl:
-        data?.redirectUrl ||
-        (
-          String(data?.entity || "").toUpperCase() === "GMAIL"
-            ? "https://mail.google.com/mail/u/0/#inbox"
-            : null
-        ),
-    };
-
-    setNotifications((previousNotifications) => {
-      const alreadyExists =
-        previousNotifications.some(
-          (item) =>
-            item.notificationId ===
-            notification.notificationId
-        );
-
-      if (alreadyExists) {
-        return previousNotifications;
+      if (!data) {
+        return;
       }
 
-      return [
-        notification,
-        ...previousNotifications,
-      ];
-    });
-  };
+      const recipientRole =
+        String(
+          data.recipientRole ||
+          data.role ||
+          ""
+        )
+          .replace(
+            /^ROLE_/i,
+            ""
+          )
+          .trim()
+          .toUpperCase();
 
-  const connect = async () => {
-    try {
-      await fetchEventSource(
-        notificationStreamUrl,
-        {
-          method: "GET",
+      /*
+       * Accepter uniquement les notifications
+       * destinées au TEACHER.
+       */
+      if (
+        recipientRole &&
+        recipientRole !== "TEACHER"
+      ) {
+        return;
+      }
 
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "text/event-stream",
-            "Cache-Control": "no-cache",
-          },
+      const notificationId =
+        createTeacherNotificationId(
+          data
+        );
 
-          signal: controller.signal,
+      const notification = {
+        ...data,
+
+        recipientRole:
+          recipientRole ||
+          "TEACHER",
+
+        notificationId,
+
+        entity: String(
+          data.entity ||
+          "NOTIFICATION"
+        ).toUpperCase(),
+
+        action: String(
+          data.action ||
+          "RECEIVED"
+        ).toUpperCase(),
+
+        message:
+          data.message ||
+          "Nouvelle notification reçue",
+
+        createdAt:
+          data.createdAt ||
+          new Date().toISOString(),
+
+        read: false,
+
+        redirectUrl:
+          data.redirectUrl ||
+          (
+            String(
+              data.entity || ""
+            ).toUpperCase() ===
+              "GMAIL"
+              ? "https://mail.google.com/mail/u/0/#inbox"
+              : null
+          ),
+      };
+
+      setNotifications(
+        (
+          previousNotifications
+        ) => {
+          const alreadyExists =
+            previousNotifications.some(
+              (item) =>
+                createTeacherNotificationId(
+                  item
+                ) === notificationId
+            );
+
+          if (alreadyExists) {
+            return previousNotifications;
+          }
+
+          const updatedNotifications =
+            [
+              notification,
+              ...previousNotifications,
+            ].slice(
+              0,
+              MAX_STORED_NOTIFICATIONS
+            );
 
           /*
-           * Important pour éviter l'arrêt automatique
-           * lorsque l'onglet devient inactif.
+           * Sauvegarde immédiate avant un éventuel
+           * changement de page.
            */
-          openWhenHidden: true,
+          saveTeacherNotifications(
+            updatedNotifications
+          );
 
-          async onopen(response) {
-            if (!response.ok) {
-              throw new Error(
-                `Erreur SSE Teacher : ${response.status}`
-              );
-            }
-
-            const contentType =
-              response.headers.get("content-type") || "";
-
-            if (
-              !contentType.includes("text/event-stream")
-            ) {
-              throw new Error(
-                `Type SSE invalide : ${contentType}`
-              );
-            }
-
-            console.log(
-              "Teacher SSE connecté avec succès."
-            );
-          },
-
-          onmessage(event) {
-            /*
-             * Accepte :
-             * event: notification
-             * ou message SSE sans nom d'événement.
-             */
-            if (
-              event.event &&
-              event.event !== "notification" &&
-              event.event !== "message"
-            ) {
-              return;
-            }
-
-            if (!event.data) {
-              return;
-            }
-
-            try {
-              const data = JSON.parse(event.data);
-
-              console.log(
-                "Notification SSE Teacher reçue :",
-                data
-              );
-
-              addNotification(data);
-            } catch (error) {
-              console.error(
-                "Notification SSE Teacher invalide :",
-                event.data,
-                error
-              );
-            }
-          },
-
-          onclose() {
-            if (!controller.signal.aborted) {
-              throw new Error(
-                "Connexion SSE Teacher fermée par le serveur."
-              );
-            }
-          },
-
-          onerror(error) {
-            if (controller.signal.aborted) {
-              return;
-            }
-
-            console.error(
-              "Erreur connexion SSE Teacher :",
-              error
-            );
-
-            /*
-             * Relance automatique de la connexion.
-             */
-            throw error;
-          },
+          return updatedNotifications;
         }
       );
-    } catch (error) {
-      if (!controller.signal.aborted) {
-        console.error(
-          "Impossible de connecter le SSE Teacher :",
-          error
+    };
+
+    const connect = async () => {
+      try {
+        await fetchEventSource(
+          notificationStreamUrl,
+          {
+            method: "GET",
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              Accept:
+                "text/event-stream",
+
+              "Cache-Control":
+                "no-cache",
+            },
+
+            signal:
+              controller.signal,
+
+            openWhenHidden: true,
+
+            async onopen(response) {
+              const contentType =
+                response.headers.get(
+                  "content-type"
+                ) || "";
+
+              if (!response.ok) {
+                throw new Error(
+                  `Erreur SSE Teacher : ${response.status}`
+                );
+              }
+
+              if (
+                !contentType
+                  .toLowerCase()
+                  .includes(
+                    "text/event-stream"
+                  )
+              ) {
+                throw new Error(
+                  `Type SSE invalide : ${contentType}`
+                );
+              }
+
+              console.log(
+                "Teacher SSE connecté avec succès."
+              );
+            },
+
+            onmessage(event) {
+              const eventName =
+                String(
+                  event.event || ""
+                )
+                  .trim()
+                  .toLowerCase();
+
+              /*
+               * Ignorer uniquement les événements
+               * techniques.
+               */
+              if (
+                eventName ===
+                "connected" ||
+                eventName ===
+                "heartbeat" ||
+                eventName === "ping" ||
+                eventName ===
+                "keepalive"
+              ) {
+                return;
+              }
+
+              if (!event.data) {
+                return;
+              }
+
+              try {
+                const parsedData =
+                  JSON.parse(
+                    event.data
+                  );
+
+                console.log(
+                  "Notification SSE Teacher reçue :",
+                  parsedData
+                );
+
+                addNotification(
+                  parsedData
+                );
+              } catch (error) {
+                console.error(
+                  "Notification SSE Teacher invalide :",
+                  event.data,
+                  error
+                );
+              }
+            },
+
+            onclose() {
+              if (
+                !controller.signal
+                  .aborted
+              ) {
+                throw new Error(
+                  "Connexion SSE Teacher fermée par le serveur."
+                );
+              }
+            },
+
+            onerror(error) {
+              if (
+                controller.signal
+                  .aborted
+              ) {
+                return;
+              }
+
+              console.error(
+                "Erreur connexion SSE Teacher :",
+                error
+              );
+
+              return 3000;
+            },
+          }
         );
+      } catch (error) {
+        if (
+          error?.name !==
+          "AbortError" &&
+          !controller.signal.aborted
+        ) {
+          console.error(
+            "Impossible de connecter le SSE Teacher :",
+            error
+          );
+        }
       }
-    }
-  };
+    };
 
-  connect();
+    connect();
 
-  return () => {
-    controller.abort();
-  };
-}, []);
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const handleLanguageChange = (event) => {
@@ -623,11 +881,12 @@ export default function DashboardTeacher() {
                 <div className={`absolute top-[calc(100%+0.75rem)] z-[999] w-96 overflow-hidden rounded-[1.4rem] border shadow-2xl ${language === "AR" ? "left-0" : "right-0"}`} style={cardStyle}>
                   <div className="flex items-center justify-between border-b px-5 py-4" style={{ borderColor: "var(--border-color)" }}>
                     <div><h3 className="text-sm font-black">Notifications</h3><p className="text-xs font-semibold" style={mutedTextStyle}>{unreadCount} non lu(s)</p></div>
-                    {cleanNotifications.length > 0 && <button type="button" onClick={() => { setNotifications([]); setShowAllNotifications(false); }} className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-600 hover:bg-red-100">Clear All</button>}
+                    {cleanNotifications.length > 0 && (<button type="button" onClick={handleClearNotifications} className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-600 hover:bg-red-100">Clear All</button>
+)}
                   </div>
                   <div className="max-h-80 overflow-y-auto p-3">
                     {displayedNotifications.length > 0 ? displayedNotifications.map((notification, index) => (
-                      <button key={notification.notificationId || index} type="button" onClick={() => handleNotificationClick(notification)} className={`mb-3 flex w-full gap-3 rounded-2xl border p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md ${notification.read ? "opacity-60" : "opacity-100"}`} style={sectionStyle}>
+                      <button key={createTeacherNotificationId(notification)} type="button" onClick={() => handleNotificationClick(notification)} className={`mb-3 flex w-full gap-3 rounded-2xl border p-3 text-left transition hover:-translate-y-0.5 hover:shadow-md ${notification.read ? "opacity-60" : "opacity-100"}`} style={sectionStyle}>
                         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white ${notification.read ? "bg-slate-400" : "bg-blue-600"}`}>{isGmailNotification(notification) ? <Mail className="h-4 w-4" /> : <Bell className="h-4 w-4" />}</div>
                         <div className="min-w-0 flex-1"><p className={`whitespace-normal break-words text-sm leading-6 ${notification.read ? "font-semibold" : "font-black"}`}>{notification.message || "Nouvelle notification reçue"}</p>{notification.createdAt && <p className="mt-2 text-[10px] font-bold" style={mutedTextStyle}>{new Date(notification.createdAt).toLocaleString()}</p>}</div>
                       </button>

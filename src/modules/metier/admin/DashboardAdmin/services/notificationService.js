@@ -14,6 +14,31 @@ const getAccessToken = () => {
   );
 };
 
+const normalizeRole = (value) => {
+  return String(value || "")
+    .replace(/^ROLE_/i, "")
+    .trim()
+    .toUpperCase();
+};
+
+const createNotificationId = (data) => {
+  return String(
+    data.notificationId ||
+      data.id ||
+      [
+        data.senderEmail,
+        data.recipientEmail,
+        data.recipientRole,
+        data.entity,
+        data.action,
+        data.entityId,
+        data.createdAt,
+        data.message,
+        Date.now(),
+      ].join("-")
+  );
+};
+
 export function connectKafkaNotifications({
   recipientRole = "ADMIN",
   onNotification,
@@ -21,11 +46,14 @@ export function connectKafkaNotifications({
   onError,
 }) {
   const controller = new AbortController();
+  const expectedRole =
+    normalizeRole(recipientRole);
+
   const token = getAccessToken();
 
   if (!token) {
     const error = new Error(
-      "Token Keycloak introuvable dans le navigateur."
+      "Token Keycloak introuvable."
     );
 
     console.error(error);
@@ -34,161 +62,190 @@ export function connectKafkaNotifications({
     return () => controller.abort();
   }
 
-  const connect = async () => {
-    try {
-      await fetchEventSource(SSE_URL, {
-        method: "GET",
+  fetchEventSource(SSE_URL, {
+    method: "GET",
 
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "text/event-stream",
-          "Cache-Control": "no-cache",
-        },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "text/event-stream",
+      "Cache-Control": "no-cache",
+    },
 
-        signal: controller.signal,
-        openWhenHidden: true,
+    signal: controller.signal,
+    openWhenHidden: true,
 
-        async onopen(response) {
-          const contentType =
-            response.headers.get("content-type") || "";
+    async onopen(response) {
+      const contentType =
+        response.headers.get("content-type") || "";
 
-          if (!response.ok) {
-            throw new Error(
-              `Connexion SSE refusée : ${response.status}`
-            );
-          }
+      console.log(
+        "Réponse connexion SSE :",
+        response.status,
+        contentType
+      );
 
-          if (!contentType.includes("text/event-stream")) {
-            throw new Error(
-              `Content-Type SSE invalide : ${contentType}`
-            );
-          }
+      if (!response.ok) {
+        throw new Error(
+          `Connexion SSE refusée : ${response.status}`
+        );
+      }
 
-          console.log("SSE Admin connecté");
-          onConnected?.();
-        },
+      if (
+        !contentType
+          .toLowerCase()
+          .includes("text/event-stream")
+      ) {
+        throw new Error(
+          `Content-Type SSE invalide : ${contentType}`
+        );
+      }
 
-        onmessage(event) {
-          console.log("SSE événement :", event.event);
-          console.log("SSE données :", event.data);
+      console.log(
+        "Connexion SSE ADMIN établie."
+      );
 
-          if (event.event === "connected") {
-            return;
-          }
+      onConnected?.();
+    },
 
-          if (
-            event.event &&
-            event.event !== "notification"
-          ) {
-            return;
-          }
+    onmessage(event) {
+      console.log(
+        "Événement SSE reçu :",
+        event.event,
+        event.data
+      );
 
-          if (!event.data) {
-            return;
-          }
+      if (
+        event.event === "connected" ||
+        event.event === "ping" ||
+        event.event === "heartbeat"
+      ) {
+        return;
+      }
 
-          try {
-            const data = JSON.parse(event.data);
+      if (!event.data) {
+        return;
+      }
 
-            const role = String(
-              data.recipientRole || ""
-            ).toUpperCase();
+      try {
+        const parsedData =
+          JSON.parse(event.data);
 
-            if (
-              role !==
-              String(recipientRole).toUpperCase()
-            ) {
-              return;
-            }
+        const data =
+          parsedData.data ||
+          parsedData.payload ||
+          parsedData;
 
-            const notification = {
-              ...data,
-
-              entity: String(
-                data.entity || "KAFKA"
-              ).toUpperCase(),
-
-              action: String(
-                data.action || "EVENT"
-              ).toUpperCase(),
-
-              entityId: data.entityId ?? null,
-
-              message:
-                data.message ||
-                "Nouvelle notification reçue",
-
-              createdAt:
-                data.createdAt ||
-                new Date().toISOString(),
-
-              notificationId:
-                data.notificationId ||
-                data.id ||
-                `${role}-${data.entity}-${data.action}-${data.createdAt}-${data.message}`,
-
-              redirectUrl:
-                data.redirectUrl ||
-                "https://mail.google.com/mail/u/0/#inbox",
-
-              read: false,
-            };
-
-            console.log(
-              "Notification Admin reçue dans React :",
-              notification
-            );
-
-            onNotification?.(notification);
-          } catch (error) {
-            console.error(
-              "Erreur parsing notification SSE :",
-              error
-            );
-
-            onError?.(error);
-          }
-        },
-
-        onclose() {
-          if (!controller.signal.aborted) {
-            throw new Error(
-              "Le serveur a fermé la connexion SSE."
-            );
-          }
-        },
-
-        onerror(error) {
-          if (controller.signal.aborted) {
-            return;
-          }
-
-          console.error(
-            "Erreur connexion SSE :",
-            error
+        const receivedRole =
+          normalizeRole(
+            data.recipientRole
           );
 
-          onError?.(error);
+        console.log(
+          "Rôle attendu :",
+          expectedRole,
+          "Rôle reçu :",
+          receivedRole
+        );
 
-          return 3000;
-        },
-      });
-    } catch (error) {
-      if (
-        error.name !== "AbortError" &&
-        !controller.signal.aborted
-      ) {
+        if (
+          receivedRole &&
+          receivedRole !== expectedRole
+        ) {
+          return;
+        }
+
+        const entity = String(
+          data.entity || "KAFKA"
+        ).toUpperCase();
+
+        const notification = {
+          ...data,
+
+          recipientRole:
+            receivedRole || expectedRole,
+
+          entity,
+
+          action: String(
+            data.action || "EVENT"
+          ).toUpperCase(),
+
+          message:
+            data.message ||
+            "Nouvelle notification reçue",
+
+          createdAt:
+            data.createdAt ||
+            new Date().toISOString(),
+
+          notificationId:
+            createNotificationId(data),
+
+          redirectUrl:
+            data.redirectUrl ||
+            (
+              entity === "GMAIL"
+                ? "https://mail.google.com/mail/u/0/#inbox"
+                : null
+            ),
+
+          read: false,
+        };
+
+        console.log(
+          "Notification envoyée à React :",
+          notification
+        );
+
+        onNotification?.(
+          notification
+        );
+      } catch (error) {
         console.error(
-          "Connexion SSE interrompue :",
-          error
+          "Erreur de lecture SSE :",
+          error,
+          event.data
         );
 
         onError?.(error);
       }
-    }
-  };
+    },
 
-  connect();
+    onclose() {
+      if (!controller.signal.aborted) {
+        throw new Error(
+          "Le serveur a fermé la connexion SSE."
+        );
+      }
+    },
+
+    onerror(error) {
+      if (controller.signal.aborted) {
+        return;
+      }
+
+      console.error(
+        "Erreur SSE :",
+        error
+      );
+
+      onError?.(error);
+
+      return 3000;
+    },
+  }).catch((error) => {
+    if (
+      error.name !== "AbortError" &&
+      !controller.signal.aborted
+    ) {
+      console.error(
+        "Connexion SSE interrompue :",
+        error
+      );
+
+      onError?.(error);
+    }
+  });
 
   return () => {
     controller.abort();

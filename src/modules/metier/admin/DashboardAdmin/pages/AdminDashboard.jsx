@@ -237,6 +237,79 @@ const months = [
 
 const STUDENTS_PER_PAGE = 5;
 
+const ADMIN_NOTIFICATIONS_STORAGE_KEY =
+  "admin-notifications";
+
+const MAX_STORED_NOTIFICATIONS = 50;
+
+const loadStoredNotifications = () => {
+  try {
+    const stored =
+      localStorage.getItem(
+        ADMIN_NOTIFICATIONS_STORAGE_KEY
+      );
+
+    if (!stored) {
+      return [];
+    }
+
+    const parsed =
+      JSON.parse(stored);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error(
+      "Erreur lecture notifications :",
+      error
+    );
+
+    return [];
+  }
+};
+
+const saveStoredNotifications = (
+  notifications
+) => {
+  try {
+    localStorage.setItem(
+      ADMIN_NOTIFICATIONS_STORAGE_KEY,
+      JSON.stringify(
+        notifications.slice(
+          0,
+          MAX_STORED_NOTIFICATIONS
+        )
+      )
+    );
+  } catch (error) {
+    console.error(
+      "Erreur sauvegarde notifications :",
+      error
+    );
+  }
+};
+
+const createNotificationId = (
+  notification
+) => {
+  return String(
+    notification?.notificationId ||
+      notification?.id ||
+      [
+        notification?.entity || "KAFKA",
+        notification?.action || "EVENT",
+        notification?.entityId ?? "",
+        notification?.senderEmail || "",
+        notification?.recipientEmail || "",
+        notification?.message || "",
+        notification?.createdAt ||
+          new Date().toISOString(),
+      ].join("-")
+  );
+};
 const getDateValue = (item) => {
   const dateValue =
     item?.createdAt ||
@@ -265,43 +338,90 @@ const buildMonthlyData = ({
   attendances = [],
   predictions = [],
 }) => {
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
+  const currentYear =
+    new Date().getFullYear();
 
-  const result = months.map((month) => ({
-    name: month,
-    students: 0,
-    teachers: 0,
-    courses: 0,
-    payements: 0,
-    attendances: 0,
-    predictions: 0,
-  }));
+  const currentMonth =
+    new Date().getMonth();
 
-  const addItemsToMonth = (items, key) => {
+  const result = months.map(
+    (month) => ({
+      name: month,
+      students: 0,
+      teachers: 0,
+      courses: 0,
+      payements: 0,
+      attendances: 0,
+      predictions: 0,
+    })
+  );
+
+  const addItemsToMonth = (
+    items,
+    key
+  ) => {
     let hasValidDate = false;
 
     items.forEach((item) => {
-      const date = getDateValue(item);
+      const date =
+        getDateValue(item);
 
-      if (!date) return;
-      if (date.getFullYear() !== currentYear) return;
+      if (!date) {
+        return;
+      }
 
-      result[date.getMonth()][key] += 1;
+      if (
+        date.getFullYear() !==
+        currentYear
+      ) {
+        return;
+      }
+
+      result[
+        date.getMonth()
+      ][key] += 1;
+
       hasValidDate = true;
     });
 
-    if (items.length > 0 && !hasValidDate) {
-      result[currentMonth][key] = items.length;
+    if (
+      items.length > 0 &&
+      !hasValidDate
+    ) {
+      result[currentMonth][key] =
+        items.length;
     }
   };
 
-  addItemsToMonth(students, "students");
-  addItemsToMonth(teachers, "teachers");
-  addItemsToMonth(courses, "courses");
-  addItemsToMonth(payements, "payements");
-  addItemsToMonth(attendances, "attendances");
-  addItemsToMonth(predictions, "predictions");
+  addItemsToMonth(
+    students,
+    "students"
+  );
+
+  addItemsToMonth(
+    teachers,
+    "teachers"
+  );
+
+  addItemsToMonth(
+    courses,
+    "courses"
+  );
+
+  addItemsToMonth(
+    payements,
+    "payements"
+  );
+
+  addItemsToMonth(
+    attendances,
+    "attendances"
+  );
+
+  addItemsToMonth(
+    predictions,
+    "predictions"
+  );
 
   return result;
 };
@@ -318,8 +438,10 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-
+  const [notifications, setNotifications] =
+    useState(() =>
+      loadStoredNotifications()
+    );
   const [gmailConnected] = useState(
     localStorage.getItem("gmail-connected") === "true"
   );
@@ -359,11 +481,35 @@ export default function AdminDashboard() {
     );
   };
 
-  const getNotificationId = (notification, index = 0) => {
-    return (
+  const getNotificationId = (
+    notification,
+    index = 0
+  ) => {
+    return String(
+      notification?.notificationId ||
       notification?.id ||
-      `${notification?.entity || "KAFKA"}-${notification?.action || "EVENT"}-${notification?.message || ""
-      }-${notification?.createdAt || index}`
+      [
+        notification?.entity ||
+        "KAFKA",
+
+        notification?.action ||
+        "EVENT",
+
+        notification?.entityId ||
+        "",
+
+        notification?.senderEmail ||
+        "",
+
+        notification?.recipientEmail ||
+        "",
+
+        notification?.message ||
+        "",
+
+        notification?.createdAt ||
+        index,
+      ].join("-")
     );
   };
 
@@ -382,23 +528,52 @@ export default function AdminDashboard() {
     0
   );
 
-  const handleNotificationClick = (notification) => {
-    const clickedId = notification.notificationId;
-
-    setNotifications((prev) =>
-      prev.map((item) =>
-        item.notificationId === clickedId ? { ...item, read: true } : item
-      )
+  const handleNotificationClick = (
+  notification
+) => {
+  const clickedId =
+    createNotificationId(
+      notification
     );
 
-    if (isGmailNotification(notification)) {
-      window.open(
-        notification.redirectUrl || GMAIL_URL,
-        "_blank",
-        "noopener,noreferrer"
+  setNotifications(
+    (
+      previousNotifications
+    ) => {
+      const updatedNotifications =
+        previousNotifications.map(
+          (item) =>
+            createNotificationId(
+              item
+            ) === clickedId
+              ? {
+                  ...item,
+                  read: true,
+                }
+              : item
+        );
+
+      saveStoredNotifications(
+        updatedNotifications
       );
+
+      return updatedNotifications;
     }
-  };
+  );
+
+  if (
+    isGmailNotification(
+      notification
+    )
+  ) {
+    window.open(
+      notification.redirectUrl ||
+        GMAIL_URL,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+};
 
   const cardStyle = {
     backgroundColor: "var(--card-bg)",
@@ -425,6 +600,12 @@ export default function AdminDashboard() {
     color: "var(--muted-text)",
   };
 
+  useEffect(() => {
+  saveStoredNotifications(
+    notifications
+  );
+}, [notifications]);
+
  useEffect(() => {
   const disconnect =
     connectKafkaNotifications({
@@ -432,28 +613,57 @@ export default function AdminDashboard() {
 
       onConnected: () => {
         console.log(
-          "Dashboard Admin connecté aux notifications"
+          "AdminDashboard connecté au SSE."
         );
       },
 
-      onNotification: (notification) => {
+      onNotification: (
+        receivedNotification
+      ) => {
+        const notificationId =
+          createNotificationId(
+            receivedNotification
+          );
+
         setNotifications(
-          (previousNotifications) => {
-            const alreadyExists =
+          (
+            previousNotifications
+          ) => {
+            const exists =
               previousNotifications.some(
                 (item) =>
-                  item.notificationId ===
-                  notification.notificationId
+                  createNotificationId(
+                    item
+                  ) === notificationId
               );
 
-            if (alreadyExists) {
+            if (exists) {
               return previousNotifications;
             }
 
-            return [
-              notification,
-              ...previousNotifications,
-            ];
+            const updatedNotifications =
+              [
+                {
+                  ...receivedNotification,
+                  notificationId,
+                  read: false,
+                  createdAt:
+                    receivedNotification
+                      ?.createdAt ||
+                    new Date()
+                      .toISOString(),
+                },
+                ...previousNotifications,
+              ].slice(
+                0,
+                MAX_STORED_NOTIFICATIONS
+              );
+
+            saveStoredNotifications(
+              updatedNotifications
+            );
+
+            return updatedNotifications;
           }
         );
       },
@@ -467,7 +677,7 @@ export default function AdminDashboard() {
     });
 
   return () => {
-    disconnect();
+    disconnect?.();
   };
 }, []);
 
@@ -485,6 +695,12 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    saveStoredNotifications(
+      notifications
+    );
+  }, [notifications]);
 
   useEffect(() => {
     loadDashboard();
@@ -675,6 +891,15 @@ export default function AdminDashboard() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handleClearNotifications =
+  () => {
+    setNotifications([]);
+    setShowAllNotifications(false);
+
+    localStorage.removeItem(
+      ADMIN_NOTIFICATIONS_STORAGE_KEY
+    );
+  };
   const pieColors = [
     "#38bdf8",
     "#f59e0b",
@@ -794,10 +1019,7 @@ export default function AdminDashboard() {
                       {cleanNotifications.length > 0 && (
                         <button
                           type="button"
-                          onClick={() => {
-                            setNotifications([]);
-                            setShowAllNotifications(false);
-                          }}
+                          onClick={handleClearNotifications}
                           className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-600 hover:bg-red-100"
                         >
                           Clear All
@@ -1321,7 +1543,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-       
+
       </div>
 
       {/* MINI SUMMARY */}
