@@ -34,6 +34,18 @@ export default function TeacherLayout() {
     };
   }, []);
 
+  const handlePageDoubleClick = (event) => {
+    const interactiveElement = event.target.closest(
+      "a, button, input, textarea, select, option, label, [role='button']"
+    );
+
+    if (interactiveElement) {
+      return;
+    }
+
+    setCollapsed((previous) => !previous);
+  };
+
   return (
     <div
       className="flex min-h-screen transition-colors duration-300"
@@ -43,14 +55,19 @@ export default function TeacherLayout() {
       }}
       dir="ltr"
     >
-      <TeacherSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+      <TeacherSidebar
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+      />
 
       <main
+        onDoubleClick={handlePageDoubleClick}
         className="min-w-0 flex-1 overflow-y-auto p-6 transition-colors duration-300"
         style={{
           backgroundColor: "var(--app-bg)",
           color: "var(--text-color)",
         }}
+        title="Double-cliquez sur une zone vide pour réduire ou agrandir le menu"
       >
         {showNavbar && (
           <div className="mb-6">

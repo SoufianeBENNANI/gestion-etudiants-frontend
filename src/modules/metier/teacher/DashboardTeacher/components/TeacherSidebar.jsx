@@ -104,6 +104,7 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
         academics: true,
         evaluation: false,
       });
+      return;
     }
 
     if (
@@ -114,12 +115,29 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
         academics: false,
         evaluation: true,
       });
+      return;
     }
+
+    setOpenMenus({
+      academics: false,
+      evaluation: false,
+    });
   }, [pathname]);
 
   const toggleMenu = (menu) => {
-    setOpenMenus((prev) => {
-      const isAlreadyOpen = prev[menu];
+    if (collapsed) {
+      setCollapsed(false);
+
+      setOpenMenus({
+        academics: menu === "academics",
+        evaluation: menu === "evaluation",
+      });
+
+      return;
+    }
+
+    setOpenMenus((previous) => {
+      const isAlreadyOpen = previous[menu];
 
       return {
         academics: menu === "academics" ? !isAlreadyOpen : false,
@@ -128,27 +146,31 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
     });
   };
 
+  const toggleSidebar = () => {
+    setCollapsed((previous) => !previous);
+  };
+
   const activeStyle =
     "bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30";
 
   const itemClass = (path) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer ${
+    `flex items-center gap-3 rounded-2xl px-4 py-3 transition-all duration-300 ${
       pathname === path
         ? activeStyle
         : "text-white hover:bg-white/10 hover:text-violet-300"
-    }`;
+    } ${collapsed ? "justify-center" : ""}`;
 
   const buttonClass = (isOpen) =>
-    `w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 ${
+    `flex w-full items-center justify-between rounded-2xl px-4 py-3 transition-all duration-300 ${
       isOpen
         ? activeStyle
         : "text-white hover:bg-white/10 hover:text-violet-300"
     }`;
 
   const subItemClass = (path) =>
-    `flex items-center gap-4 px-4 py-3 rounded-xl text-sm transition-all duration-300 ${
+    `flex items-center gap-4 rounded-xl px-4 py-3 text-sm transition-all duration-300 ${
       pathname === path
-        ? "bg-white/10 text-white font-semibold"
+        ? "bg-white/10 font-semibold text-white"
         : "text-slate-300 hover:bg-white/10 hover:text-white"
     }`;
 
@@ -163,22 +185,36 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
         color: "white",
       }}
     >
-      <div className="flex items-center justify-between p-5">
+      <div
+        className={`flex items-center p-5 ${
+          collapsed ? "justify-center" : "justify-between"
+        }`}
+      >
         {!collapsed && (
-          <img src={logo} alt="logo" className="w-44 object-contain" />
+          <img
+            src={logo}
+            alt="logo"
+            className="w-44 object-contain"
+          />
         )}
 
         <button
           type="button"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleSidebar}
           className="rounded-xl p-2 transition hover:bg-white/10"
+          aria-label={collapsed ? "Agrandir le menu" : "Réduire le menu"}
+          title={collapsed ? "Agrandir le menu" : "Réduire le menu"}
         >
           <Menu size={22} />
         </button>
       </div>
 
       <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto p-3">
-        <Link to="/teacher" className={itemClass("/teacher")}>
+        <Link
+          to="/teacher"
+          className={itemClass("/teacher")}
+          title={collapsed ? t.dashboard : undefined}
+        >
           <LayoutDashboard size={20} />
           {!collapsed && <span>{t.dashboard}</span>}
         </Link>
@@ -188,8 +224,9 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
             type="button"
             onClick={() => toggleMenu("academics")}
             className={buttonClass(openMenus.academics)}
+            title={collapsed ? t.academics : undefined}
           >
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${collapsed ? "w-full justify-center" : ""}`}>
               <BookOpen size={20} />
               {!collapsed && <span>{t.academics}</span>}
             </div>
@@ -242,8 +279,9 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
             type="button"
             onClick={() => toggleMenu("evaluation")}
             className={buttonClass(openMenus.evaluation)}
+            title={collapsed ? t.evaluation : undefined}
           >
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${collapsed ? "w-full justify-center" : ""}`}>
               <ClipboardList size={20} />
               {!collapsed && <span>{t.evaluation}</span>}
             </div>
@@ -273,7 +311,11 @@ export default function TeacherSidebar({ collapsed, setCollapsed }) {
       </div>
 
       <div className="p-3">
-        <Link to="/teacher/settings" className={itemClass("/teacher/settings")}>
+        <Link
+          to="/teacher/settings"
+          className={itemClass("/teacher/settings")}
+          title={collapsed ? t.settings : undefined}
+        >
           <Settings size={20} />
           {!collapsed && <span>{t.settings}</span>}
         </Link>
