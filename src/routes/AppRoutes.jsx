@@ -1,14 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
 import DashboardRedirect from "./DashboardRedirect";
 import AdminRoutes from "./AdminRoutes";
 import TeacherRoutes from "./TeacherRoutes";
+import ManagerRoutes from "./ManagerRoutes";
+
 import Unauthorized from "./Unauthorized";
 
 import StudentDashboard from "../modules/metier/student/StudentDashboard";
-
-import ManagerLayout from "../layouts/ManagerLayout";
-import ManagerDashboard from "../modules/metier/manager/DashboardManager/pages/ManagerDashboard";
 
 import Settings from "../modules/metier/settings/pages/Settings";
 import PrivateRoute from "./PrivateRoute";
@@ -19,11 +22,16 @@ function AppRoutes() {
       <Routes>
         <Route
           path="/"
-          element={<DashboardRedirect />}
+          element={
+            <DashboardRedirect />
+          }
         />
 
         {AdminRoutes()}
+
         {TeacherRoutes()}
+
+        {ManagerRoutes()}
 
         <Route
           path="/student"
@@ -34,34 +42,27 @@ function AppRoutes() {
           }
         />
 
-        {/* MANAGER ROUTES */}
-        <Route
-          path="/manager"
-          element={
-            <PrivateRoute role="MANAGER">
-              <ManagerLayout />
-            </PrivateRoute>
-          }
-        >
-          <Route
-            index
-            element={<ManagerDashboard />}
-          />
-        </Route>
-
         <Route
           path="/settings"
-          element={<Settings />}
+          element={
+            <Settings />
+          }
         />
 
         <Route
           path="/unauthorized"
-          element={<Unauthorized />}
+          element={
+            <Unauthorized />
+          }
         />
 
         <Route
           path="*"
-          element={<h1>Page introuvable</h1>}
+          element={
+            <h1>
+              Page introuvable
+            </h1>
+          }
         />
       </Routes>
     </BrowserRouter>
