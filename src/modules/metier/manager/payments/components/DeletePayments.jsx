@@ -1,7 +1,121 @@
-import { useState } from "react";
-import { Loader2, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
+import {
+  X,
+  Trash2,
+  AlertTriangle,
+  Loader2,
+  User,
+  CircleDollarSign,
+  CalendarDays,
+} from "lucide-react";
 
 import { deletePayement } from "../services/payementService";
+
+const headerGradient =
+  "linear-gradient(135deg, #c2410c 0%, #9a3412 45%, #431407 100%)";
+
+const translations = {
+  EN: {
+    management: "Payment Management",
+    title: "Delete Payment",
+    subtitle: "Confirm payment deletion.",
+
+    question: "Are you sure you want to delete this payment?",
+    description:
+      "This payment will be permanently removed from the list.",
+
+    student: "Student",
+    amount: "Amount",
+    date: "Date",
+
+    delete: "Delete",
+    deleting: "Deleting...",
+    close: "Close",
+
+    unavailableStudent: "Student name unavailable",
+    deleteError: "Unable to delete payment.",
+  },
+
+  FR: {
+    management: "Gestion des paiements",
+    title: "Supprimer le paiement",
+    subtitle: "Confirmer la suppression du paiement.",
+
+    question:
+      "Êtes-vous sûr de vouloir supprimer ce paiement ?",
+    description:
+      "Ce paiement sera définitivement supprimé de la liste.",
+
+    student: "Étudiant",
+    amount: "Montant",
+    date: "Date",
+
+    delete: "Supprimer",
+    deleting: "Suppression...",
+    close: "Fermer",
+
+    unavailableStudent:
+      "Nom étudiant non disponible",
+    deleteError:
+      "Impossible de supprimer le paiement.",
+  },
+
+  AR: {
+    management: "إدارة المدفوعات",
+    title: "حذف الدفع",
+    subtitle: "تأكيد حذف الدفع.",
+
+    question:
+      "هل أنت متأكد أنك تريد حذف هذا الدفع؟",
+    description:
+      "سيتم حذف هذا الدفع نهائيًا من القائمة.",
+
+    student: "الطالب",
+    amount: "المبلغ",
+    date: "التاريخ",
+
+    delete: "حذف",
+    deleting: "جاري الحذف...",
+    close: "إغلاق",
+
+    unavailableStudent:
+      "اسم الطالب غير متوفر",
+    deleteError:
+      "تعذر حذف الدفع.",
+  },
+};
+
+const formatAmount = (amount) => {
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(amount || 0));
+};
+
+const formatDate = (date, language) => {
+  if (!date) return "-";
+
+  const cleanDate =
+    String(date).split("T")[0];
+
+  const parsedDate =
+    new Date(`${cleanDate}T00:00:00`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return date;
+  }
+
+  const locale =
+    language === "AR"
+      ? "ar-MA"
+      : language === "FR"
+      ? "fr-FR"
+      : "en-US";
+
+  return parsedDate.toLocaleDateString(locale);
+};
 
 export default function DeletePayments({
   open,
@@ -9,27 +123,123 @@ export default function DeletePayments({
   onClose,
   onSuccess,
 }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [deleting, setDeleting] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [language, setLanguage] =
+    useState(
+      localStorage.getItem(
+        "app-language"
+      ) || "EN"
+    );
+
+  const t =
+    translations[language] ||
+    translations.EN;
+
+  const isArabic =
+    language === "AR";
+
+  /* =========================
+     LANGUAGE
+  ========================= */
+
+  useEffect(() => {
+    const handleLanguageChange = (
+      event
+    ) => {
+      setLanguage(
+        event.detail ||
+          localStorage.getItem(
+            "app-language"
+          ) ||
+          "EN"
+      );
+    };
+
+    window.addEventListener(
+      "app-language-change",
+      handleLanguageChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        "app-language-change",
+        handleLanguageChange
+      );
+    };
+  }, []);
+
+  /* =========================
+     RESET ERROR
+  ========================= */
+
+  useEffect(() => {
+    if (open) {
+      setError("");
+    }
+  }, [open, payement]);
+
+  /* =========================
+     BLOCK SCROLL
+  ========================= */
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow =
+      "hidden";
+
+    return () => {
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [open]);
+
+  /* =========================
+     DELETE
+  ========================= */
 
   const handleDelete = async () => {
+    if (!payement?.id) return;
+
     try {
-      setLoading(true);
+      setDeleting(true);
       setError("");
 
-      await deletePayement(payement.id);
+      await deletePayement(
+        payement.id
+      );
+
+      /* Actualisation automatique */
+      window.dispatchEvent(
+        new CustomEvent(
+          "payments-updated"
+        )
+      );
 
       await onSuccess?.();
+
       onClose();
     } catch (error) {
-      console.error("Erreur suppression paiement :", error);
+      console.error(
+        "Erreur suppression paiement :",
+        error
+      );
 
       setError(
-        error?.response?.data?.message ||
-          "Impossible de supprimer le paiement."
+        error?.response?.data
+          ?.message ||
+          t.deleteError
       );
     } finally {
-      setLoading(false);
+      setDeleting(false);
     }
   };
 
@@ -37,117 +247,432 @@ export default function DeletePayments({
     return null;
   }
 
-  const studentName = `${payement.studentNom || ""} ${
-    payement.studentPrenom || ""
-  }`.trim();
+  /* =========================
+     STUDENT
+  ========================= */
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+  const studentName =
+    `${payement.studentPrenom || ""} ${
+      payement.studentNom || ""
+    }`.trim() ||
+    payement.studentName ||
+    payement.studentFullName ||
+    `${payement.student?.prenom || ""} ${
+      payement.student?.nom || ""
+    }`.trim() ||
+    t.unavailableStudent;
+
+  return createPortal(
+    <div
+      className="
+        fixed
+        inset-0
+        z-[9999]
+        flex
+        h-[100dvh]
+        w-screen
+        items-center
+        justify-center
+        overflow-y-auto
+        bg-slate-950/60
+        p-4
+        backdrop-blur-sm
+      "
+      onClick={onClose}
+      dir={
+        isArabic
+          ? "rtl"
+          : "ltr"
+      }
+    >
       <div
-        className="w-full max-w-md overflow-hidden rounded-[1.7rem] border shadow-2xl"
+        className="
+          my-auto
+          w-full
+          max-w-lg
+          overflow-hidden
+          rounded-[2rem]
+          shadow-2xl
+          transition-colors
+          duration-300
+        "
         style={{
-          backgroundColor: "var(--card-bg)",
-          borderColor: "var(--border-color)",
-          color: "var(--text-color)",
+          backgroundColor:
+            "var(--card-bg)",
+          color:
+            "var(--text-color)",
         }}
+        onClick={(event) =>
+          event.stopPropagation()
+        }
       >
-        <div className="flex items-center justify-between bg-gradient-to-r from-red-700 to-red-950 px-6 py-5 text-white">
-          <div>
-            <p className="text-xs font-bold text-red-200">
-              Manager / Paiements
-            </p>
+        {/* ======================
+            HEADER
+        ====================== */}
 
-            <h2 className="mt-1 text-xl font-black">
-              Supprimer le paiement
-            </h2>
-          </div>
+        <div
+          className="
+            relative
+            overflow-hidden
+            px-6
+            py-6
+            text-white
+          "
+          style={{
+            background:
+              headerGradient,
+          }}
+        >
+          <div className="absolute -right-10 -top-14 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+          <div
+            className={`
+              relative
+              flex
+              items-center
+              justify-between
+              gap-4
+
+              ${
+                isArabic
+                  ? "flex-row-reverse"
+                  : ""
+              }
+            `}
           >
-            <X size={19} />
-          </button>
+            <div
+              className={`
+                flex
+                items-center
+                gap-3
+
+                ${
+                  isArabic
+                    ? "flex-row-reverse text-right"
+                    : "text-left"
+                }
+              `}
+            >
+              <div
+                className="
+                  flex
+                  h-12
+                  w-12
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  bg-white/15
+                  text-orange-100
+                  ring-1
+                  ring-white/20
+                "
+              >
+                <AlertTriangle
+                  size={24}
+                />
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-orange-200">
+                  {t.management}
+                </p>
+
+                <h2 className="mt-1 text-xl font-black">
+                  {t.title}
+                </h2>
+
+                <p className="mt-1 text-xs font-semibold text-orange-100/80">
+                  {t.subtitle}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={deleting}
+              title={t.close}
+              className="
+                inline-flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-xl
+                bg-white/10
+                text-white
+                transition
+                hover:bg-white/20
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-5 p-6">
+        {/* ======================
+            CONTENT
+        ====================== */}
+
+        <div className="p-6">
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-bold text-red-600">
+            <div
+              className="
+                mb-5
+                rounded-2xl
+                border
+                px-4
+                py-3
+                text-sm
+                font-bold
+              "
+              style={{
+                backgroundColor:
+                  "var(--section-bg)",
+                borderColor:
+                  "var(--border-color)",
+                color:
+                  "var(--text-color)",
+              }}
+            >
               {error}
             </div>
           )}
 
-          <div className="flex justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600">
-              <Trash2 size={28} />
+          {/* CONFIRMATION */}
+
+          <div
+            className="
+              rounded-2xl
+              border
+              p-5
+            "
+            style={{
+              backgroundColor:
+                "var(--section-bg)",
+              borderColor:
+                "var(--border-color)",
+            }}
+          >
+            <div
+              className={`
+                flex
+                items-start
+                gap-4
+
+                ${
+                  isArabic
+                    ? "flex-row-reverse text-right"
+                    : "text-left"
+                }
+              `}
+            >
+              <div
+                className="
+                  flex
+                  h-11
+                  w-11
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  text-white
+                "
+                style={{
+                  background:
+                    headerGradient,
+                }}
+              >
+                <Trash2 size={20} />
+              </div>
+
+              <div>
+                <p
+                  className="text-sm font-black"
+                  style={{
+                    color:
+                      "var(--text-color)",
+                  }}
+                >
+                  {t.question}
+                </p>
+
+                <p
+                  className="mt-2 text-sm font-semibold"
+                  style={{
+                    color:
+                      "var(--muted-text)",
+                  }}
+                >
+                  {t.description}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="text-center">
-            <h3 className="text-lg font-black">
-              Confirmer la suppression
-            </h3>
+          {/* PAYMENT INFO */}
 
-            <p
-              className="mt-2 text-sm font-semibold"
-              style={{ color: "var(--muted-text)" }}
-            >
-              Voulez-vous supprimer le paiement de{" "}
-              <strong>{studentName || "-"}</strong> ?
-            </p>
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <InfoItem
+              icon={User}
+              label={t.student}
+              value={studentName}
+            />
+
+            <InfoItem
+              icon={CircleDollarSign}
+              label={t.amount}
+              value={`${formatAmount(
+                payement.amount
+              )} MAD`}
+            />
+
+            <InfoItem
+              icon={CalendarDays}
+              label={t.date}
+              value={formatDate(
+                payement.date,
+                language
+              )}
+            />
           </div>
 
-          <div
-            className="rounded-xl border p-4 text-sm"
-            style={{
-              backgroundColor: "var(--section-bg)",
-              borderColor: "var(--border-color)",
-            }}
-          >
-            <p>
-              <strong>Montant :</strong>{" "}
-              {Number(payement.amount || 0).toFixed(2)} MAD
-            </p>
-
-            <p className="mt-1">
-              <strong>Date :</strong> {payement.date || "-"}
-            </p>
-          </div>
+          {/* DELETE BUTTON */}
 
           <div
-            className="flex justify-end gap-3 border-t pt-5"
-            style={{ borderColor: "var(--border-color)" }}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border px-5 py-2.5 text-sm font-black"
-              style={{
-                borderColor: "var(--border-color)",
-                color: "var(--text-color)",
-              }}
-            >
-              Annuler
-            </button>
+            className={`
+              mt-6
+              flex
 
+              ${
+                isArabic
+                  ? "justify-start"
+                  : "justify-end"
+              }
+            `}
+          >
             <button
               type="button"
               onClick={handleDelete}
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-black text-white transition hover:bg-red-700 disabled:opacity-60"
+              disabled={deleting}
+              className="
+                inline-flex
+                min-w-[145px]
+                items-center
+                justify-center
+                gap-2
+                rounded-2xl
+                px-5
+                py-3
+                text-sm
+                font-bold
+                text-white
+                shadow-lg
+                transition
+                hover:opacity-90
+                disabled:cursor-not-allowed
+                disabled:opacity-60
+              "
+              style={{
+                background:
+                  headerGradient,
+              }}
             >
-              {loading ? (
-                <Loader2 size={17} className="animate-spin" />
-              ) : (
-                <Trash2 size={17} />
-              )}
+              {deleting ? (
+                <>
+                  <Loader2
+                    size={17}
+                    className="animate-spin"
+                  />
 
-              Supprimer
+                  {t.deleting}
+                </>
+              ) : (
+                <>
+                  <Trash2
+                    size={17}
+                  />
+
+                  {t.delete}
+                </>
+              )}
             </button>
           </div>
         </div>
       </div>
+    </div>,
+    document.body
+  );
+}
+
+/* =====================================================
+   INFO ITEM
+===================================================== */
+
+function InfoItem({
+  icon: Icon,
+  label,
+  value,
+}) {
+  return (
+    <div
+      className="
+        rounded-2xl
+        border
+        p-4
+      "
+      style={{
+        backgroundColor:
+          "var(--section-bg)",
+        borderColor:
+          "var(--border-color)",
+      }}
+    >
+      <div
+        className="
+          mb-3
+          flex
+          h-9
+          w-9
+          items-center
+          justify-center
+          rounded-xl
+          text-white
+        "
+        style={{
+          background:
+            headerGradient,
+        }}
+      >
+        <Icon size={17} />
+      </div>
+
+      <p
+        className="text-[11px] font-black"
+        style={{
+          color:
+            "var(--muted-text)",
+        }}
+      >
+        {label}
+      </p>
+
+      <p
+        className="
+          mt-1
+          break-words
+          text-sm
+          font-black
+        "
+        style={{
+          color:
+            "var(--text-color)",
+        }}
+      >
+        {value || "-"}
+      </p>
     </div>
   );
 }

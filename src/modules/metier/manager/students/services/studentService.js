@@ -8,6 +8,15 @@ export const getAllStudents = async () => {
   return response.data;
 };
 
+
+export const searchStudentsByNom = async (nom) => {
+  const response = await api.get("/Students/Recherche", {
+    params: { nom },
+  });
+  return response.data;
+};
+
+
 export const downloadStudentsPdf = async () => {
   const response = await api.get(
     "/Students/DownloadPdf",

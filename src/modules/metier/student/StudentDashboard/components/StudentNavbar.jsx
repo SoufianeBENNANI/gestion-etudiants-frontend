@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import {
   Bell,
@@ -8,14 +11,93 @@ import {
 } from "lucide-react";
 
 const headerGradient =
-  "linear-gradient(135deg, #c2410c 0%, #9a3412 45%, #431407 100%)";
+  "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #134e4a 100%)";
 
-export default function ManagerNavbar() {
-  const [managerMenuOpen, setManagerMenuOpen] =
-    useState(false);
+const translations = {
+  EN: {
+    hello: "Hey, Student 👋",
+    welcome: "Welcome to your Student Dashboard",
+    dashboard: "Dashboard",
+    search: "Search",
+    notifications: "Notifications",
+    noNotifications: "No new notifications",
+    account: "Student account",
+    logout: "Logout",
+  },
 
-  const [notificationOpen, setNotificationOpen] =
-    useState(false);
+  FR: {
+    hello: "Bonjour, Étudiant 👋",
+    welcome: "Bienvenue dans votre espace étudiant",
+    dashboard: "Tableau de bord",
+    search: "Rechercher",
+    notifications: "Notifications",
+    noNotifications: "Aucune nouvelle notification",
+    account: "Compte étudiant",
+    logout: "Déconnexion",
+  },
+
+  AR: {
+    hello: "مرحباً أيها الطالب 👋",
+    welcome: "مرحباً بك في لوحة تحكم الطالب",
+    dashboard: "لوحة التحكم",
+    search: "بحث",
+    notifications: "الإشعارات",
+    noNotifications: "لا توجد إشعارات جديدة",
+    account: "حساب الطالب",
+    logout: "تسجيل الخروج",
+  },
+};
+
+export default function StudentNavbar() {
+  const [
+    studentMenuOpen,
+    setStudentMenuOpen,
+  ] = useState(false);
+
+  const [
+    notificationOpen,
+    setNotificationOpen,
+  ] = useState(false);
+
+  const [language, setLanguage] =
+    useState(
+      localStorage.getItem(
+        "app-language"
+      ) || "EN"
+    );
+
+  const t =
+    translations[language] ||
+    translations.EN;
+
+  const isArabic =
+    language === "AR";
+
+  useEffect(() => {
+    const handleLanguageChange = (
+      event
+    ) => {
+      setLanguage(
+        event.detail ||
+          localStorage.getItem(
+            "app-language"
+          ) ||
+          "EN"
+      );
+    };
+
+    window.addEventListener(
+      "app-language-change",
+      handleLanguageChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        "app-language-change",
+        handleLanguageChange
+      );
+    };
+  }, []);
 
   const handleKeycloakLogout = () => {
     const keycloakUrl =
@@ -76,6 +158,11 @@ export default function ManagerNavbar() {
 
   return (
     <header
+      dir={
+        isArabic
+          ? "rtl"
+          : "ltr"
+      }
       className="
         relative
         z-40
@@ -97,34 +184,51 @@ export default function ManagerNavbar() {
         lg:justify-between
       "
       style={{
-        background: headerGradient,
+        background:
+          headerGradient,
+
         boxShadow:
-          "0 15px 30px rgba(67, 20, 7, 0.20)",
+          "0 15px 30px rgba(13, 148, 136, 0.20)",
       }}
     >
-      {/* Decorative circles */}
+      {/* DECORATION */}
+
       <div className="pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full bg-white/5" />
 
       <div className="pointer-events-none absolute -bottom-24 left-1/3 h-44 w-44 rounded-full bg-white/5" />
 
       {/* TITLE */}
+
       <div className="relative z-10 min-w-0">
-        <p className="text-xs font-semibold text-orange-200">
-          Hey, Manager 👋
+        <p className="text-xs font-semibold text-teal-100">
+          {t.hello}
         </p>
 
         <h1 className="mt-1 truncate text-2xl font-black text-white">
-          Welcome to your Manager Dashboard
+          {t.welcome}
         </h1>
 
-        <p className="mt-1 text-sm font-semibold text-orange-100/80">
-          Dashboard
+        <p className="mt-1 text-sm font-semibold text-teal-100/80">
+          {t.dashboard}
         </p>
       </div>
 
       {/* ACTIONS */}
-      <div className="relative z-10 flex flex-col gap-3 lg:flex-row lg:items-center">
+
+      <div
+        className="
+          relative
+          z-10
+          flex
+          flex-col
+          gap-3
+
+          lg:flex-row
+          lg:items-center
+        "
+      >
         {/* SEARCH */}
+
         <div
           className="
             flex
@@ -141,7 +245,7 @@ export default function ManagerNavbar() {
         >
           <input
             type="text"
-            placeholder="Search"
+            placeholder={t.search}
             className="
               w-full
               bg-transparent
@@ -149,7 +253,7 @@ export default function ManagerNavbar() {
               font-semibold
               text-white
               outline-none
-              placeholder:text-orange-100/70
+              placeholder:text-teal-100/70
 
               sm:w-72
             "
@@ -161,34 +265,34 @@ export default function ManagerNavbar() {
               flex
               h-8
               w-8
-              shrink-0
               items-center
               justify-center
               rounded-full
               bg-transparent
-              text-orange-100
+              text-teal-100
               transition
 
               hover:bg-white/10
             "
-            aria-label="Search"
+            aria-label={t.search}
           >
-            <Search className="h-4 w-4" />
+            <Search size={16} />
           </button>
         </div>
 
         <div className="flex items-center gap-3">
           {/* NOTIFICATION */}
+
           <div className="relative">
             <button
               type="button"
               onClick={() =>
                 setNotificationOpen(
-                  (previous) => !previous
+                  (previous) =>
+                    !previous
                 )
               }
               className="
-                relative
                 flex
                 h-11
                 w-11
@@ -203,16 +307,15 @@ export default function ManagerNavbar() {
 
                 hover:bg-white/15
               "
-              aria-label="Notifications"
+              aria-label={t.notifications}
             >
-              <Bell className="h-5 w-5" />
+              <Bell size={20} />
             </button>
 
             {notificationOpen && (
               <div
-                className="
+                className={`
                   absolute
-                  right-0
                   top-[calc(100%+0.75rem)]
                   z-[999]
                   w-80
@@ -223,32 +326,36 @@ export default function ManagerNavbar() {
                   bg-white
                   text-slate-900
                   shadow-2xl
-                "
+
+                  ${
+                    isArabic
+                      ? "left-0"
+                      : "right-0"
+                  }
+                `}
               >
                 <div className="border-b border-slate-200 px-5 py-4">
                   <h3 className="text-sm font-black">
-                    Notifications
+                    {t.notifications}
                   </h3>
 
                   <p className="text-xs font-semibold text-slate-500">
-                    Aucune nouvelle notification
+                    {t.noNotifications}
                   </p>
-                </div>
-
-                <div className="p-4 text-center text-sm text-slate-500">
-                  Aucune notification
                 </div>
               </div>
             )}
           </div>
 
           {/* PROFILE */}
+
           <div className="relative">
             <button
               type="button"
               onClick={() =>
-                setManagerMenuOpen(
-                  (previous) => !previous
+                setStudentMenuOpen(
+                  (previous) =>
+                    !previous
                 )
               }
               className="
@@ -278,36 +385,49 @@ export default function ManagerNavbar() {
                     items-center
                     justify-center
                     rounded-full
-                    bg-orange-500
+                    bg-teal-500
                     text-sm
                     font-black
                     text-white
+                    shadow-sm
                   "
                 >
-                  M
+                  S
                 </div>
 
-                <div className="hidden min-w-0 text-left sm:block">
+                <div
+                  className={`
+                    hidden
+                    min-w-0
+
+                    sm:block
+
+                    ${
+                      isArabic
+                        ? "text-right"
+                        : "text-left"
+                    }
+                  `}
+                >
                   <p className="truncate text-sm font-black text-white">
-                    Manager
+                    Student
                   </p>
 
-                  <p className="truncate text-xs font-semibold text-orange-100">
-                    Manager
+                  <p className="truncate text-xs font-semibold text-teal-100">
+                    Student
                   </p>
                 </div>
               </div>
 
               <ChevronDown
+                size={16}
                 className={`
-                  h-4
-                  w-4
                   shrink-0
-                  text-orange-100
+                  text-teal-100
                   transition
 
                   ${
-                    managerMenuOpen
+                    studentMenuOpen
                       ? "rotate-180"
                       : ""
                   }
@@ -315,11 +435,10 @@ export default function ManagerNavbar() {
               />
             </button>
 
-            {managerMenuOpen && (
+            {studentMenuOpen && (
               <div
-                className="
+                className={`
                   absolute
-                  right-0
                   top-[calc(100%+0.75rem)]
                   z-[999]
                   w-64
@@ -330,7 +449,13 @@ export default function ManagerNavbar() {
                   bg-white
                   text-slate-900
                   shadow-2xl
-                "
+
+                  ${
+                    isArabic
+                      ? "left-0"
+                      : "right-0"
+                  }
+                `}
               >
                 <div className="border-b border-slate-200 px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -342,22 +467,21 @@ export default function ManagerNavbar() {
                         items-center
                         justify-center
                         rounded-full
-                        bg-orange-500
-                        text-sm
+                        bg-teal-500
                         font-black
                         text-white
                       "
                     >
-                      M
+                      S
                     </div>
 
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-black">
-                        Manager
+                    <div>
+                      <p className="text-sm font-black">
+                        Student
                       </p>
 
-                      <p className="truncate text-xs font-semibold text-slate-500">
-                        Manager account
+                      <p className="text-xs font-semibold text-slate-500">
+                        {t.account}
                       </p>
                     </div>
                   </div>
@@ -365,7 +489,9 @@ export default function ManagerNavbar() {
 
                 <button
                   type="button"
-                  onClick={handleKeycloakLogout}
+                  onClick={
+                    handleKeycloakLogout
+                  }
                   className="
                     flex
                     w-full
@@ -382,9 +508,9 @@ export default function ManagerNavbar() {
                     hover:bg-red-50
                   "
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut size={16} />
 
-                  Logout
+                  {t.logout}
                 </button>
               </div>
             )}
