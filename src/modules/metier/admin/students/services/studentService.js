@@ -2,8 +2,26 @@ import api from "../../../../../api/axios";
 import { getAllAttendances } from "./attendanceService";
 
 export const addStudent = async (studentData) => {
-  const response = await api.post("/Students/Ajouter", studentData);
-  return response.data;
+  const payload = {
+    prenom: studentData.prenom.trim(),
+    nom: studentData.nom.trim(),
+    email: studentData.email.trim().toLowerCase(),
+    dateNaissance: studentData.dateNaissance || null,
+    genre: studentData.genre || null,
+    adresse: studentData.adresse?.trim() || null,
+    telephone: studentData.telephone?.trim() || null,
+  };
+
+  console.log("PAYLOAD ÉTUDIANT :", payload);
+
+  try {
+    const response = await api.post("/Students/Ajouter", payload);
+    return response.data;
+  } catch (error) {
+    console.error("STATUT BACKEND :", error.response?.status);
+    console.error("RÉPONSE BACKEND :", error.response?.data);
+    throw error;
+  }
 };
 
 export const getAllStudents = async () => {
@@ -12,8 +30,7 @@ export const getAllStudents = async () => {
 };
 
 export const deleteStudent = async (id) => {
-  const response = await api.delete(`/Students/Supprimer/${id}`);
-  return response.data;
+  await api.delete(`/Students/Supprimer/${id}`);
 };
 
 export const updateStudent = async (id, studentData) => {
@@ -54,20 +71,6 @@ export const generateStudentPrediction = async (id) => {
   return response.data;
 };
 
-const getNumberValue = (...values) => {
-  for (const value of values) {
-    if (value !== null && value !== undefined && value !== "") {
-      const number = Number(value);
-
-      if (!Number.isNaN(number)) {
-        return number;
-      }
-    }
-  }
-
-  return 0;
-};
-
 export const getStudentOverviewStats = async () => {
   try {
     const [
@@ -83,96 +86,49 @@ export const getStudentOverviewStats = async () => {
     ]);
 
     const students = Array.isArray(studentsData) ? studentsData : [];
-
-    const archivedStudents = Array.isArray(archivedStudentsData)
+    const archived = Array.isArray(archivedStudentsData)
       ? archivedStudentsData
       : [];
-
     const performances = Array.isArray(performancesData)
       ? performancesData
       : [];
-
     const attendances = Array.isArray(attendancesData)
       ? attendancesData
       : [];
 
-    const totalStudents = students.length;
-    const totalArchivedStudents = archivedStudents.length;
-    const totalAttendance = attendances.length;
+    const predictedStudents = performances.filter(
+      (item) => item.hasPrediction === true
+    );
 
-    const predictedStudents = performances.filter((item) => {
-      const hasPrediction = item.hasPrediction === true;
-
-      const prediction = String(item.prediction || "")
-        .trim()
-        .toLowerCase();
-
-      const status = String(item.status || "")
-        .trim()
-        .toLowerCase();
-
-      const scoreRisque = item.scoreRisque;
-
-      const hasValidPredictionText =
-        prediction !== "" &&
-        prediction !== "-" &&
-        prediction !== "no prediction" &&
-        prediction !== "no prediction yet";
-
-      const hasValidStatus =
-        status !== "" &&
-        status !== "-" &&
-        status !== "no prediction" &&
-        status !== "no prediction yet";
-
-      const hasValidScore =
-        scoreRisque !== null &&
-        scoreRisque !== undefined &&
-        scoreRisque !== "" &&
-        !Number.isNaN(Number(scoreRisque));
-
-      return (
-        hasPrediction &&
-        (hasValidPredictionText || hasValidStatus || hasValidScore)
+    const sum = predictedStudents.reduce((total, item) => {
+      const value = Number(
+        item.moyenne ??
+          item.average ??
+          item.averageGrade ??
+          item.note ??
+          item.performance ??
+          0
       );
-    });
 
-    const totalPredictions = predictedStudents.length;
+      return total + (Number.isNaN(value) ? 0 : value);
+    }, 0);
 
-    let averagePerformance = 0;
-
-    if (predictedStudents.length > 0) {
-      const performanceSum = predictedStudents.reduce((sum, item) => {
-        const moyenne = getNumberValue(
-          item.moyenne,
-          item.average,
-          item.averageGrade,
-          item.note,
-          item.performance
-        );
-
-        return sum + moyenne;
-      }, 0);
-
-      const averageGrade = performanceSum / predictedStudents.length;
-
-      // Si moyenne est sur 20 => convertir en %
-      // Si performance est déjà sur 100 => garder comme %
-      averagePerformance =
-        averageGrade <= 20
-          ? Math.round((averageGrade / 20) * 100)
-          : Math.round(averageGrade);
-    }
+    const average = predictedStudents.length
+      ? sum / predictedStudents.length
+      : 0;
 
     return {
-      totalStudents,
-      totalArchivedStudents,
-      totalPredictions,
-      totalAttendance,
-      averagePerformance,
+      totalStudents: students.length,
+      totalArchivedStudents: archived.length,
+      totalPredictions: predictedStudents.length,
+      totalAttendance: attendances.length,
+      averagePerformance:
+        average <= 20
+          ? Math.round((average / 20) * 100)
+          : Math.round(average),
     };
   } catch (error) {
-    console.error("Error loading student overview stats:", error);
+    console.error("Erreur lors du chargement des statistiques :", error);
 
     return {
       totalStudents: 0,
@@ -189,19 +145,17 @@ export const downloadStudentsPdf = async () => {
     responseType: "blob",
   });
 
-  const file = new Blob([response.data], {
-    type: "application/pdf",
-  });
-
-  const fileURL = window.URL.createObjectURL(file);
+  const fileUrl = URL.createObjectURL(
+    new Blob([response.data], { type: "application/pdf" })
+  );
 
   const link = document.createElement("a");
-  link.href = fileURL;
+  link.href = fileUrl;
   link.download = "liste_etudiants.pdf";
 
   document.body.appendChild(link);
   link.click();
+  link.remove();
 
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(fileURL);
+  URL.revokeObjectURL(fileUrl);
 };

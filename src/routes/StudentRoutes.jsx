@@ -12,6 +12,12 @@ import StudentAttendancePage from "../modules/metier/student/attendance/page/Stu
 
 import StudentGrade from "../modules/metier/student/grade/page/StudentGrade";
 
+import StudentPaymentsPage from "../modules/metier/student/Payment/page/StudentPaymentsPage";
+
+import DepartmentsStudentPage from "../modules/metier/student/departement/page/DepartmentsStudentPage";
+
+import StudentPredictionPage from "../modules/metier/student/prediction/page/StudentPredictionPage";
+
 import StudentSettings from "../modules/metier/student/settings/pages/StudentSettings";
 
 function StudentRoutes() {
@@ -49,6 +55,29 @@ function StudentRoutes() {
         element={
           <StudentGrade />
         }
+      />
+
+      {/* PAYMENTS */}
+
+      <Route
+        path="Payments"
+        element={
+          <StudentPaymentsPage />
+        }
+      />
+
+      {/* DEPARTMENTS */}
+
+      <Route
+        path="departments"
+        element={
+          <DepartmentsStudentPage />
+        }
+      />
+
+      <Route
+        path="predictions"
+        element={<StudentPredictionPage />}
       />
 
       {/* SETTINGS */}

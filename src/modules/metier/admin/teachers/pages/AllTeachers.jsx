@@ -29,6 +29,7 @@ import ArchivedTeachers from "../components/ArchivedTeachers";
 import TeacherDetails from "../components/TeacherDetails";
 import EditTeacher from "../components/EditTeacher";
 import DeleteTeacher from "../components/DeleteTeacher";
+import CreatedTeacherAccountModal from "../components/CreatedTeacherAccountModal";
 
 const translations = {
   EN: {
@@ -175,7 +176,7 @@ const translations = {
 
 export default function AllTeachers() {
   const [language, setLanguage] = useState(
-    localStorage.getItem("app-language") || "EN"
+    localStorage.getItem("app-language") || "EN",
   );
 
   const t = translations[language] || translations.EN;
@@ -191,9 +192,11 @@ export default function AllTeachers() {
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
   const [viewTeacher, setViewTeacher] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [createdAccount, setCreatedAccount] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
+  const [addError, setAddError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -328,11 +331,15 @@ export default function AllTeachers() {
       departementId: "",
     });
 
+    setAddError("");
     setOpenAddDialog(true);
   };
 
   const handleCloseAddDialog = () => {
+    if (savingAdd) return;
+
     setOpenAddDialog(false);
+    setAddError("");
 
     setAddFormData({
       nom: "",
@@ -357,16 +364,50 @@ export default function AllTeachers() {
 
     try {
       setSavingAdd(true);
+      setAddError("");
 
-      const newTeacher = await addTeacher(addFormData);
+      const response = await addTeacher(addFormData);
+      const newTeacher = response?.teacher ?? response?.teacherDTO ?? null;
+      const username =
+        response?.username ??
+        response?.email ??
+        newTeacher?.email ??
+        addFormData.email;
+      const temporaryPassword =
+        response?.temporaryPassword ??
+        response?.tempPassword ??
+        response?.password;
 
-      setTeachers((prev) => [newTeacher, ...prev]);
-      setTotalTeachers((prev) => prev + 1);
+      if (!temporaryPassword) {
+        throw new Error(
+          "L’enseignant a été créé, mais aucun mot de passe temporaire n’a été retourné.",
+        );
+      }
 
-      handleCloseAddDialog();
+      setOpenAddDialog(false);
+      setAddFormData({
+        nom: "",
+        prenom: "",
+        email: "",
+        specialite: "",
+        departementId: "",
+      });
+      setCreatedAccount({ username, temporaryPassword });
+
+      if (newTeacher?.id) {
+        setTeachers((prev) => [newTeacher, ...prev]);
+        setTotalTeachers((prev) => prev + 1);
+      } else {
+        await loadTeachers();
+      }
     } catch (error) {
       console.error("Add teacher error:", error);
-      alert(t.addError);
+      setAddError(
+        error.response?.data?.message ??
+          error.response?.data?.error ??
+          error.message ??
+          t.addError,
+      );
     } finally {
       setSavingAdd(false);
     }
@@ -382,8 +423,8 @@ export default function AllTeachers() {
 
       setTeachers((prevTeachers) =>
         prevTeachers.map((teacher) =>
-          teacher.id === id ? updatedTeacher : teacher
-        )
+          teacher.id === id ? updatedTeacher : teacher,
+        ),
       );
 
       setSelectedTeacher(null);
@@ -409,7 +450,7 @@ export default function AllTeachers() {
 
   const visiblePages = Array.from(
     { length: totalPages },
-    (_, index) => index + 1
+    (_, index) => index + 1,
   ).slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages));
 
   const goToPreviousPage = () => {
@@ -471,9 +512,7 @@ export default function AllTeachers() {
         }}
       >
         <div>
-          <p className="text-xs font-semibold text-blue-200">
-            {t.management}
-          </p>
+          <p className="text-xs font-semibold text-blue-200">{t.management}</p>
 
           <h1 className="mt-1 text-2xl font-black text-white">{t.title}</h1>
 
@@ -593,7 +632,10 @@ export default function AllTeachers() {
                 {t.teachersList}
               </h2>
 
-              <p className="mt-0.5 text-xs font-semibold" style={mutedTextStyle}>
+              <p
+                className="mt-0.5 text-xs font-semibold"
+                style={mutedTextStyle}
+              >
                 {t.showing} {startTeacher} {t.to} {endTeacher} {t.of}{" "}
                 {teachers.length} {t.teachers}
               </p>
@@ -631,12 +673,8 @@ export default function AllTeachers() {
               >
                 <th className="w-[24%] px-5 py-4 font-black">{t.teacher}</th>
                 <th className="w-[26%] px-5 py-4 font-black">{t.email}</th>
-                <th className="w-[18%] px-5 py-4 font-black">
-                  {t.speciality}
-                </th>
-                <th className="w-[17%] px-5 py-4 font-black">
-                  {t.department}
-                </th>
+                <th className="w-[18%] px-5 py-4 font-black">{t.speciality}</th>
+                <th className="w-[17%] px-5 py-4 font-black">{t.department}</th>
                 <th className="w-[15%] px-5 py-4 font-black">{t.actions}</th>
               </tr>
             </thead>
@@ -686,11 +724,16 @@ export default function AllTeachers() {
                       <td className="px-5 py-4">
                         <div className="mx-auto flex max-w-full items-center justify-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 font-black text-orange-600">
-                            {String(fullName || "-").charAt(0).toUpperCase()}
+                            {String(fullName || "-")
+                              .charAt(0)
+                              .toUpperCase()}
                           </div>
 
                           <div className="min-w-0 text-center">
-                            <p className="truncate font-black" style={textStyle}>
+                            <p
+                              className="truncate font-black"
+                              style={textStyle}
+                            >
                               {fullName || "-"}
                             </p>
 
@@ -850,9 +893,15 @@ export default function AllTeachers() {
         open={openAddDialog}
         formData={addFormData}
         saving={savingAdd}
+        error={addError}
         onClose={handleCloseAddDialog}
         onChange={handleChangeAddForm}
         onSubmit={handleAddTeacher}
+      />
+
+      <CreatedTeacherAccountModal
+        account={createdAccount}
+        onClose={() => setCreatedAccount(null)}
       />
 
       <TeacherDetails
@@ -873,7 +922,7 @@ export default function AllTeachers() {
         onClose={() => setTeacherToDelete(null)}
         onDeleted={(deletedId) => {
           setTeachers((prev) =>
-            prev.filter((teacher) => teacher.id !== deletedId)
+            prev.filter((teacher) => teacher.id !== deletedId),
           );
           setTotalTeachers((prev) => Math.max(prev - 1, 0));
           setArchivedCount((prev) => prev + 1);

@@ -29,6 +29,17 @@ import AddStudent from "./AddStudent";
 import ArchivedStudents from "./ArchivedStudents";
 import StudentDetails from "./StudentDetails";
 import EditStudent from "./EditStudent";
+import CreatedStudentAccountModal from "../components/CreatedStudentAccountModal";
+
+const initialAddFormData = {
+  nom: "",
+  prenom: "",
+  email: "",
+  dateNaissance: "",
+  genre: "",
+  telephone: "",
+  adresse: "",
+};
 
 const translations = {
   EN: {
@@ -183,9 +194,11 @@ export default function AllStudents() {
   const [openArchiveDialog, setOpenArchiveDialog] = useState(false);
   const [viewStudent, setViewStudent] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [createdAccount, setCreatedAccount] = useState(null);
 
   const [savingAdd, setSavingAdd] = useState(false);
   const [savingUpdate, setSavingUpdate] = useState(false);
+  const [addError, setAddError] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -193,14 +206,7 @@ export default function AllStudents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searching, setSearching] = useState(false);
 
-  const [addFormData, setAddFormData] = useState({
-    nom: "",
-    prenom: "",
-    email: "",
-    genre: "",
-    telephone: "",
-    adresse: "",
-  });
+  const [addFormData, setAddFormData] = useState(initialAddFormData);
 
   const cardStyle = {
     backgroundColor: "var(--card-bg)",
@@ -303,29 +309,17 @@ export default function AllStudents() {
   };
 
   const handleOpenAddDialog = () => {
-    setAddFormData({
-      nom: "",
-      prenom: "",
-      email: "",
-      genre: "",
-      telephone: "",
-      adresse: "",
-    });
-
+    setAddFormData(initialAddFormData);
+    setAddError("");
     setOpenAddDialog(true);
   };
 
   const handleCloseAddDialog = () => {
-    setOpenAddDialog(false);
+    if (savingAdd) return;
 
-    setAddFormData({
-      nom: "",
-      prenom: "",
-      email: "",
-      genre: "",
-      telephone: "",
-      adresse: "",
-    });
+    setOpenAddDialog(false);
+    setAddFormData(initialAddFormData);
+    setAddError("");
   };
 
   const handleChangeAddForm = (e) => {
@@ -342,16 +336,48 @@ export default function AllStudents() {
 
     try {
       setSavingAdd(true);
+      setAddError("");
 
-      const newStudent = await addStudent(addFormData);
+      const response = await addStudent(addFormData);
 
-      setStudents((prev) => [newStudent, ...prev]);
-      setTotalStudents((prev) => prev + 1);
+      const newStudent = response?.student ?? response?.studentDTO ?? null;
+      const username =
+        response?.username ??
+        response?.email ??
+        newStudent?.email ??
+        addFormData.email;
+      const temporaryPassword =
+        response?.temporaryPassword ??
+        response?.tempPassword ??
+        response?.password;
 
-      handleCloseAddDialog();
+      if (!temporaryPassword) {
+        throw new Error(
+          "L’étudiant a été créé, mais aucun mot de passe temporaire n’a été retourné."
+        );
+      }
+
+      setOpenAddDialog(false);
+      setAddFormData(initialAddFormData);
+      setCreatedAccount({
+        username,
+        temporaryPassword,
+      });
+
+      if (newStudent?.id) {
+        setStudents((prev) => [newStudent, ...prev]);
+        setTotalStudents((prev) => prev + 1);
+      } else {
+        await loadStudents();
+      }
     } catch (error) {
       console.error("Add student error:", error);
-      alert(t.addError);
+      setAddError(
+        error.response?.data?.message ??
+          error.response?.data?.error ??
+          error.message ??
+          t.addError
+      );
     } finally {
       setSavingAdd(false);
     }
@@ -853,9 +879,15 @@ export default function AllStudents() {
         open={openAddDialog}
         formData={addFormData}
         saving={savingAdd}
+        error={addError}
         onClose={handleCloseAddDialog}
         onChange={handleChangeAddForm}
         onSubmit={handleAddStudent}
+      />
+
+      <CreatedStudentAccountModal
+        account={createdAccount}
+        onClose={() => setCreatedAccount(null)}
       />
 
       <StudentDetails

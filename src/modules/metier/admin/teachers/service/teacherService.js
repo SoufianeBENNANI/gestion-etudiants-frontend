@@ -1,8 +1,40 @@
 import api from "../../../../../api/axios";
 
+const buildTeacherPayload = (teacherData) => {
+  const payload = {
+    nom: teacherData.nom?.trim() || "",
+    prenom: teacherData.prenom?.trim() || "",
+    email: teacherData.email?.trim().toLowerCase() || "",
+    specialite: teacherData.specialite?.trim() || "",
+    departementNom: teacherData.departementNom?.trim() || "",
+  };
+
+  if (!payload.departementNom) {
+    throw new Error("Le département est obligatoire");
+  }
+
+  return payload;
+};
+
+const getErrorData = (error) =>
+  error.response?.data || error.message || "Erreur inconnue";
+
 export const addTeacher = async (teacherData) => {
-  const response = await api.post("/teachers/Add", teacherData);
-  return response.data;
+  try {
+    const payload = buildTeacherPayload(teacherData);
+
+    console.log("Payload Add Teacher :", payload);
+
+    const response = await api.post("/teachers/Add", payload);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Erreur création enseignant :",
+      getErrorData(error)
+    );
+
+    throw error;
+  }
 };
 
 export const getAllTeachers = async () => {
@@ -17,14 +49,34 @@ export const getTeacherById = async (id) => {
 
 export const searchTeachersByName = async (nom) => {
   const response = await api.get("/teachers/Search", {
-    params: { nom },
+    params: {
+      nom: nom?.trim() || "",
+    },
   });
+
   return response.data;
 };
 
 export const updateTeacher = async (id, teacherData) => {
-  const response = await api.put(`/teachers/Update/${id}`, teacherData);
-  return response.data;
+  try {
+    const payload = buildTeacherPayload(teacherData);
+
+    console.log("Payload Update Teacher :", payload);
+
+    const response = await api.put(
+      `/teachers/Update/${id}`,
+      payload
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Erreur modification enseignant :",
+      getErrorData(error)
+    );
+
+    throw error;
+  }
 };
 
 export const deleteTeacher = async (id) => {
@@ -38,7 +90,10 @@ export const getArchivedTeachers = async () => {
 };
 
 export const restoreTeacher = async (id) => {
-  const response = await api.put(`/teachers/Restaurer/${id}`);
+  const response = await api.put(
+    `/teachers/Restaurer/${id}`
+  );
+
   return response.data;
 };
 
@@ -47,14 +102,15 @@ export const downloadTeachersPdf = async () => {
     responseType: "blob",
   });
 
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const url = window.URL.createObjectURL(response.data);
   const link = document.createElement("a");
 
   link.href = url;
-  link.setAttribute("download", "teachers.pdf");
+  link.download = "teachers.pdf";
+
   document.body.appendChild(link);
   link.click();
-
   link.remove();
+
   window.URL.revokeObjectURL(url);
 };
