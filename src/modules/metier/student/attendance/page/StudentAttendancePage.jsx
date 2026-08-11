@@ -8,17 +8,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
-  Eye,
   Loader2,
   Search,
 } from "lucide-react";
 
-import {
-  getAllAttendances,
-  getAttendanceById,
-} from "../services/attendanceService";
-
-import DetailsAttendance from "../components/DetailsAttendance";
+import { getMyAttendances } from "../services/attendanceService";
 
 const headerGradient =
   "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #134e4a 100%)";
@@ -35,7 +29,7 @@ const translations = {
       "View attendance records.",
 
     search:
-      "Search student...",
+      "Search attendance...",
 
     attendanceList:
       "Attendance List",
@@ -54,12 +48,6 @@ const translations = {
 
     remark:
       "Remark",
-
-    actions:
-      "Actions",
-
-    view:
-      "View details",
 
     showing:
       "Showing",
@@ -97,7 +85,7 @@ const translations = {
       "Consulter les enregistrements de présence.",
 
     search:
-      "Rechercher un étudiant...",
+      "Rechercher une présence...",
 
     attendanceList:
       "Liste des présences",
@@ -116,12 +104,6 @@ const translations = {
 
     remark:
       "Remarque",
-
-    actions:
-      "Actions",
-
-    view:
-      "Voir les détails",
 
     showing:
       "Affichage",
@@ -159,7 +141,7 @@ const translations = {
       "عرض سجلات الحضور.",
 
     search:
-      "البحث عن طالب...",
+      "البحث في الحضور...",
 
     attendanceList:
       "قائمة الحضور",
@@ -178,12 +160,6 @@ const translations = {
 
     remark:
       "ملاحظة",
-
-    actions:
-      "الإجراءات",
-
-    view:
-      "عرض التفاصيل",
 
     showing:
       "عرض",
@@ -210,10 +186,6 @@ const translations = {
       "تعذر تحميل الحضور.",
   },
 };
-
-/* =====================================================
-   HELPERS
-===================================================== */
 
 const normalizeAttendances = (
   data
@@ -297,36 +269,17 @@ const formatDate = (date) => {
   ).slice(-2)}`;
 };
 
-/* =====================================================
-   PAGE
-===================================================== */
-
 export default function StudentAttendancePage() {
   const [
     attendances,
     setAttendances,
   ] = useState([]);
 
-  const [
-    selectedAttendance,
-    setSelectedAttendance,
-  ] = useState(null);
-
-  const [
-    detailsOpen,
-    setDetailsOpen,
-  ] = useState(false);
-
   const [search, setSearch] =
     useState("");
 
   const [loading, setLoading] =
     useState(true);
-
-  const [
-    detailsLoading,
-    setDetailsLoading,
-  ] = useState(false);
 
   const [error, setError] =
     useState("");
@@ -356,10 +309,6 @@ export default function StudentAttendancePage() {
 
   const isArabic =
     language === "AR";
-
-  /* =====================================================
-     THEME
-  ===================================================== */
 
   const cardStyle = {
     backgroundColor:
@@ -401,10 +350,6 @@ export default function StudentAttendancePage() {
       "var(--muted-text)",
   };
 
-  /* =====================================================
-     LANGUAGE
-  ===================================================== */
-
   useEffect(() => {
     const handleLanguageChange = (
       event
@@ -431,10 +376,6 @@ export default function StudentAttendancePage() {
     };
   }, []);
 
-  /* =====================================================
-     LOAD
-  ===================================================== */
-
   const loadAttendances =
     async () => {
       try {
@@ -442,7 +383,7 @@ export default function StudentAttendancePage() {
         setError("");
 
         const data =
-          await getAllAttendances();
+          await getMyAttendances();
 
         setAttendances(
           normalizeAttendances(
@@ -467,10 +408,6 @@ export default function StudentAttendancePage() {
   useEffect(() => {
     loadAttendances();
   }, []);
-
-  /* =====================================================
-     SEARCH
-  ===================================================== */
 
   const filteredAttendances =
     useMemo(() => {
@@ -533,10 +470,6 @@ export default function StudentAttendancePage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
-
-  /* =====================================================
-     PAGINATION
-  ===================================================== */
 
   const totalPages =
     Math.max(
@@ -615,46 +548,6 @@ export default function StudentAttendancePage() {
       )
     );
 
-  /* =====================================================
-     DETAILS
-  ===================================================== */
-
-  const handleDetails =
-    async (attendance) => {
-      try {
-        setDetailsLoading(true);
-
-        const data =
-          await getAttendanceById(
-            attendance.id
-          );
-
-        setSelectedAttendance(
-          data ||
-            attendance
-        );
-
-        setDetailsOpen(true);
-      } catch (
-        requestError
-      ) {
-        console.error(
-          "Erreur détails présence :",
-          requestError
-        );
-
-        setSelectedAttendance(
-          attendance
-        );
-
-        setDetailsOpen(true);
-      } finally {
-        setDetailsLoading(
-          false
-        );
-      }
-    };
-
   return (
     <div
       className="
@@ -673,7 +566,7 @@ export default function StudentAttendancePage() {
           "var(--text-color)",
       }}
     >
-      {/* HEADER */}
+      {}
 
       <section
         className="
@@ -757,7 +650,7 @@ export default function StudentAttendancePage() {
         </div>
       </section>
 
-      {/* TOTAL */}
+      {}
 
       <section
         className="
@@ -811,7 +704,7 @@ export default function StudentAttendancePage() {
         </div>
       </section>
 
-      {/* ERROR */}
+      {}
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-600">
@@ -819,7 +712,7 @@ export default function StudentAttendancePage() {
         </div>
       )}
 
-      {/* TABLE */}
+      {}
 
       <section
         className="
@@ -974,11 +867,11 @@ export default function StudentAttendancePage() {
                     "var(--muted-text)",
                 }}
               >
-                <th className="w-[30%] px-5 py-4">
+                <th className="w-[35%] px-5 py-4">
                   {t.student}
                 </th>
 
-                <th className="w-[20%] px-5 py-4">
+                <th className="w-[25%] px-5 py-4">
                   {t.date}
                 </th>
 
@@ -989,10 +882,6 @@ export default function StudentAttendancePage() {
                 <th className="w-[20%] px-5 py-4">
                   {t.remark}
                 </th>
-
-                <th className="w-[10%] px-5 py-4">
-                  {t.actions}
-                </th>
               </tr>
             </thead>
 
@@ -1000,7 +889,7 @@ export default function StudentAttendancePage() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="4"
                     className="px-5 py-10 text-center"
                   >
                     <div className="flex items-center justify-center gap-2 font-bold">
@@ -1019,7 +908,7 @@ export default function StudentAttendancePage() {
                 0 ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="4"
                     className="px-5 py-10 text-center font-bold"
                   >
                     {
@@ -1111,40 +1000,6 @@ export default function StudentAttendancePage() {
                             "-"}
                         </td>
 
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDetails(
-                                attendance
-                              )
-                            }
-                            disabled={
-                              detailsLoading
-                            }
-                            title={
-                              t.view
-                            }
-                            className="
-                              inline-flex
-                              h-9
-                              w-9
-                              items-center
-                              justify-center
-                              rounded-xl
-                              bg-teal-600
-                              text-white
-                              transition
-
-                              hover:bg-teal-700
-                              disabled:opacity-60
-                            "
-                          >
-                            <Eye
-                              size={16}
-                            />
-                          </button>
-                        </td>
                       </tr>
                     );
                   }
@@ -1154,7 +1009,7 @@ export default function StudentAttendancePage() {
           </table>
         </div>
 
-        {/* PAGINATION */}
+        {}
 
         <div
           className="
@@ -1337,29 +1192,9 @@ export default function StudentAttendancePage() {
         </div>
       </section>
 
-      {/* DETAILS */}
-
-      <DetailsAttendance
-        open={
-          detailsOpen
-        }
-        attendance={
-          selectedAttendance
-        }
-        onClose={() => {
-          setDetailsOpen(false);
-          setSelectedAttendance(
-            null
-          );
-        }}
-      />
     </div>
   );
 }
-
-/* =====================================================
-   STATUS
-===================================================== */
 
 function AttendanceStatus({
   status,

@@ -8,29 +8,17 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleDollarSign,
-  Eye,
   Loader2,
   Search,
   User,
 } from "lucide-react";
 
 import {
-  getAllPayements,
-  getPayementById,
+  getMyPayements,
 } from "../services/paymentService";
-
-import DetailsPayments from "../components/DetailsPayments";
-
-/* =====================================================
-   STYLE
-===================================================== */
 
 const headerGradient =
   "linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #115e59 100%)";
-
-/* =====================================================
-   TRANSLATIONS
-===================================================== */
 
 const translations = {
   EN: {
@@ -46,8 +34,6 @@ const translations = {
     amount: "Amount",
     date: "Date",
     status: "Status",
-    actions: "Actions",
-    view: "View details",
 
     showing: "Showing",
     to: "to",
@@ -73,8 +59,6 @@ const translations = {
     amount: "Montant",
     date: "Date",
     status: "Statut",
-    actions: "Actions",
-    view: "Voir les détails",
 
     showing: "Affichage",
     to: "à",
@@ -100,8 +84,6 @@ const translations = {
     amount: "المبلغ",
     date: "التاريخ",
     status: "الحالة",
-    actions: "الإجراءات",
-    view: "عرض التفاصيل",
 
     showing: "عرض",
     to: "إلى",
@@ -114,10 +96,6 @@ const translations = {
     error: "تعذر تحميل المدفوعات.",
   },
 };
-
-/* =====================================================
-   HELPERS
-===================================================== */
 
 const normalizePayements = (data) => {
   if (Array.isArray(data)) {
@@ -183,10 +161,6 @@ const formatDate = (date, language) => {
   return parsedDate.toLocaleDateString(locale);
 };
 
-/* =====================================================
-   PAGE
-===================================================== */
-
 export default function StudentPaymentsPage() {
   const [payements, setPayements] = useState([]);
   const [search, setSearch] = useState("");
@@ -195,13 +169,6 @@ export default function StudentPaymentsPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const [selectedPayement, setSelectedPayement] =
-    useState(null);
-
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [detailsLoading, setDetailsLoading] =
-    useState(false);
 
   const [language, setLanguage] = useState(
     localStorage.getItem("app-language") || "EN"
@@ -213,10 +180,6 @@ export default function StudentPaymentsPage() {
 
   const isArabic =
     language === "AR";
-
-  /* =====================================================
-     THEME
-  ===================================================== */
 
   const cardStyle = {
     backgroundColor:
@@ -258,10 +221,6 @@ export default function StudentPaymentsPage() {
       "var(--muted-text)",
   };
 
-  /* =====================================================
-     LANGUAGE
-  ===================================================== */
-
   useEffect(() => {
     const handleLanguageChange = (event) => {
       setLanguage(
@@ -284,17 +243,13 @@ export default function StudentPaymentsPage() {
     };
   }, []);
 
-  /* =====================================================
-     LOAD PAYEMENTS
-  ===================================================== */
-
   const loadPayements = async () => {
     try {
       setLoading(true);
       setError("");
 
       const data =
-        await getAllPayements();
+        await getMyPayements();
 
       setPayements(
         normalizePayements(data)
@@ -315,10 +270,6 @@ export default function StudentPaymentsPage() {
   useEffect(() => {
     loadPayements();
   }, []);
-
-  /* =====================================================
-     SEARCH
-  ===================================================== */
 
   const filteredPayements =
     useMemo(() => {
@@ -369,10 +320,6 @@ export default function StudentPaymentsPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
-
-  /* =====================================================
-     PAGINATION
-  ===================================================== */
 
   const totalPages =
     Math.max(
@@ -449,51 +396,6 @@ export default function StudentPaymentsPage() {
       )
     );
 
-  /* =====================================================
-     DETAILS
-  ===================================================== */
-
-  const handleDetails =
-    async (payement) => {
-      try {
-        setDetailsLoading(true);
-
-        const data =
-          await getPayementById(
-            payement.id
-          );
-
-        setSelectedPayement(
-          data ||
-            payement
-        );
-
-        setDetailsOpen(true);
-      } catch (requestError) {
-        console.error(
-          "Erreur détails paiement :",
-          requestError
-        );
-
-        setSelectedPayement(
-          payement
-        );
-
-        setDetailsOpen(true);
-      } finally {
-        setDetailsLoading(false);
-      }
-    };
-
-  const closeDetails = () => {
-    setDetailsOpen(false);
-    setSelectedPayement(null);
-  };
-
-  /* =====================================================
-     RENDER
-  ===================================================== */
-
   return (
     <div
       className="
@@ -512,8 +414,6 @@ export default function StudentPaymentsPage() {
           "var(--text-color)",
       }}
     >
-      {/* HEADER */}
-
       <section
         className="
           flex
@@ -549,8 +449,6 @@ export default function StudentPaymentsPage() {
             {t.subtitle}
           </p>
         </div>
-
-        {/* SEARCH */}
 
         <div
           className="
@@ -592,8 +490,6 @@ export default function StudentPaymentsPage() {
           />
         </div>
       </section>
-
-      {/* TOTAL */}
 
       <section
         className="
@@ -643,15 +539,11 @@ export default function StudentPaymentsPage() {
         </div>
       </section>
 
-      {/* ERROR */}
-
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-600">
           {error}
         </div>
       )}
-
-      {/* TABLE */}
 
       <section
         className="
@@ -662,8 +554,6 @@ export default function StudentPaymentsPage() {
         "
         style={cardStyle}
       >
-        {/* TABLE TOP */}
-
         <div
           className="
             flex
@@ -722,8 +612,6 @@ export default function StudentPaymentsPage() {
             </div>
           </div>
 
-          {/* ROWS */}
-
           <div className="flex items-center gap-2">
             <span
               className="text-xs font-black"
@@ -773,10 +661,8 @@ export default function StudentPaymentsPage() {
           </div>
         </div>
 
-        {/* TABLE */}
-
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] table-fixed">
+          <table className="w-full min-w-[760px] table-fixed">
             <thead>
               <tr
                 className="
@@ -793,24 +679,20 @@ export default function StudentPaymentsPage() {
                     "var(--muted-text)",
                 }}
               >
-                <th className="w-[26%] px-5 py-4">
+                <th className="w-[30%] px-5 py-4">
                   {t.student}
                 </th>
 
-                <th className="w-[22%] px-5 py-4">
+                <th className="w-[24%] px-5 py-4">
                   {t.amount}
                 </th>
 
-                <th className="w-[22%] px-5 py-4">
+                <th className="w-[24%] px-5 py-4">
                   {t.date}
                 </th>
 
-                <th className="w-[18%] px-5 py-4">
+                <th className="w-[22%] px-5 py-4">
                   {t.status}
-                </th>
-
-                <th className="w-[12%] px-5 py-4">
-                  {t.actions}
                 </th>
               </tr>
             </thead>
@@ -819,7 +701,7 @@ export default function StudentPaymentsPage() {
               {loading ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="4"
                     className="px-5 py-10 text-center"
                   >
                     <div className="flex items-center justify-center gap-2 font-bold">
@@ -835,7 +717,7 @@ export default function StudentPaymentsPage() {
               ) : paginatedPayements.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="4"
                     className="px-5 py-10 text-center font-bold"
                   >
                     {t.noData}
@@ -866,8 +748,6 @@ export default function StudentPaymentsPage() {
                             "var(--border-color)",
                         }}
                       >
-                        {/* STUDENT */}
-
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-center gap-3">
                             <div
@@ -911,8 +791,6 @@ export default function StudentPaymentsPage() {
                           </div>
                         </td>
 
-                        {/* AMOUNT */}
-
                         <td className="px-5 py-4">
                           <span className="font-black text-teal-600">
                             {formatAmount(
@@ -921,8 +799,6 @@ export default function StudentPaymentsPage() {
                             MAD
                           </span>
                         </td>
-
-                        {/* DATE */}
 
                         <td
                           className="px-5 py-4 font-semibold"
@@ -934,8 +810,6 @@ export default function StudentPaymentsPage() {
                           )}
                         </td>
 
-                        {/* STATUS */}
-
                         <td className="px-5 py-4">
                           <PaymentStatusBadge
                             status={
@@ -944,51 +818,6 @@ export default function StudentPaymentsPage() {
                           />
                         </td>
 
-                        {/* ACTION */}
-
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDetails(
-                                payement
-                              )
-                            }
-                            disabled={
-                              detailsLoading
-                            }
-                            title={t.view}
-                            className="
-                              inline-flex
-                              h-9
-                              w-9
-                              items-center
-                              justify-center
-                              rounded-xl
-                              bg-teal-600
-                              text-white
-                              shadow-sm
-                              transition
-
-                              hover:bg-teal-700
-                              hover:shadow-md
-
-                              disabled:cursor-not-allowed
-                              disabled:opacity-60
-                            "
-                          >
-                            {detailsLoading ? (
-                              <Loader2
-                                size={16}
-                                className="animate-spin"
-                              />
-                            ) : (
-                              <Eye
-                                size={16}
-                              />
-                            )}
-                          </button>
-                        </td>
                       </tr>
                     );
                   }
@@ -997,8 +826,6 @@ export default function StudentPaymentsPage() {
             </tbody>
           </table>
         </div>
-
-        {/* PAGINATION */}
 
         <div
           className="
@@ -1039,8 +866,6 @@ export default function StudentPaymentsPage() {
           </p>
 
           <div className="flex items-center gap-2">
-            {/* PREVIOUS */}
-
             <button
               type="button"
               disabled={
@@ -1073,8 +898,6 @@ export default function StudentPaymentsPage() {
                 size={16}
               />
             </button>
-
-            {/* PAGE NUMBERS */}
 
             {visiblePages.map(
               (pageNumber) => (
@@ -1122,8 +945,6 @@ export default function StudentPaymentsPage() {
               )
             )}
 
-            {/* NEXT */}
-
             <button
               type="button"
               disabled={
@@ -1158,8 +979,6 @@ export default function StudentPaymentsPage() {
               />
             </button>
 
-            {/* PAGE INFO */}
-
             <span
               className="
                 rounded-xl
@@ -1179,20 +998,9 @@ export default function StudentPaymentsPage() {
         </div>
       </section>
 
-      {/* DETAILS */}
-
-      <DetailsPayments
-        open={detailsOpen}
-        payement={selectedPayement}
-        onClose={closeDetails}
-      />
     </div>
   );
 }
-
-/* =====================================================
-   STATUS BADGE
-===================================================== */
 
 function PaymentStatusBadge({
   status,
