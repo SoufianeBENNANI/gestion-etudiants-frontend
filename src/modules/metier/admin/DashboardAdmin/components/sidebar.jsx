@@ -19,6 +19,7 @@ import {
   Building2,
   Cpu,
   ScrollText,
+  Activity,
 } from "lucide-react";
 
 const logo = "/images/LogoSchool.png";
@@ -49,6 +50,7 @@ const translations = {
 
     finance: "Finance",
     payments: "Payments",
+    monitoring: "Monitoring",
 
     settings: "Settings",
   },
@@ -78,6 +80,7 @@ const translations = {
 
     finance: "Finance",
     payments: "Paiements",
+    monitoring: "Supervision",
 
     settings: "Paramètres",
   },
@@ -107,6 +110,7 @@ const translations = {
 
     finance: "المالية",
     payments: "المدفوعات",
+    monitoring: "المراقبة",
 
     settings: "الإعدادات",
   },
@@ -172,8 +176,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
     "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30";
 
   const itemClass = (path) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer ${
-      pathname === path
+    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer ${pathname === path
       ? activeStyle
       : "text-white hover:bg-white/10 hover:text-cyan-300"
     }`;
@@ -462,6 +465,10 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             </div>
           )}
         </div>
+        <Link to="/admin/monitoring" className={itemClass("/admin/monitoring")}>
+          <Activity size={20} />
+          {!collapsed && <span>{t.monitoring}</span>}
+        </Link>
       </div>
 
       {/* FOOTER */}

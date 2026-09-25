@@ -31,7 +31,12 @@ import {
 } from "recharts";
 
 import { getDashboardData } from "../services/dashboardService";
-import { connectKafkaNotifications } from "../services/notificationService";
+import {
+  connectKafkaNotifications,
+  fetchMyNotifications,
+  fetchUnreadCount,
+  markNotificationAsRead,
+} from "../services/notificationService";
 
 const translations = {
   EN: {
@@ -237,60 +242,7 @@ const months = [
 
 const STUDENTS_PER_PAGE = 5;
 
-const ADMIN_NOTIFICATIONS_STORAGE_KEY =
-  "admin-notifications";
-
 const MAX_STORED_NOTIFICATIONS = 50;
-
-const loadStoredNotifications = () => {
-  try {
-    const stored =
-      localStorage.getItem(
-        ADMIN_NOTIFICATIONS_STORAGE_KEY
-      );
-
-    if (!stored) {
-      return [];
-    }
-
-    const parsed =
-      JSON.parse(stored);
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed;
-  } catch (error) {
-    console.error(
-      "Erreur lecture notifications :",
-      error
-    );
-
-    return [];
-  }
-};
-
-const saveStoredNotifications = (
-  notifications
-) => {
-  try {
-    localStorage.setItem(
-      ADMIN_NOTIFICATIONS_STORAGE_KEY,
-      JSON.stringify(
-        notifications.slice(
-          0,
-          MAX_STORED_NOTIFICATIONS
-        )
-      )
-    );
-  } catch (error) {
-    console.error(
-      "Erreur sauvegarde notifications :",
-      error
-    );
-  }
-};
 
 const createNotificationId = (
   notification
@@ -438,13 +390,10 @@ export default function AdminDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] =
-    useState(() =>
-      loadStoredNotifications()
-    );
-  const [gmailConnected] = useState(
-    localStorage.getItem("gmail-connected") === "true"
-  );
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsLoading, setNotificationsLoading] = useState(true);
+  const [notificationError, setNotificationError] = useState("");
 
   const [dashboardData, setDashboardData] = useState({
     students: [],
@@ -517,8 +466,6 @@ export default function AdminDashboard() {
     (notification) => !isOldGmailSuccessMessage(notification)
   );
 
-  const unreadCount = cleanNotifications.filter((item) => !item.read).length;
-
   const displayedNotifications = showAllNotifications
     ? cleanNotifications
     : cleanNotifications.slice(0, MAX_VISIBLE_NOTIFICATIONS);
@@ -528,38 +475,27 @@ export default function AdminDashboard() {
     0
   );
 
-  const handleNotificationClick = (
-  notification
-) => {
-  const clickedId =
-    createNotificationId(
-      notification
-    );
+  const handleNotificationClick = async (notification) => {
+    const clickedId = createNotificationId(notification);
 
-  setNotifications(
-    (
-      previousNotifications
-    ) => {
-      const updatedNotifications =
-        previousNotifications.map(
-          (item) =>
-            createNotificationId(
-              item
-            ) === clickedId
-              ? {
-                  ...item,
-                  read: true,
-                }
+    if (!notification.read && notification.id) {
+      try {
+        const updatedNotification = await markNotificationAsRead(notification.id);
+
+        setNotifications((previousNotifications) =>
+          previousNotifications.map((item) =>
+            createNotificationId(item) === clickedId
+              ? { ...item, ...updatedNotification, read: true, readStatus: true }
               : item
+          )
         );
-
-      saveStoredNotifications(
-        updatedNotifications
-      );
-
-      return updatedNotifications;
+        setUnreadCount((count) => Math.max(count - 1, 0));
+      } catch (error) {
+        console.error("Erreur lors du marquage de la notification :", error);
+        setNotificationError("Impossible de marquer la notification comme lue.");
+        return;
+      }
     }
-  );
 
   if (
     isGmailNotification(
@@ -573,7 +509,7 @@ export default function AdminDashboard() {
       "noopener,noreferrer"
     );
   }
-};
+  };
 
   const cardStyle = {
     backgroundColor: "var(--card-bg)",
@@ -601,12 +537,44 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-  saveStoredNotifications(
-    notifications
-  );
-}, [notifications]);
+    let active = true;
 
- useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        setNotificationsLoading(true);
+        setNotificationError("");
+
+        const [notificationList, countResult] = await Promise.all([
+          fetchMyNotifications(),
+          fetchUnreadCount(),
+        ]);
+
+        if (!active) return;
+
+        setNotifications(notificationList.slice(0, MAX_STORED_NOTIFICATIONS));
+        setUnreadCount(
+          typeof countResult === "number"
+            ? countResult
+            : Number(countResult?.count ?? countResult?.unreadCount ?? 0)
+        );
+      } catch (error) {
+        console.error("Erreur chargement notifications :", error);
+        if (active) {
+          setNotificationError("Impossible de charger les notifications.");
+        }
+      } finally {
+        if (active) setNotificationsLoading(false);
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
   const disconnect =
     connectKafkaNotifications({
       recipientRole: "ADMIN",
@@ -641,12 +609,12 @@ export default function AdminDashboard() {
               return previousNotifications;
             }
 
-            const updatedNotifications =
-              [
+            const updatedNotifications = [
                 {
                   ...receivedNotification,
                   notificationId,
                   read: false,
+                  readStatus: false,
                   createdAt:
                     receivedNotification
                       ?.createdAt ||
@@ -654,14 +622,9 @@ export default function AdminDashboard() {
                       .toISOString(),
                 },
                 ...previousNotifications,
-              ].slice(
-                0,
-                MAX_STORED_NOTIFICATIONS
-              );
+              ].slice(0, MAX_STORED_NOTIFICATIONS);
 
-            saveStoredNotifications(
-              updatedNotifications
-            );
+            setUnreadCount((count) => count + 1);
 
             return updatedNotifications;
           }
@@ -695,12 +658,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    saveStoredNotifications(
-      notifications
-    );
-  }, [notifications]);
 
   useEffect(() => {
     loadDashboard();
@@ -891,15 +848,6 @@ export default function AdminDashboard() {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleClearNotifications =
-  () => {
-    setNotifications([]);
-    setShowAllNotifications(false);
-
-    localStorage.removeItem(
-      ADMIN_NOTIFICATIONS_STORAGE_KEY
-    );
-  };
   const pieColors = [
     "#38bdf8",
     "#f59e0b",
@@ -1016,19 +964,26 @@ export default function AdminDashboard() {
                           {unreadCount} non lu(s)</p>
                       </div>
 
-                      {cleanNotifications.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={handleClearNotifications}
-                          className="rounded-full bg-red-50 px-3 py-1 text-xs font-black text-red-600 hover:bg-red-100"
-                        >
-                          Clear All
-                        </button>
-                      )}
+                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-600">
+                        Temps réel
+                      </span>
                     </div>
 
                     <div className="max-h-80 overflow-y-auto p-3">
-                      {displayedNotifications.length > 0 ? (
+                      {notificationsLoading ? (
+                        <div className="flex items-center justify-center gap-2 rounded-2xl border p-5" style={sectionStyle}>
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          <p className="text-sm font-semibold" style={mutedTextStyle}>
+                            Chargement des notifications...
+                          </p>
+                        </div>
+                      ) : notificationError && displayedNotifications.length === 0 ? (
+                        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-center">
+                          <p className="text-sm font-bold text-red-700">
+                            {notificationError}
+                          </p>
+                        </div>
+                      ) : displayedNotifications.length > 0 ? (
                         <>
                           {displayedNotifications.map((notification, index) => (
                             <button

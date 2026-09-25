@@ -21,6 +21,7 @@ import AllModels from "../modules/metier/admin/AImodels/pages/AllModels";
 import Alllogs from "../modules/metier/admin/AIlogs/pages/Alllogs";
 import AllGrades from "../modules/metier/admin/grades/pages/AllGrades";
 import AllPayements from "../modules/metier/admin/payments/pages/AllPayements";
+import MonitoringDashboard from "../modules/metier/admin/monitoring/MonitoringDashboard";
 import Settings from "../modules/metier/settings/pages/Settings";
 
 export default function AdminRoutes() {
@@ -43,6 +44,7 @@ export default function AdminRoutes() {
       <Route path="students/attendance" element={<StudentAttendance />} />
       <Route path="students/predictions" element={<StudentPredictions />} />
       <Route path="students/attendance/archive" element={<ArchivedAttendance />} />
+      <Route path="monitoring" element={<MonitoringDashboard />} />
 
       <Route path="classes" element={<AllClasses />} />
       <Route path="courses" element={<AllCourses />} />

@@ -34,16 +34,8 @@ import {
   getManagerDashboardData,
 } from "../services/managerDashboardService";
 
-/* =====================================================
-   STYLE
-===================================================== */
-
 const headerGradient =
   "linear-gradient(135deg, #c2410c 0%, #9a3412 45%, #431407 100%)";
-
-/* =====================================================
-   TRANSLATIONS
-===================================================== */
 
 const translations = {
   EN: {
@@ -1803,10 +1795,6 @@ export default function ManagerDashboard() {
   );
 }
 
-/* =====================================================
-   STATISTIC CARD
-===================================================== */
-
 function StatisticCard({
   title,
   value,
@@ -1912,10 +1900,6 @@ function StatisticCard({
   );
 }
 
-/* =====================================================
-   AMOUNT CARD
-===================================================== */
-
 function AmountCard({
   title,
   amount,
@@ -1995,10 +1979,6 @@ function AmountCard({
     </div>
   );
 }
-
-/* =====================================================
-   STATUS BADGE
-===================================================== */
 
 function StatusBadge({
   status,

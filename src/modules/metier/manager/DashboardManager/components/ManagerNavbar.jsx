@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import {
-  Bell,
   ChevronDown,
   LogOut,
   Search,
@@ -12,9 +11,6 @@ const headerGradient =
 
 export default function ManagerNavbar() {
   const [managerMenuOpen, setManagerMenuOpen] =
-    useState(false);
-
-  const [notificationOpen, setNotificationOpen] =
     useState(false);
 
   const handleKeycloakLogout = () => {
@@ -178,70 +174,6 @@ export default function ManagerNavbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* NOTIFICATION */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() =>
-                setNotificationOpen(
-                  (previous) => !previous
-                )
-              }
-              className="
-                relative
-                flex
-                h-11
-                w-11
-                items-center
-                justify-center
-                rounded-full
-                bg-white/10
-                text-white
-                ring-1
-                ring-white/15
-                transition
-
-                hover:bg-white/15
-              "
-              aria-label="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
-
-            {notificationOpen && (
-              <div
-                className="
-                  absolute
-                  right-0
-                  top-[calc(100%+0.75rem)]
-                  z-[999]
-                  w-80
-                  overflow-hidden
-                  rounded-[1.2rem]
-                  border
-                  border-slate-200
-                  bg-white
-                  text-slate-900
-                  shadow-2xl
-                "
-              >
-                <div className="border-b border-slate-200 px-5 py-4">
-                  <h3 className="text-sm font-black">
-                    Notifications
-                  </h3>
-
-                  <p className="text-xs font-semibold text-slate-500">
-                    Aucune nouvelle notification
-                  </p>
-                </div>
-
-                <div className="p-4 text-center text-sm text-slate-500">
-                  Aucune notification
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* PROFILE */}
           <div className="relative">
             <button
